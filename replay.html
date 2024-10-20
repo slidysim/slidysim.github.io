@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="images/egg.png" type="image/png">
+  <title>Sliding Puzzle Replays (BL)</title>
+  <style>#closeReplayButton{display: none !important};</style>
+</head>
+
+<body>
+  <div id="tooltip" class="hidden"></div>
+  <div id="overlay">
+    <div id="recOveralyContainer">
+      <div id="popupContainer"></div>
+      <div id="rewindContainer"></div>
+    </div>
+    <div id="popupContainerSettings"></div>
+    <div id="popupContainerCustom"></div>
+  </div>
+  <div id="contentDiv">
+    <h1 id="loadingPlaceHolder"></h1>
+  </div>
+  
+  <script src="libs/pako.min.js"></script>
+  <script src="libs/sha256.min.js"></script>
+
+  <script src="scripts/countryData.js"></script>
+  <script src="scripts/strings.js"></script>
+  <script src="scripts/stringsImportant.js"></script>
+  <script src="scripts/rankingsPercentage.js"></script>
+  <script src="scripts/elementSelectors.js"></script>
+  <script src="scripts/mainRankings.js"></script>
+  <script src="scripts/globalVars.js"></script>
+  <script src="scripts/dropreplay.js"></script>
+
+  <script src="modules/gridsAnalysis.js"></script>
+  <script src="modules/slidingPuzzle.js"></script>
+  <script src="modules/fringeColors.js"></script>
+  <script src="modules/optimalSolver.js"></script>
+  <script src="modules/replayGeneration.js"></script>
+  <script src="modules/dataFetching.js"></script>
+  <script src="modules/dataProcessing.js"></script>
+  <script src="modules/dataDisplaying.js"></script>
+  <script src="modules/userInteraction.js"></script>
+  <script src="scripts/matrx.js"></script>
+  <script> customReplayCheck();if (loadingDataNormally) {makeReplay("", -1, 15000, 4, 4, "Custom");}
+  
+  </script>
+  
+</body>
+
+</html>

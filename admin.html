@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="images/egg.png" type="image/png">
+    <title>Hacker API Console</title>
+    <style>
+        body {
+            background-color: black;
+            color: #00FF00;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            user-select: none;
+            text-shadow: 0px 0px 10px #00FF00;
+        }
+
+        .container {
+            display: flex;
+            gap: 50px;
+        }
+
+        .request-panel, .response-panel {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00FF00;
+            padding: 20px;
+            width: 300px;
+            box-shadow: 0px 0px 20px #00FF00;
+        }
+
+        .request-panel h2, .response-panel h2 {
+            margin-bottom: 10px;
+            font-size: 20px;
+            border-bottom: 1px solid #00FF00;
+            padding-bottom: 5px;
+        }
+
+        .request-panel input, .request-panel button {
+            width: 100%;
+            margin-bottom: 10px;
+            background: black;
+            color: #00FF00;
+            border: 1px solid #00FF00;
+            padding: 10px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+        }
+        .request-panel input {
+            max-width: 280px;
+        }
+        .response {
+            white-space: pre-wrap;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border: 1px solid #00FF00;
+            height: 200px;
+            overflow-y: auto;
+            user-select: all;
+        }
+
+        .neon-button:hover {
+            background-color: #00FF00;
+            color: black;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <div class="request-panel">
+            <h2>API Requests</h2>
+            <span>Welcome, <a id="user_logged_in" style="color: rgb(0, 255, 0); font-weight: bold; text-shadow: 0px 0px 10px rgb(0, 255, 0); text-decoration: underline;"></a>!</span>
+            <input type="password" id="authToken" placeholder="Enter Admin Token" style="display: none">
+            <input type="text" id="username" placeholder="Enter Target Username">
+            <button class="neon-button" onclick="createUserRequest()">Create User</button>
+            <button class="neon-button" onclick="getTokenRequest()">Get Token</button>
+            <button class="neon-button" onclick="checkUserRequest()">Check User</button>
+            <button class="neon-button" onclick="resetUserRequest()">Reset User</button>
+            <button class="neon-button" onclick="deleteUserRequest()">Delete User</button>
+            <button class="neon-button" onclick="deleteUserScoresRequest()">Delete User's scores</button>
+        </div>
+        <div class="response-panel">
+            <h2>Response</h2>
+            <div id="response" class="response">Awaiting response...</div>
+            <a style="color: rgb(0, 255, 0); text-shadow: 0px 0px 10px rgb(0, 255, 0); font-weight: bold; padding: 100px; display: block;" href="index.html">Home page</a>
+        </div>
+        
+    </div>
+
+    <script src="modules/apiRequests.js"></script>
+
+    <script>
+        function displayResponse(text) {
+            document.getElementById('response').textContent = text;
+        }
+
+        // Functions to send requests and display responses
+        async function createUserRequest() {
+            const authToken = document.getElementById('authToken').value;
+            const username = document.getElementById('username').value;
+            const response = await createUser(authToken, username);
+            displayResponse(response);
+        }
+
+        async function getTokenRequest() {
+            const authToken = document.getElementById('authToken').value;
+            const username = document.getElementById('username').value;
+            const response = await getToken(authToken, username);
+            displayResponse(response);
+        }
+
+        async function checkUserRequest() {
+            const authToken = document.getElementById('authToken').value;
+            const username = document.getElementById('username').value;
+            const response = await checkUser(authToken, username);
+            displayResponse(response);
+        }
+
+        async function resetUserRequest() {
+            const authToken = document.getElementById('authToken').value;
+            const username = document.getElementById('username').value;
+            const response = await resetUser(authToken, username);
+            displayResponse(response);
+        }
+
+        async function deleteUserRequest() {
+            const authToken = document.getElementById('authToken').value;
+            const username = document.getElementById('username').value;
+            const response = await deleteUser(authToken, username);
+            displayResponse(response);
+        }
+        async function deleteUserScoresRequest() {
+            const authToken = document.getElementById('authToken').value;
+            const username = document.getElementById('username').value;
+            const response = await deleteUserScores(authToken, username);
+            displayResponse(response);
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.style.position = "absolute";
+        canvas.style.zIndex = "-100";
+        document.body.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const matrixChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%";
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+
+        const drops = new Array(Math.floor(columns)).fill(1);
+
+        function draw() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#0F0';
+            ctx.font = `${fontSize}px monospace`;
+
+            drops.forEach((y, index) => {
+                const text = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+                const x = index * fontSize;
+
+                ctx.fillText(text, x, y * fontSize);
+
+                if (y * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[index] = 0;
+                }
+
+                drops[index]++;
+            });
+        }
+
+        setInterval(draw, 50);
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            drops.length = Math.floor(canvas.width / fontSize);
+            drops.fill(1);
+        });
+        verifyLogin().then((result) => {
+            console.log(logged_in_as);
+            if (logged_in_as === "vovker" || logged_in_as === "dphdmn"){
+                document.getElementById("authToken").value = user_token;
+            }
+            else{
+                alert("You are not admin, go away");
+                window.location.href = '/'; // Redirect to the root URL
+            }
+            
+        })
+        .catch((error) => {
+            alert(error);
+            window.location.href = '/'; // Redirect to the root URL
+        });
+    </script>
+</body>
+</html>
