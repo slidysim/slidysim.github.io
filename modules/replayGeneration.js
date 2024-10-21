@@ -1062,8 +1062,8 @@ function animateMatrix(scoreTitle, matrix, solution, tps, allFringeSchemes, grid
     const constantTPSCheckboxLabel = document.createElement("label");
     constantTPSCheckboxLabel.textContent = constantTPSCheckboxText;
     constantTPSCheckboxLabel.htmlFor = "constantTPSCheckbox";
-    popupContainerSettings.appendChild(constantTPSCheckbox);
-    popupContainerSettings.appendChild(constantTPSCheckboxLabel);
+    //popupContainerSettings.appendChild(constantTPSCheckbox);
+   // popupContainerSettings.appendChild(constantTPSCheckboxLabel);
 
     let moveTimesButton = document.createElement("button");
     moveTimesButton.textContent = moveTimesButtonText;
