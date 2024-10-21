@@ -249,9 +249,11 @@ table.rankingCells td {
 
 .WRPB,
 .WRPB td {
-    text-shadow: 1px 1px 0 black,
-        2px 2px 0 black,
-        0 3px 12px currentColor;
+    background-color: #00f1ff17;
+}
+
+.WRPB td {
+    box-shadow:  0 2px cyan !important;
 }
 
 #pbTypeSelect {
