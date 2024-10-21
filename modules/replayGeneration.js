@@ -994,9 +994,9 @@ function animateMatrix(scoreTitle, matrix, solution, tps, allFringeSchemes, grid
     autoDetectGridsCheckbox.addEventListener("change", function () {
         autoDetectGridsCheckbox_last = autoDetectGridsCheckbox.checked;
         if (!isCustomReplay) {
-            makeReplay(solution, -1, tps, matrix[0].length, matrix.length, scoreTitle);
+            makeReplay(solution, -1, tps, matrix[0].length, matrix.length, scoreTitle, stringScramble, customMoveTimes, cummulitive_data);
         } else {
-            makeReplay(solution, -1, tps, matrix[0].length, matrix.length, "Custom", stringScramble, customMoveTimes);
+            makeReplay(solution, -1, tps, matrix[0].length, matrix.length, "Custom", stringScramble, customMoveTimes, cummulitive_data);
         }
     });
     const autoDetectGridsCheckboxLabel = document.createElement("label");
