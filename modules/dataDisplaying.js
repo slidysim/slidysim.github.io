@@ -1451,7 +1451,7 @@ function generateFormattedString(request) {
     }
     if (request.width === squaresSheetType) {
         if (request.nameFilter.length === 0) {
-            formattedParts.push(`<span class="grandmaster" style="font-weight: 900;">${worldRecordsOnNN}</span> ${slidingPuzzleString}`);
+            formattedParts.push(`<span class="epsilon" style="font-weight: 900;">${worldRecordsOnNN}</span> ${slidingPuzzleString}`);
             if (NxMSelected !== totalWRsAmount) {
                 formattedParts.push(`${byString}<span class="pinktext">${NxMSelected}</span>`);
             }
@@ -1475,7 +1475,7 @@ function generateFormattedString(request) {
     } else if (request.width === "Rankings3") {
         formattedParts.push(`<span class="beta" style="font-weight: 900;">${customRankingsString}</span> ${slidingPuzzleString}`);
     } else if (request.width === "History") {
-        formattedParts.push(`<span class="professional" style="font-weight: 900;">${hisroryPageString}</span> ${slidingPuzzleString}`);
+        formattedParts.push(`<span class="delta" style="font-weight: 900;">${hisroryPageString}</span> ${slidingPuzzleString}`);
         if (request.nameFilter !== "") {
             formattedParts.push(`${byString}<span id="nameSpanHeader" class="pinktext" style="font-weight: 900;"></span>`);
         }
