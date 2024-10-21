@@ -1447,7 +1447,7 @@ function generateFormattedString(request) {
     formattedParts.push(sortedByPart);
     if (request.gameMode !== "Standard" && !String(request.width)
         .includes("Rankings")) {
-        formattedParts.push(`<span class="alpha" style="font-weight: 700;">${request.gameMode}</span> `);
+        formattedParts.push(`<span class="gamma" style="font-weight: 700;">${request.gameMode}</span> `);
     }
     if (request.width === squaresSheetType) {
         if (request.nameFilter.length === 0) {
