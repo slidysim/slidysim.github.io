@@ -424,35 +424,35 @@ table.rankingCells td {
     text-shadow: 0px 0px 10px #ff0090;
 }
 
-.unranked {
+.kappa {
     color: rgb(175, 175, 175);
 }
 
-.beginner {
+.iota {
     color: #23958b;
 }
 
-.average {
+.theta {
     color: #b9f2ff;
 }
 
-.good {
+.eta {
     color: #85fa85;
 }
 
-.master {
+.zeta {
     color: #ffaaf4;
 }
 
-.grandmaster {
+.epsilon {
     color: #ffff00;
 }
 
-.professional {
+.delta {
     color: #a14dff;
 }
 
-.alpha {
+.gamma {
     color: #ff2262;
 }
 
@@ -460,7 +460,7 @@ table.rankingCells td {
     color: #00ff00;
 }
 
-.gamma {
+.alpha {
     color: #00ffff;
     font-weight: 700;
 }

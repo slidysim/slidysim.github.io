@@ -514,7 +514,7 @@ function getKinchRankings(uniqueNames, scoresLists, scoreType, percentageTable, 
                 sum += Math.pow(score.scorePercentage, weight);
                 count++;
             } else{
-                score.scoreTier = "unranked";
+                score.scoreTier = "kappa";
             }
         });
         if (count === 0) {
@@ -535,7 +535,7 @@ function getKinchRankings(uniqueNames, scoresLists, scoreType, percentageTable, 
                 let scoreTier = getScoreTier(scorePercentage);
                 if (scorePercentage < getTierPercentageLimit()) {
                     scorePercentage = 0;
-                    scoreTier = "unranked";
+                    scoreTier = "kappa";
                     score = defaultScore;
                     scoreInfo = defaultScore;
                 }
@@ -548,7 +548,7 @@ function getKinchRankings(uniqueNames, scoresLists, scoreType, percentageTable, 
                 };
             });
         const power = getPlayersPower(scores, weight);
-        const allScoresAreUnranked = scores.every(scoreObj => scoreObj.scoreTier === "unranked");
+        const allScoresAreUnranked = scores.every(scoreObj => scoreObj.scoreTier === "kappa");
         if (allScoresAreUnranked) {
             return null;
         }

@@ -7,6 +7,52 @@ replayGeneration.js
 userInteractions.js
 */
 
+function greekLetterSpan(tierName) {
+    if (tierName === "Any" || tierName === "WRs only") {
+        return tierName;
+    }
+    // Create a mapping of tier names to their corresponding letters, classes, and glow colors
+    const tierMap = {
+        kappa: { letter: 'κ', class: 'kappa', glow: '#afafaf' },
+        iota: { letter: 'ι', class: 'iota', glow: '#23958b' },
+        theta: { letter: 'θ', class: 'theta', glow: '#b9f2ff' },
+        eta: { letter: 'η', class: 'eta', glow: '#85fa85' },
+        zeta: { letter: 'ζ', class: 'zeta', glow: '#ffaaf4' },
+        epsilon: { letter: 'ε', class: 'epsilon', glow: '#ffff00' },
+        delta: { letter: 'δ', class: 'delta', glow: '#a14dff' },
+        gamma: { letter: 'γ', class: 'gamma', glow: '#ff2262' },
+        beta: { letter: 'β', class: 'beta', glow: '#00ff00' },
+        alpha: { letter: 'α', class: 'alpha', glow: '#00ffff' }
+    };
+
+    // Check if the tierName exists in the mapping
+    if (tierMap[tierName]) {
+        // Create a span element
+        const span = document.createElement('span');
+
+        // Set the class for base styling
+        span.className = tierMap[tierName].class;
+
+        // Set the letter as the text content
+        span.textContent = tierMap[tierName].letter;
+
+        // Apply glowing effect using inline style for text-shadow
+        span.style.textShadow = `
+            0 0 5px ${tierMap[tierName].glow},
+            0 0 10px ${tierMap[tierName].glow},
+            0 0 15px ${tierMap[tierName].glow}
+        `;
+
+        span.style.fontSize = '18px';
+
+        // Return the span element
+        return span;
+    } else {
+        console.error('Invalid tier name:', tierName);
+        return null;
+    }
+}
+
 //"Public" function to create card-style sheets (normal or square WRs), sheetType = Squares / -1
 function createSheet(sortedLists, sheetType) {
     const noNameFilter = (request.nameFilter === "");
@@ -104,9 +150,9 @@ function createSheet(sortedLists, sheetType) {
                         const limit = getScoreLimitExact(100, bestValue, reverse);
                         const limitVisual = getScoreLimit(100, bestValue, reverse, scoreType, isAverage);
                         if (limit !== limitVisual) {
-                            limitsString += `<p><span class="gamma WRPB">WR: ${limitVisual} (${limit})</span></p>`;
+                            limitsString += `<p><span class="alpha WRPB">WR: ${limitVisual} (${limit})</span></p>`;
                         } else {
-                            limitsString += `<p><span class="gamma WRPB">WR: ${limitVisual}</span></p>`;
+                            limitsString += `<p><span class="alpha WRPB">WR: ${limitVisual}</span></p>`;
                         }
                         for (const key in percentageTable) {
                             if (percentageTable.hasOwnProperty(key)) {
@@ -137,7 +183,7 @@ function createSheet(sortedLists, sheetType) {
                         }
                     } else {
                         isWRforReplay = true;
-                        tierNameForReplay = "gamma";
+                        tierNameForReplay = "alpha";
                         tableRow.classList.add(tiersMap[item.nameFilter]);
                     }
                     const puzzleSizeCell = createTableCell(item.width + "x" + item.height, 'tableid');
@@ -365,7 +411,7 @@ function createSheetNxM(WRList) {
                 }
                 let bestValue;
                 let percentage = 100;
-                let tierName = "gamma";
+                let tierName = "alpha";
                 let isWR = true;
                 if (request.nameFilter !== "") {
                     bestValue = getBestValue(WRsDataForPBs, scoreType, result.width, result.height);
@@ -385,7 +431,7 @@ function createSheetNxM(WRList) {
                         displayedName = "";
                     }
                     let scoreString = getScoreStringNxM(result.time, result.moves, result.tps, scoreType, isAverage = false, displayedName);
-                    cell = createTableCellScore(scoreString, 'score', "unranked");
+                    cell = createTableCellScore(scoreString, 'score', "kappa");
                     cell.classList.add(tierName);
                     if (isWR) {
                         cell.classList.add("WRPB");
@@ -533,12 +579,18 @@ function createSheetRankings(playerScores) {
                 table.classList.add("rankingCells");
                 const tableHeaderRow = document.createElement('tr');
                 const currentPrecentage = percentageTable[category];
-                let categoryCapName = category.charAt(0)
-                    .toUpperCase() + category.slice(1);
-                tableHeaderRow.appendChild(document.createElement('th'))
-                    .textContent = "#";
-                tableHeaderRow.appendChild(document.createElement('th'))
-                    .textContent = categoryCapName;
+                let categoryCapName = category.charAt(0).toUpperCase() + category.slice(1);
+
+                const thElementLetter = document.createElement('th');
+                thElementLetter.appendChild(greekLetterSpan(category));
+                tableHeaderRow.appendChild(thElementLetter);
+
+                const thElementName = document.createElement('th');
+                thElementName.textContent = categoryCapName;
+                thElementName.style.fontSize = "12px";
+                tableHeaderRow.appendChild(thElementName);
+
+
                 tableHeaderRow.appendChild(document.createElement('th'))
                     .textContent = ">" + currentPrecentage + "%";
                 tableHeaderRow.classList.add(category);
@@ -621,7 +673,7 @@ function createSheetRankings(playerScores) {
                             let item = scoreData.scoreInfo;
                             let isAverage = (item.avglen !== 1);
                             let scoreString = getScoreString(item.time, item.moves, item.tps, scoreType, isAverage);
-                            const scoreCell = createTableCellScore([scoreString[0], ""], 'score', "unranked");
+                            const scoreCell = createTableCellScore([scoreString[0], ""], 'score', "kappa");
                             scoreCell.classList.add(scoreData.scoreTier);
                             let extraInfo = "";
                             if (scoreType === "Time") {
@@ -1048,7 +1100,7 @@ function calculatePercentage(value, bestValue, reverse) {
 
 //"Public" function to calculate class based on score percentage
 function getClassBasedOnPercentage(percentage, percentageTable) {
-    let className = "unranked";
+    let className = "kappa";
     for (const cls in percentageTable) {
         if (percentage >= percentageTable[cls]) {
             className = cls;
@@ -1303,7 +1355,7 @@ function calculateNxMTiers(WRList) {
     });
     const sortedNames = Object.keys(scoresCount).sort((a, b) => scoresCount[b] - scoresCount[a]);
     sortedNames.forEach((name, index) => {
-        const tier = tierstable[index] || 'unranked';
+        const tier = tierstable[index] || 'kappa';
         tiersMap[name] = tier;
     });
     const scoreCountOutput = Object.entries({
@@ -1408,7 +1460,7 @@ function generateFormattedString(request) {
         }
     } else if (request.width === "All") {
         if (request.nameFilter.length === 0) {
-            formattedParts.push(`<span class="gamma" style="font-weight: 900;">${worldRecordsOnNM}</span> ${slidingPuzzleString}</span>`);
+            formattedParts.push(`<span class="alpha" style="font-weight: 900;">${worldRecordsOnNM}</span> ${slidingPuzzleString}</span>`);
             if (NxMSelected !== totalWRsAmount) {
                 formattedParts.push(`${byString}<span class="pinktext">${NxMSelected}</span>`);
             }
@@ -1942,9 +1994,9 @@ function getLimitString(bestValue, item, avgpart, gameMode, reverse, isAverage, 
     const limit = getScoreLimitExact(100, bestValue, reverse);
     const limitVisual = getScoreLimit(100, bestValue, reverse, scoreType, isAverage);
     if (limit !== limitVisual) {
-        limitsString += `<p><span class="gamma WRPB">WR: ${limitVisual} (${limit})</span></p>`;
+        limitsString += `<p><span class="alpha WRPB">WR: ${limitVisual} (${limit})</span></p>`;
     } else {
-        limitsString += `<p><span class="gamma WRPB">WR: ${limitVisual}</span></p>`;
+        limitsString += `<p><span class="alpha WRPB">WR: ${limitVisual}</span></p>`;
     }
 
     for (const key in percentageTable) {

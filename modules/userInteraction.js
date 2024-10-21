@@ -156,11 +156,15 @@ function addListenersToElements() {
         const value = tierSlider.value;
         tierLimit = tierLabels[value];
         if (value < 1) {
-            tierSliderLabel.innerHTML = `<span class="unranked">${showAnyLevelRecords}</span>`;
+            tierSliderLabel.innerHTML = `<span class="kappa">${showAnyLevelRecords}</span>`;
         } else if (value > 9) {
-            tierSliderLabel.innerHTML = `<span class="gamma WRPB">${showWRsOnly}</span>`;
+            tierSliderLabel.innerHTML = `<span class="alpha WRPB">${showWRsOnly}</span>`;
         } else {
-            tierSliderLabel.innerHTML = `${showRecordsAtleast} <span class = "${tierLimit}">${tierLimit}</span> ${showRecordsAtleastTierWord}`;
+            tierSliderLabel.textContent = '';
+            tierSliderLabel.appendChild(document.createTextNode(showRecordsAtleast + ' '));
+            tierSliderLabel.appendChild(greekLetterSpan(tierLimit));
+            tierSliderLabel.appendChild(document.createTextNode(' ' + showRecordsAtleastTierWord));
+            
         }
         sendMyRequest();
     });

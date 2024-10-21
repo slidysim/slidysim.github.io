@@ -27,27 +27,27 @@ const displayTypeOptions = [
 ];
 const tierLabels = [
     "Any",
-    "beginner",
-    "average",
-    "good",
-    "master",
-    "grandmaster",
-    "professional",
-    "alpha",
-    "beta",
+    "iota",
+    "theta",
+    "eta",
+    "zeta",
+    "epsilon",
+    "delta",
     "gamma",
+    "beta",
+    "alpha",
     "WRs only"
 ];
 const tierstable = [
-    'gamma',
-    'beta',
     'alpha',
-    'professional',
-    'grandmaster',
-    'master',
-    'good',
-    'average',
-    'beginner',
+    'beta',
+    'gamma',
+    'delta',
+    'epsilon',
+    'zeta',
+    'eta',
+    'theta',
+    'iota',
 ];
 const controlTypeSelectValues = ["unique", "both", "mouse", "keyboard"];
 const controlTypeSelectValuesUnique = ["unique", "mouse", "keyboard"];
