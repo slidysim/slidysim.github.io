@@ -110,7 +110,8 @@ function handleSavedReplay(item, solveData, event, tps, width, height, scoreTitl
 
     const data = readSolveData(solveData);
     if (data === -1) {
-        alert("Could not get data :(\nYou should not see this\nBlame vovker idk");
+        alert("Could not get data :(\nYour page is probably outdated.\nRefreshing...");
+        updateServer(user_token, last_displayType, last_controlType, last_pbType);
         return;
     }
     let bld_times = [];
