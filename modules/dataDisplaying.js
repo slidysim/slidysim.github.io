@@ -1586,7 +1586,11 @@ function appendFlagIconToNickname(nickname) {
 function createTableCell(item, className) {
     const cell = document.createElement('td');
     cell.className = className;
-    cell.innerHTML = item;
+
+    // Create a text node and append it to the cell
+    const textNode = document.createTextNode(item);
+    cell.appendChild(textNode);
+
     return cell;
 }
 
