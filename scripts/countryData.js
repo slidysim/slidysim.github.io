@@ -134,7 +134,8 @@ const userCountryMap = {
     July2nd: 'United States of America',
     Corpllwacquirerrichmf: 'Germany',
     erykkas: 'Poland',
-    BollnKK: 'Singapore'
+    BollnKK: 'Singapore',
+    majesticwalrus: 'New Zealand'
 };
 
 const countryEmojis = {
@@ -167,4 +168,5 @@ const countryEmojis = {
     'United States of America': '🇺🇸',
     Brazil: '🇧🇷',
     Norway: '🇳🇴',
+    'New Zealand': '🇳🇿',
 };

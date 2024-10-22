@@ -24,6 +24,21 @@
             gap: 50px;
         }
 
+                /* Adjust layout for mobile screens */
+        @media (max-width: 768px) {
+            body {
+                height: auto; /* Allow the body height to adjust based on content */
+                justify-content: flex-start; /* Align the content to the top */
+                padding: 20px; /* Add padding for better spacing */
+                overflow-y: auto; /* Allow scrolling if content overflows */
+            }
+            
+            .container {
+                flex-direction: column;
+                align-items: center; /* Center items horizontally */
+            }
+        }
+
         .request-panel, .response-panel {
             background: rgba(0, 0, 0, 0.8);
             border: 2px solid #00FF00;
