@@ -246,6 +246,11 @@ table.rankingCells td {
     background-color: #222;
     color: #fff;
 }
+@media (max-width: 1200px) {
+    .WRstable {
+        display: none;
+    }
+}
 
 .WRPB,
 .WRPB td {
