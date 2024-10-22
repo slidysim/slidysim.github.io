@@ -13,7 +13,7 @@ async function main(bypass = false) {
         try {
             await verifyLogin(); // Wait for the async function to finish
             if (logged_in_as === "vovker" || logged_in_as === "dphdmn"){
-                document.getElementById("enableDebugMode").style.display = "inline";
+               // document.getElementById("enableDebugMode").style.display = "inline";
                 document.getElementById("admin_link").style.display = "inline";
             }
             updateServer(user_token, "Standard", "unique", "time");
