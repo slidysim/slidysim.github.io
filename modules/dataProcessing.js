@@ -6,6 +6,70 @@ dataFetching.js
 userInteractions.js
 */
 
+
+function getCountryScores() {
+    // Step 1: Define variables.
+    let scores = leaderboardData; // List of player scores.
+    let countries = userCountryMap; // Map of {nameFilter: country}.
+    let countryScores = []; // Final list of scores by country.
+    let countryBestScores = {}; // Track the best score for each unique combination per country.
+
+    // Step 2: Iterate through each score in leaderboardData.
+    for (let score of scores) {
+        // Step 3: Get the country of the player using nameFilter.
+        let country = countries[score.nameFilter];
+        
+        // Step 4: Ignore scores for players that don't have an associated country.
+        if (!country) continue;
+
+        // Step 5: Create a key based on the unique combination of attributes.
+        let scoreKey = `${score.width}-${score.height}-${score.leaderboardType}-${score.controls}-${score.gameMode}-${score.displayType}-${score.avglen}-${country}`;
+
+        // Step 6: Check if this combination for this country exists in the best scores map.
+        if (!countryBestScores[scoreKey]) {
+            // Step 7: If it doesn't exist, set this as the initial best score for the country.
+            let countryScore = { ...score, nameFilter: country };
+            countryBestScores[scoreKey] = countryScore;
+        } else {
+            // Step 8: If a score for this combination exists, check if this new score is better.
+            let currentBest = countryBestScores[scoreKey];
+            let newValue = getMainValue(score, score.leaderboardType);
+            let currentValue = getMainValue(currentBest, score.leaderboardType);
+
+            // Step 9: For "time" and "move", lower is better; for "tps", higher is better.
+            let isBetterScore = (score.leaderboardType === "time" || score.leaderboardType === "move")
+                ? newValue < currentValue
+                : newValue > currentValue;
+
+            // Step 10: If the new score is better, update the best score for this country.
+            if (isBetterScore) {
+                countryBestScores[scoreKey] = { ...score, nameFilter: country };
+            }
+        }
+    }
+
+    // Step 11: Convert the best scores map to a list.
+    for (let key in countryBestScores) {
+        countryScores.push(countryBestScores[key]);
+    }
+
+    // Step 12: Return the final list of scores by country.
+    return countryScores;
+
+    // Helper function to get the main value of a score based on the leaderboard type.
+    function getMainValue(score, scoreType) {
+        if (scoreType === "time") {
+            return score.time;
+        } else if (scoreType === "move") {
+            return score.moves;
+        } else if (scoreType === "tps") {
+            return score.tps;
+        }
+        return Infinity; // Default to a very high value if the type is unrecognized.
+    }
+}
+
+
 //"Public" function to process NxN Records data
 function processSquareRecordsData(cleanedData) {
     let organizedLists;

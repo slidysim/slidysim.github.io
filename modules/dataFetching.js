@@ -73,7 +73,12 @@ function directUpdate(){
         radiostandardgamemode.checked = true;
         request.gameMode = "Standard";
     }
-    let cleanedData = filterDataByRequest(leaderboardData, request);
+    let cleanedData;
+    if (countryRanksEnabled) {
+        cleanedData = filterDataByRequest(getCountryScores(leaderboardData), request);
+    } else{
+        cleanedData = filterDataByRequest(leaderboardData, request);
+    }
     cleanedData = cleanedData.sort((a, b) => {
         return a["timestamp"] - b["timestamp"];
     });

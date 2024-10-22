@@ -1078,7 +1078,7 @@ function makeExampleButtons(customRankButtonsExamples) {
                 button.textContent = buttonText;
                 button.addEventListener("click", () => setCustomRanks(ranksText));
                 container.appendChild(button);
-                if (buttonText === "<MAIN 30>"){
+                if (buttonText === "MAIN 30"){
                     button.click();
                 }
             }

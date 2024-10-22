@@ -6,202 +6,193 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="images/egg.png" type="image/png">
-  <title>Open Slidysim Leaderboard v2.0</title>
+  <title>Open Slidysim Leaderboard v2.1</title>
   
 </head>
 
 <body>
-  
-  <div class="controls" id="controlsDiv" style="opacity: 0;">
-    <div>
-      <div class="tabs">
-        <div class="form_radio_btn">
-          <input id="radio-3x3" type="radio" name="puzzleSize" value="3x3" />
-          <label for="radio-3x3">3x3</label>
-        </div>
-        <div class="form_radio_btn">
-          <input id="radio-4x4" type="radio" name="puzzleSize" value="4x4" checked />
-          <label for="radio-4x4">4x4</label>
-        </div>
-        <div class="form_radio_btn">
-          <input id="radio-5x5" type="radio" name="puzzleSize" value="5x5" />
-          <label for="radio-5x5">5x5</label>
-        </div>
-        <div class="form_radio_btn">
-          <input id="radio-6x6" type="radio" name="puzzleSize" value="6x6" />
-          <label for="radio-6x6">6x6</label>
-        </div>
-        <div class="form_radio_btn">
-          <input id="radio-7x7" type="radio" name="puzzleSize" value="7x7" />
-          <label for="radio-7x7">7x7</label>
-        </div>
-        <div class="form_radio_btn">
-          <input id="radio-8x8" type="radio" name="puzzleSize" value="8x8" />
-          <label for="radio-8x8">8x8</label>
-        </div>
-        <div class="form_radio_btn">
-          <input id="radio-9x9" type="radio" name="puzzleSize" value="9x9" />
-          <label for="radio-9x9">9x9</label>
-        </div>
-        <div class="form_radio_btn">
-          <input id="radio-10x10" type="radio" name="puzzleSize" value="10x10" />
-          <label for="radio-10x10">10x10</label>
-        </div>
-        <div class="form_radio_btn">
-          <input id="radio-11x11" type="radio" name="puzzleSize" value="11x11" />
-          <label for="radio-11x11">11x11</label>
-        </div>
-        <div class="form_radio_btn">
-          <input id="radio-12x12" type="radio" name="puzzleSize" value="12x12" />
-          <label for="radio-12x12">12x12</label>
-        </div>
-        <div class="form_radio_btn">
-          <input id="radio-13x13" type="radio" name="puzzleSize" value="13x13" />
-          <label for="radio-13x13">13x13</label>
-        </div>
-        <div class="form_radio_btn">
-          <input id="radio-14x14" type="radio" name="puzzleSize" value="14x14" />
-          <label for="radio-14x14">14x14</label>
-        </div>
-        <div class="form_radio_btn">
-          <input id="radio-15x15" type="radio" name="puzzleSize" value="15x15" />
-          <label for="radio-15x15">15x15</label>
-        </div>
-        <div class="form_radio_btn">
-          <input id="radio-16x16" type="radio" name="puzzleSize" value="16x16" />
-          <label for="radio-16x16">16x16</label>
-        </div>
-        <div class="form_radio_btn">
-          <input id="radio-17x17" type="radio" name="puzzleSize" value="17x17" />
-          <label for="radio-17x17">17x17</label>
-        </div>
-        <div class="form_radio_btn">
-          <input id="radio-18x18" type="radio" name="puzzleSize" value="18x18" />
-          <label for="radio-18x18">18x18</label>
-        </div>
-        <div class="form_radio_btn">
-          <input id="radio-19x19" type="radio" name="puzzleSize" value="19x19" />
-          <label for="radio-19x19">19x19</label>
-        </div>
-        <div class="form_radio_btn">
-          <input id="radio-20x20" type="radio" name="puzzleSize" value="20x20" />
-          <label for="radio-20x20">20x20</label>
-        </div>
-        <div class="form_radio_btn">
-          <input id="radio-custom-size" type="radio" name="puzzleSize" value="30x30" />
-          <label for="radio-custom-size">Custom</label>
-          <input class="inputText" style="max-width: 60px;" type="text" id="customInputSize" placeholder="Size" value="30x30" />
-        </div>
-        <br>
-        <!--
-        <div class="form_radio_btn">
-          <input id="rankingsRadio" type="radio" name="puzzleSize" value="Rankings" />
-          <label id="label_rankingsRadio" for="rankingsRadio">Main Ranks</label>
-        </div>
-      -->
-      <div class="form_radio_btn">
-        <input id="rankingsRadio3" type="radio" name="puzzleSize" value="Rankings3" />
-        <label id="label_rankingsRadio3" for="rankingsRadio3">Rankings</label>
-      </div>
-        <div class="form_radio_btn">
-          <input id="rankingsRadio2" type="radio" name="puzzleSize" value="Rankings2" />
-          <label id="label_rankingsRadio2" for="rankingsRadio2">Popular Ranks</label>
-        </div>
-
-        <div class="form_radio_btn">
-          <input id="recordsHistoryRadio" type="radio" name="puzzleSize" value="History" />
-          <label id="label_recordsHistoryRadio" for="recordsHistoryRadio">Latest Records</label>
-        </div>
-        <div class="form_radio_btn">
-          <input id="radio-NxN-WRs" type="radio" name="puzzleSize" value="NxN WRs" />
-          <label id="label_NxN-WRs" for="radio-NxN-WRs">NxN Records</label>
-        </div>
-        <div class="form_radio_btn">
-          <input id="all-Singles" type="radio" name="puzzleSize" value="All Singles" />
-          <label id="label_all-Singles" for="all-Singles">NxM Records</label>
-        </div>
-        <div class="form_radio_btn">
-          <input class="inputText" type="text" id="username" placeholder="PBs by Username..." style="display:none"
-            autocomplete="off" />
-          <div id="suggestionsContainer"></div>
-        </div>
-        <button id="createCustomReplayButton">Replay</button>
-        <button id="createCustomReplayButtonLink" style="display: none;">Replay Link</button>
-        <button id="enableDebugMode">Upload video mode</button>
-        <span>Welcome, <a id="user_logged_in" style="color: white; font-weight: bold; text-shadow: 0px 0px 10px white; text-decoration: underline;"></a>!</span>
-        <a style="color: cyan; font-weight: bold; text-shadow: 0px 0px 10px cyan;" href="/">Main</a>
-        <a style="color: rgb(0, 255, 0); font-weight: bold; display: none; text-shadow: 0px 0px 10px rgb(0, 255, 0);" href="admin" id="admin_link">Admin</a>
-        <!--<a style="color: #ff006f; font-weight: bold; text-shadow: 0px 0px 10px #ff006f;" href="https://docs.google.com/forms/d/e/1FAIpQLSd14jEa6wVTrRkgiuEBKdC8nvdU4JjRfVuOIuPTtkl1zzzKxA/viewform">Submit video</a>-->
-      </div>
-      <div id="solveTypeDiv">
+  <div class="controls-container">
+    <div class="controls" id="controlsDiv" style="opacity: 0;">
+      <div>
         <div class="tabs">
           <div class="form_radio_btn">
-            <input id="radio-standard-gamemode" type="radio" name="gamemode" value="Standard" checked />
-            <label for="radio-standard-gamemode">Standard</label>
+            <input id="radio-3x3" type="radio" name="puzzleSize" value="3x3" />
+            <label for="radio-3x3">3x3</label>
           </div>
           <div class="form_radio_btn">
-            <input id="radio-relay" type="radio" name="gamemode" value="2-N relay" />
-            <label class="gameModeLabel" for="radio-relay">2-N relay</label>
+            <input id="radio-4x4" type="radio" name="puzzleSize" value="4x4" checked />
+            <label for="radio-4x4">4x4</label>
           </div>
           <div class="form_radio_btn">
-            <input id="radio-height-relay" type="radio" name="gamemode" value="Height relay" />
-            <label class="gameModeLabel" for="radio-height-relay">Height Relay</label>
+            <input id="radio-5x5" type="radio" name="puzzleSize" value="5x5" />
+            <label for="radio-5x5">5x5</label>
           </div>
           <div class="form_radio_btn">
-            <input id="radio-width-relay" type="radio" name="gamemode" value="Width relay" />
-            <label class="gameModeLabel" for="radio-width-relay">Width Relay</label>
+            <input id="radio-6x6" type="radio" name="puzzleSize" value="6x6" />
+            <label for="radio-6x6">6x6</label>
           </div>
           <div class="form_radio_btn">
-            <input id="radio-up-to-relay" type="radio" name="gamemode" value="Everything-up-to relay" />
-            <label class="gameModeLabel" for="radio-up-to-relay">EUT relay</label>
+            <input id="radio-7x7" type="radio" name="puzzleSize" value="7x7" />
+            <label for="radio-7x7">7x7</label>
           </div>
           <div class="form_radio_btn">
-            <input id="radio-bld" type="radio" name="gamemode" value="BLD" />
-            <label class="gameModeLabel" for="radio-bld">BLD</label>
+            <input id="radio-8x8" type="radio" name="puzzleSize" value="8x8" />
+            <label for="radio-8x8">8x8</label>
           </div>
           <div class="form_radio_btn">
-            <input id="radio-marathon10" type="radio" name="gamemode" value="Marathon 10" />
-            <label class="gameModeLabel" for="radio-marathon10">Marathon x10</label>
+            <input id="radio-9x9" type="radio" name="puzzleSize" value="9x9" />
+            <label for="radio-9x9">9x9</label>
           </div>
           <div class="form_radio_btn">
-            <input id="radio-marathon42" type="radio" name="gamemode" value="Marathon 42" />
-            <label class="gameModeLabel" for="radio-marathon42">Marathon x42</label>
+            <input id="radio-10x10" type="radio" name="puzzleSize" value="10x10" />
+            <label for="radio-10x10">10x10</label>
           </div>
           <div class="form_radio_btn">
-            <input id="radio-custom" type="radio" name="gamemode" value="Marathon 100" />
-            <label class="gameModeLabel" for="radio-custom">Custom marathon:</label>
-            <input class="inputText" type="text" id="customInputMarathon" placeholder="Amount of solves" value="100" />
+            <input id="radio-11x11" type="radio" name="puzzleSize" value="11x11" />
+            <label for="radio-11x11">11x11</label>
           </div>
+          <div class="form_radio_btn">
+            <input id="radio-12x12" type="radio" name="puzzleSize" value="12x12" />
+            <label for="radio-12x12">12x12</label>
+          </div>
+          <div class="form_radio_btn">
+            <input id="radio-13x13" type="radio" name="puzzleSize" value="13x13" />
+            <label for="radio-13x13">13x13</label>
+          </div>
+          <div class="form_radio_btn">
+            <input id="radio-14x14" type="radio" name="puzzleSize" value="14x14" />
+            <label for="radio-14x14">14x14</label>
+          </div>
+          <div class="form_radio_btn">
+            <input id="radio-15x15" type="radio" name="puzzleSize" value="15x15" />
+            <label for="radio-15x15">15x15</label>
+          </div>
+          <div class="form_radio_btn">
+            <input id="radio-16x16" type="radio" name="puzzleSize" value="16x16" />
+            <label for="radio-16x16">16x16</label>
+          </div>
+          <div class="form_radio_btn">
+            <input id="radio-custom-size" type="radio" name="puzzleSize" value="20x20" />
+            <label for="radio-custom-size">Custom</label>
+            <input class="inputText" style="max-width: 60px;" type="text" id="customInputSize" placeholder="Size" value="20x20" />
+          </div>
+          <br>
+          <!--
+          <div class="form_radio_btn">
+            <input id="rankingsRadio" type="radio" name="puzzleSize" value="Rankings" />
+            <label id="label_rankingsRadio" for="rankingsRadio">Main Ranks</label>
+          </div>
+        -->
+        <div class="form_radio_btn">
+          <input id="rankingsRadio3" type="radio" name="puzzleSize" value="Rankings3" />
+          <label id="label_rankingsRadio3" for="rankingsRadio3">Rankings</label>
+        </div>
+          <div class="form_radio_btn">
+            <input id="rankingsRadio2" type="radio" name="puzzleSize" value="Rankings2" />
+            <label id="label_rankingsRadio2" for="rankingsRadio2">Popular</label>
+          </div>
+
+          <div class="form_radio_btn">
+            <input id="recordsHistoryRadio" type="radio" name="puzzleSize" value="History" />
+            <label id="label_recordsHistoryRadio" for="recordsHistoryRadio">Latest</label>
+          </div>
+          <div class="form_radio_btn">
+            <input id="radio-NxN-WRs" type="radio" name="puzzleSize" value="NxN WRs" />
+            <label id="label_NxN-WRs" for="radio-NxN-WRs">WRs</label>
+          </div>
+          <div class="form_radio_btn">
+            <input id="all-Singles" type="radio" name="puzzleSize" value="All Singles" />
+            <label id="label_all-Singles" for="all-Singles">NxM</label>
+          </div>
+          <div class="form_radio_btn">
+            <input class="inputText" type="text" id="username" placeholder="PBs by Username..." style="display:none"
+              autocomplete="off" />
+            <div id="suggestionsContainer"></div>
+          </div>
+          <label class="custom-checkbox-countries">
+            <input type="checkbox" id="countriesLeaderboard" />
+            <span class="checkbox-text">Countries LB</span>
+        </label>
+          <button id="createCustomReplayButton">Replay</button>
+          <button id="createCustomReplayButtonLink" style="display: none;">Replay Link</button>
+          <button id="enableDebugMode">Upload videos</button>
+
+
           
-          <div class="form_radio_btn">
-            <input id="radio_allGameMods" type="radio" name="gamemode" value="All Solve Types" />
-            <label id="radio_allGameModsLabel" for="radio_allGameMods" style="display:none">All</label>
-          </div>
-          <div class="form_radio_btn">
-            <input id="radio_allGameModsInteresting" type="radio" name="gamemode" value="Interesting" />
-            <label id="radio_allGameModsLabelInteresting" for="radio_allGameModsInteresting"
-              style="display:none">Interesting</label>
-          </div>
-          <div class="form_radio_btn">
-            <input id="radio_allGameModsNMSingles" type="radio" name="gamemode" value="Standard Singles" />
-            <label id="radio_allGameModsLabelNMSingles" for="radio_allGameModsNMSingles" style="display:none">Standard
-              Singles</label>
+          <span>Welcome, <a id="user_logged_in" style="color: white; font-weight: bold; text-shadow: 0px 0px 10px white; text-decoration: underline;"></a>!</span>
+          <a style="color: cyan; font-weight: bold; text-shadow: 0px 0px 10px cyan;" href="/">Main</a>
+          <a style="color: rgb(0, 255, 0); font-weight: bold; display: none; text-shadow: 0px 0px 10px rgb(0, 255, 0);" href="admin" id="admin_link">Admin</a>
+          <!--<a style="color: #ff006f; font-weight: bold; text-shadow: 0px 0px 10px #ff006f;" href="https://docs.google.com/forms/d/e/1FAIpQLSd14jEa6wVTrRkgiuEBKdC8nvdU4JjRfVuOIuPTtkl1zzzKxA/viewform">Submit video</a>-->
+        </div>
+        <div id="solveTypeDiv">
+          <div class="tabs">
+            <div class="form_radio_btn">
+              <input id="radio-standard-gamemode" type="radio" name="gamemode" value="Standard" checked />
+              <label for="radio-standard-gamemode">Standard</label>
+            </div>
+            <div class="form_radio_btn">
+              <input id="radio-relay" type="radio" name="gamemode" value="2-N relay" />
+              <label class="gameModeLabel" for="radio-relay">Relay</label>
+            </div>
+            <div class="form_radio_btn">
+              <input id="radio-height-relay" type="radio" name="gamemode" value="Height relay" />
+              <label class="gameModeLabel" for="radio-height-relay">H-Relay</label>
+            </div>
+            <div class="form_radio_btn">
+              <input id="radio-width-relay" type="radio" name="gamemode" value="Width relay" />
+              <label class="gameModeLabel" for="radio-width-relay">W-Relay</label>
+            </div>
+            <div class="form_radio_btn">
+              <input id="radio-up-to-relay" type="radio" name="gamemode" value="Everything-up-to relay" />
+              <label class="gameModeLabel" for="radio-up-to-relay">EUT-Relay</label>
+            </div>
+            <div class="form_radio_btn">
+              <input id="radio-bld" type="radio" name="gamemode" value="BLD" />
+              <label class="gameModeLabel" for="radio-bld">BLD</label>
+            </div>
+            <div class="form_radio_btn">
+              <input id="radio-marathon10" type="radio" name="gamemode" value="Marathon 10" />
+              <label class="gameModeLabel" for="radio-marathon10">x10</label>
+            </div>
+            <div class="form_radio_btn">
+              <input id="radio-marathon42" type="radio" name="gamemode" value="Marathon 42" />
+              <label class="gameModeLabel" for="radio-marathon42">x42</label>
+            </div>
+            <div class="form_radio_btn">
+              <input id="radio-custom" type="radio" name="gamemode" value="Marathon 100" />
+              <label class="gameModeLabel" for="radio-custom">Marathon:</label>
+              <input class="inputText" type="text" id="customInputMarathon" placeholder="Amount of solves" value="100" />
+            </div>
+            
+            <div class="form_radio_btn">
+              <input id="radio_allGameMods" type="radio" name="gamemode" value="All Solve Types" />
+              <label id="radio_allGameModsLabel" for="radio_allGameMods" style="display:none">All</label>
+            </div>
+            <div class="form_radio_btn">
+              <input id="radio_allGameModsInteresting" type="radio" name="gamemode" value="Interesting" />
+              <label id="radio_allGameModsLabelInteresting" for="radio_allGameModsInteresting"
+                style="display:none">Interesting</label>
+            </div>
+            <div class="form_radio_btn">
+              <input id="radio_allGameModsNMSingles" type="radio" name="gamemode" value="Standard Singles" />
+              <label id="radio_allGameModsLabelNMSingles" for="radio_allGameModsNMSingles" style="display:none">Singles</label>
+            </div>
           </div>
         </div>
-      </div>
-      <div id="RankingTabs" class="tabs" style="display:none">
-        <div id="#containerCustomRanksText">
-          <textarea id="text-input" class="text-input" placeholder="Enter custom categories here..."></textarea>
+        <div id="RankingTabs" class="tabs" style="display:none">
+          <div id="#containerCustomRanksText">
+            <textarea id="text-input" class="text-input" placeholder="Enter custom categories here..."></textarea>
+          </div>
         </div>
-      </div>
-      <div id="TierLimiterTab" class="tabs" style="display:none">
-        <input id="tierSlider" type="range" min="0" max="10" value="0" />
-        <div id="tierSliderLabel">
-          <span class="unranked">Show any level records</span>
+        <div id="TierLimiterTab" class="tabs" style="display:none">
+          <input id="tierSlider" type="range" min="0" max="10" value="0" />
+          <div id="tierSliderLabel">
+            <span class="unranked">Show any level records</span>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+</div>
   <div id="tooltip" class="hidden"></div>
   <h1 id="leaderboardName"></h1>
   <div id="NxNWRsContainer"></div>

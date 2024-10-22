@@ -6,6 +6,11 @@ dataFetching.js
 replayGeneration.js
 */
 
+function toggleCountryRanks(){
+    countryRanksEnabled = countriesCB.checked;
+    sendMyRequest();
+}
+
 //"Public" function to change control type
 function changeControls(newtype) {
     controlType = newtype;
@@ -62,6 +67,7 @@ function changePuzzleSize(puzzleSize) {
 
 //"Public" function to add major event listeners for html elements
 function addListenersToElements() {
+    countriesCB.addEventListener("change", toggleCountryRanks);
     function addSuggestions() {
         let filteredSuggestions = [];
         usernameInput.addEventListener("input", function () {
