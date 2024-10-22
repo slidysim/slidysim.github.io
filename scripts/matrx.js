@@ -1,23 +1,13 @@
-const canvas = document.createElement('canvas');
-canvas.style.position = "fixed";
-canvas.style.top = "0";
-canvas.style.left = "0";
-canvas.style.zIndex = "-1";
-canvas.style.width = "100vw";
-canvas.style.height = "100vh";
-canvas.style.margin = "0";
-canvas.style.padding = "0";
-canvas.style.border = "none";
-canvas.style.opacity = "0.5";
-document.body.appendChild(canvas);
+let canvas, ctx;
 
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+function createCanvas() {
+    // Remove the old canvas if it exists
+    if (canvas) {
+        canvas.remove();
+    }
 
-// Update canvas size on window resize
-window.addEventListener('resize', () => {
-    const canvas = document.createElement('canvas');
+    // Create a new canvas and append it
+    canvas = document.createElement('canvas');
     canvas.style.position = "fixed";
     canvas.style.top = "0";
     canvas.style.left = "0";
@@ -30,12 +20,17 @@ window.addEventListener('resize', () => {
     canvas.style.opacity = "0.5";
     document.body.appendChild(canvas);
 
-    const ctx = canvas.getContext('2d');
-  //  canvas.width = window.innerWidth;
-   // canvas.height = window.innerHeight;
-    draw();
-});
+    // Get the drawing context
+    ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
 
+// Initial canvas creation
+createCanvas();
+
+// Update canvas size on window resize
+window.addEventListener('resize', createCanvas);
 const eggWords = [
     "EGG", "EGGAG", "EGGON", "EGGENGAGEG", 
     "GAMMA", "BETA", "ALEPH", "ASCENDED",

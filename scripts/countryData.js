@@ -166,7 +166,8 @@ const userCountryMap = {
     Corpllwacquirerrichmf: 'Germany',
     erykkas: 'Poland',
     BollnKK: 'Singapore',
-    majesticwalrus: 'New Zealand'
+    majesticwalrus: 'New Zealand',
+    wiserboblouis: 'Australia',
 };
 
 const countryEmojis = {
