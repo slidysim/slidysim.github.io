@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="images/egg.png" type="image/png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Slidysim Donation</title>
+    <style>
+        body {
+            background-color: black;
+            color: #ffffffe6;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #1e1e1eb7;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.1);
+
+        }
+
+        h1 {
+            font-size: 2em;
+            color: #00ffff;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .back-link {
+            font-size: 0.9em;
+            color: #00ffff;
+            text-decoration: none;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        p {
+            font-size: 1em;
+            color: #e0e0e0;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .team-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .team-member {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            background: #2b2b2b;
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0 2px 5px rgba(0, 255, 255, 0.1);
+        }
+
+        .team-member img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+
+        .team-member strong {
+            font-size: 1.1em;
+            color: #00ffff;
+        }
+
+        .team-member p {
+            margin: 5px 0 0 0;
+        }
+
+        .donation-options {
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        .donation-options a {
+            color: #00ffff;
+            text-decoration: none;
+        }
+
+        .donation-options a:hover {
+            text-decoration: underline;
+        }
+
+        .donators-list {
+            margin-top: 20px;
+            padding: 0;
+            list-style-type: none;
+            background: #2b2b2b;
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0 2px 5px rgba(0, 255, 255, 0.1);
+        }
+
+        .donator-entry {
+            padding: 10px;
+            border-bottom: 1px solid #333;
+        }
+
+        .donator-entry:last-child {
+            border-bottom: none;
+        }
+
+        .donator-name {
+            font-weight: bold;
+            color: #00ffff;
+        }
+
+        .donator-comment {
+            font-style: italic;
+            color: #a0a0a0;
+        }
+
+        .donator-amount {
+            font-weight: bold;
+            color: #4db6ac;
+        }
+        a{
+            font-size: 18px;
+            text-shadow: 0px 0px 10px cyan;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Support Open Slidysim</h1>
+        <a href="/" class="back-link">Go back to the main page</a>
+        <p>Thank you for considering a donation to Open Slidysim!</p>
+        <p>
+            Open Slidysim is a passion project, dedicated to providing an ad-free experience and keeping the speedsliding leaderboard open to all.
+        </p>
+        <p>
+            Hosting costs start at just $15 per year, so every contribution makes a difference. We appreciate your support!
+        </p>
+        
+        
+        <h2>Our Team</h2>
+        <ul class="team-list">
+            <li class="team-member">
+                <img src="images/team/dphdmn.png" alt="dphdmn">
+                <div>
+                    <strong>dphdmn</strong><br>(former) #1 Slidysim player<br>Frontend developer<br>Creator of this website and the PB upload manager.
+                    <p class="donation-options">
+                        Donation options:
+                        <br>
+                        <a href="https://boosty.to/dphdmn/donate" target="_blank">Boosty - send cash in any currency</a>
+                        <br>
+                        <a style="font-size: 12px; color: magenta; text-shadow: 0px 0px 10px magenta;" href="https://steamcommunity.com/tradeoffer/new/?partner=99151588&token=kKNvThDz" target="_blank">
+                            (Alternatively) Send Steam items (TF2 / CS2 / EGGs) with a trade offer (if you know you know)
+                        </a>
+                    </p>
+                </div>
+            </li>
+            <li class="team-member">
+                <img src="images/team/vovker.png" alt="vovker">
+                <div>
+                    <strong>vovker</strong><br>#1 Slidysim player<br>Backend developer<br>Creator of the PB server.
+                    <p class="donation-options">Donation options: <br>
+                        <a href="https://boosty.to/yaytso/donate" target="_blank">Boosty - send cash in any currency</a>
+                        <br>
+                </div>
+            </li>
+        </ul>
+        <p>
+            All donations will be acknowledged on this page. While we can't offer any tangible rewards for your contributions, you have our deepest gratitude.
+        </p>
+        <h2>Donators</h2>
+        <ul class="donators-list">
+            <h3 style="text-align: center">Be the first! Eggag, no one supported yet :(</h3>
+            <!--
+            <li class="donator-entry">
+                <span class="donator-name">Anonymous</span> - 
+                <span class="donator-amount">128 RUB</span> 
+                <span class="donator-comment">Comment: Yaytso pashot</span>
+            </li>
+            <li class="donator-entry">
+                <span class="donator-name">Anonymous</span> - 
+                <span class="donator-amount">$1</span> 
+                <span class="donator-comment">Comment: Eggag</span>
+            </li>
+            -->
+        </ul>
+    </div>
+
+    <script src="scripts/matrx.js"></script>
+</body>
+</html>
