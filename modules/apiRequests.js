@@ -1,4 +1,4 @@
-const dblink = "https://slidy-lb.fly.dev";
+const dblink = "https://slidysim.ru";
 let user_token = "";
 let logged_in_as = "";
 
