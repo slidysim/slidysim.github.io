@@ -1579,7 +1579,7 @@ function appendFlagIconToNickname(nickname) {
     const isDonator = donatorsList.some(donator => donator.toLowerCase() === lowerCaseNickname);
     const donatorIcon = isDonator ? `<a href="/donate" class="gold-icon-link">
     <img class="emoji" draggable="false" alt="gold" src="images/gold.png" 
-    style="box-shadow: 0 0 3px 2px #ffd700; border-radius: 50%;"
+    style=" border-radius: 50%;"
     title="✨ This user supported Open Leaderboard! &#10;💛 Very Egg-cellent! &#10;(click for more info)">
     </a>` : '';
 
