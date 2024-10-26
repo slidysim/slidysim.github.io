@@ -1583,8 +1583,14 @@ function appendFlagIconToNickname(nickname) {
     title="✨ This user supported Open Leaderboard! &#10;💛 Very Egg-cellent! &#10;(click for more info)">
     </a>` : '';
 
-    return `<img class="emoji" draggable="false" alt="${emoji}" src="${flagIconLink}?style=twitter">${nickname}${donatorIcon}`;
+    const isAdminOrDeveloper = adminsList.some(user => user.toLowerCase() === lowerCaseNickname);
+    const roleIcon = isAdminOrDeveloper ? `<a href="/donate" class="admin-icon-link"  
+    title="🛠️ This user is an Admin/Developer! &#10;They build and maintain the system. &#10;(click for more info)">🛠️
+    </a>` : '';
+
+    return `<img class="emoji" draggable="false" alt="${emoji}" src="${flagIconLink}?style=twitter">${nickname}${roleIcon}${donatorIcon}`;
 }
+
 
 //_________________"Private" functions (multiple usage) ends_________________
 

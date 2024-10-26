@@ -1067,6 +1067,16 @@ img {
     background-color: #00ffff;
 }
 
+.admin-icon-link {
+    text-decoration: none; /* Removes underline from links */
+    display: inline-flex; /* Makes the link behave like an inline element */
+    margin-left: 2px;
+    max-height: 1px;
+}
+
 .gold-icon-link {
-    text-decoration: none;
+    text-decoration: none; /* Removes underline from links */
+    display: inline-flex; /* Makes the link behave like an inline element */
+    margin-left: 2px;
+    
 }

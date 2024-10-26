@@ -16,7 +16,9 @@ async function main(bypass = false) {
                // document.getElementById("enableDebugMode").style.display = "inline";
                 document.getElementById("admin_link").style.display = "inline";
             }
+            console.log("Updating server (initial)");
             updateServer(user_token, "Standard", "unique", "time");
+           
         } catch (error) {
             console.error("Error during login verification:", error);
         }

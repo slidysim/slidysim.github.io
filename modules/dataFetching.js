@@ -103,11 +103,17 @@ function sendMyRequest() {
     let new_displayType = request.displayType;
     let new_controlType = controlType;
     let new_pbType = request.leaderboardType;
-
+    console.log(last_displayType);
     if (new_displayType === last_displayType && new_controlType === last_controlType && new_pbType === last_pbType){
         directUpdate();
+        console.log("Normal update");
     } else{
-        updateServer(user_token, new_displayType, controlType, new_pbType);
+        if (last_displayType !== -1){
+            console.log("Updating server");
+            updateServer(user_token, new_displayType, controlType, new_pbType);
+        } else {
+            console.log("not doing repeated update");
+        }
     }
 }
 

@@ -65,3 +65,4 @@ let last_controlType = -1;
 let last_pbType = -1;
 let replayStatus = "DEAD"; //replayStatus = "PLAYING"; "DEAD"; "PENDING"; "FINISHED"
 let countryRanksEnabled = false;
+let updatedInitial = false;
