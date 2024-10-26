@@ -119,6 +119,9 @@ function processNxMRecordsData(cleanedData) {
     controlsFilteredLists = getAllWRs(sortedLists, controlType);
     NxMRecords.length = 0;
     NxMRecords = controlsFilteredLists;
+    if (n_m_size_limit > 0){
+        NxMRecords = NxMRecords.filter(record => record.width * record.height <= n_m_size_limit);
+    }
     if (request.nameFilter !== "") {
         //if there is a name, we should prepare more data to get WRs using modified request
         tierLimiterTab.style.display = "block";

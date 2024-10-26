@@ -327,6 +327,64 @@ function createSheet(sortedLists, sheetType) {
     });
 }
 
+function createNMSlider() {
+
+    // Create container for slider
+    const container = document.createElement('div');
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.alignItems = 'center';
+    container.style.justifyContent = 'center';
+    container.style.backgroundColor = '#12121205'; // Dark background
+    container.style.paddingTop = "10px";
+    container.style.paddingBottom = "10px";
+    container.style.color = 'cyan'; // Text color
+    
+    // Create slider element
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.min = 0;
+    slider.max = 500;
+    slider.step = 50;
+    slider.value = n_m_size_limit;
+    slider.style.width = '80%';
+    slider.style.outline = 'none';
+    slider.style.border = 'none';
+    
+    // Create a label to display the slider value
+    const valueDisplay = document.createElement('div');
+    valueDisplay.style.marginTop = '10px';
+    valueDisplay.style.textAlign = 'center';
+    valueDisplay.style.fontSize = '1.5em';
+    valueDisplay.style.textShadow = '0 0 10px cyan, 0 0 20px cyan'; // Neon effect
+    function changeSliderText(){
+        let val = parseInt(slider.value);
+        if (val !== 0){
+            valueDisplay.textContent = `Tiles limit: ${val}`; // Update displayed value
+        }
+        else {
+            valueDisplay.textContent = `No limit for tiles`; // Update displayed value
+        }
+    }
+    changeSliderText();
+    // Update the global variable and display the value when the slider is changed
+    slider.addEventListener('change', () => {
+        n_m_size_limit = parseInt(slider.value); // Set global variable
+        changeSliderText();
+        sendMyRequest();
+    });
+    slider.addEventListener('input', () => {
+        changeSliderText();
+       
+    });
+    
+    // Append slider and value display to the container
+    container.appendChild(slider);
+    container.appendChild(valueDisplay);
+    
+    return container; // Return the container with the slider and value display
+}
+
 //"Public" function to create NxM matrix sheet (can also display PBs)
 function createSheetNxM(WRList) {
     copyOfWRList = JSON.parse(JSON.stringify(WRList));
@@ -346,6 +404,7 @@ function createSheetNxM(WRList) {
     const tableContainer = document.createElement('div');
     tableContainer.classList.add('table-container');
     tableContainer.classList.add("bigContainer");
+    contentDiv.appendChild(createNMSlider());
     contentDiv.appendChild(tableContainer);
     const table = document.createElement('table');
     tableContainer.appendChild(table);
