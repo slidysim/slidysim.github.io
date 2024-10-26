@@ -1,3 +1,7 @@
+const donatorsList = [
+    "SkyStep",
+    "qqwref"
+]
 //countries list and emoji for users to add flags
 
 const userCountryMap = {

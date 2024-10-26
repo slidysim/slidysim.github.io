@@ -1066,3 +1066,7 @@ img {
 .custom-checkbox-countries input[type="checkbox"]:checked + .checkbox-text::before {
     background-color: #00ffff;
 }
+
+.gold-icon-link {
+    text-decoration: none;
+}
