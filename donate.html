@@ -135,6 +135,24 @@
             font-size: 18px;
             text-shadow: 0px 0px 10px cyan;
         }
+        .goal-container {
+            margin: 10px 0;
+            background-color: rgb(0, 110, 110);
+            
+            border-radius: 10px;
+            width: 100%;
+            max-width: 100%px;
+        }
+
+        .goal-bar {
+            background-color: cyan;
+            color: black;
+            height: 20px;
+            text-align: center;
+            line-height: 20px;
+            font-size: 14px;
+            transition: width 0.5s ease;
+        }
     </style>
 </head>
 <body>
@@ -184,44 +202,57 @@
         </p>
         <h2>Donators</h2>
         <p>(note, 100 ₽ ~ 1 $, values shown in converted currency)</p>
-        <ul class="donators-list">
-            <li class="donator-entry">
-                <span class="donator-name">SkyStep</span> - 
-                <span class="donator-amount">468 ₽</span> 
-                <span class="donator-comment">[to vovker] [2024.10.26] Comment: Egg</span>
-            </li>
-            <li class="donator-entry">
-                <span class="donator-name">qqwref</span> - 
-                <span class="donator-amount">1873 ₽</span> 
-                <span class="donator-comment">[to vovker] [2024.10.26] Comment: hosting</span>
-            </li>
-            <li class="donator-entry">
-                <span class="donator-name">c0wmanglr</span> - 
-                <span class="donator-amount">~1428 ₽</span> 
-                <span class="donator-comment">[to dphdmn] [2024.10.26] Comment: donation to slidy leaderboard</span>
-            </li>
-            <li class="donator-entry">
-                <span class="donator-name">goodevening</span> - 
-                <span class="donator-amount">100 ₽</span> 
-                <span class="donator-comment">[to dphdmn] [2024.10.27] Comment: не забывай кушать яйца пашот</span>
-            </li>
-            <li class="donator-entry">
-                <span class="donator-name">XLII</span> - 
-                <span class="donator-amount">468 ₽</span> 
-                <span class="donator-comment">[to vovker] [2024.10.28] Comment: Idk what to put here 🍳 (I couldn't find normal egg emoji on my phone lol</span>
-            </li>
-            <li class="donator-entry">
-                <span class="donator-name">XLII</span> - 
-                <span class="donator-amount">468 ₽</span> 
-                <span class="donator-comment">[to dphdmn] [2024.10.28] Comment: Pls return to speedsliding server</span>
-            </li>
-            <li class="donator-entry">
-                <span class="donator-name">VaniLalatina</span> - 
-                <span class="donator-amount">149 ₽</span> 
-                <span class="donator-comment">[to dphdmn] [2024.10.29] Comment: Яйица</span>
-            </li>
-        </ul>
-    </div>
+        <div class="goal-container">
+            <div class="goal-bar" id="goalBar">0 / 10,000 ₽</div>
+        </div>
+    
+        <ul class="donators-list" id="donatorsList"></ul>
+
+        <script>
+            // Donators data
+            const donators = [
+                { name: "SkyStep", amount: 468, recipient: "vovker", date: "2024.10.26", comment: "Egg" },
+                { name: "qqwref", amount: 1873, recipient: "vovker", date: "2024.10.26", comment: "hosting" },
+                { name: "c0wmanglr", amount: 1428, recipient: "dphdmn", date: "2024.10.26", comment: "donation to slidy leaderboard" },
+                { name: "goodevening", amount: 100, recipient: "dphdmn", date: "2024.10.27", comment: "не забывай кушать яйца пашот" },
+                { name: "XLII", amount: 468, recipient: "vovker", date: "2024.10.28", comment: "Idk what to put here 🍳 (I couldn't find normal egg emoji on my phone lol)" },
+                { name: "XLII", amount: 468, recipient: "dphdmn", date: "2024.10.28", comment: "Pls return to speedsliding server" },
+                { name: "VaniLalatina", amount: 149, recipient: "dphdmn", date: "2024.10.29", comment: "Яйица" }
+            ];
+    
+            const goalAmount = 10000; // Goal in rubles
+            let totalAmount = 0;
+    
+            const donatorsList = document.getElementById("donatorsList");
+            const goalBar = document.getElementById("goalBar");
+    
+            // Function to format numbers with commas
+            function formatNumber(num) {
+                return num.toLocaleString("ru");
+            }
+    
+            // Populate the donators list and update the goal progress
+            donators.forEach(donator => {
+                totalAmount += donator.amount;
+    
+                // Create list item
+                const listItem = document.createElement("li");
+                listItem.className = "donator-entry";
+    
+                listItem.innerHTML = `
+                    <span class="donator-name">${donator.name}</span> - 
+                    <span class="donator-amount">${formatNumber(donator.amount)} ₽</span>
+                    <span class="donator-comment">[to ${donator.recipient}] [${donator.date}] Comment: ${donator.comment}</span>
+                `;
+    
+                donatorsList.appendChild(listItem);
+            });
+    
+            // Update goal progress bar
+            const progress = Math.min((totalAmount / goalAmount) * 100, 100);
+            goalBar.style.width = `${progress}%`;
+            goalBar.textContent = `Total: ${formatNumber(totalAmount)} / ${formatNumber(goalAmount)} ₽ for 5 years of hosting`;
+        </script>
 
     <script src="scripts/matrx.js"></script>
 </body>
