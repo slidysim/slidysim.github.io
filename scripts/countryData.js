@@ -2,7 +2,8 @@ const donatorsList = [
     "SkyStep",
     "qqwref",
     "c0wmanglr",
-    "goodevening"
+    "goodevening",
+    "XLII"
 ];
 
 const adminsList = [
