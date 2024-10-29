@@ -369,8 +369,8 @@ function createNMSlider() {
         inputElement = document.createElement('input');
         inputElement.type = 'range';
         inputElement.min = 0;
-        inputElement.max = 500;
-        inputElement.step = 50;
+        inputElement.max = 1000;
+        inputElement.step = 10;
         inputElement.value = n_m_size_limit;
         inputElement.style.width = '80%';
         inputElement.style.outline = 'none';
@@ -618,10 +618,9 @@ function createSheetNxM(WRList) {
                     cell.style.textWeight = "bold";
                 }
             } else {
-                if (NxMstyleDPH) {
-                    cell.textContent = height + "x" + width;
-                } else {
-                    cell.textContent = width + "x" + height;
+                cell.textContent = NxMstyleDPH ? `${height}x${width}` : `${width}x${height}`;
+                if (n_m_size_limit > 0 && width * height > n_m_size_limit){
+                    cell.style.opacity = 0;
                 }
                 cell.style.color = "#555";
                 cell.style.fontSize = "12px";
