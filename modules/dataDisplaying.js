@@ -378,13 +378,41 @@ function createNMSlider() {
     }
 
     const valueDisplay = document.createElement('div');
+    valueDisplay.addEventListener('click', () => {
+        // Prompt user for a number input, ensuring it's above 10
+        const userInput = prompt("Enter a custom limit (must be above 10):");
+        n_m_size_limit = parseInt(userInput, 10);
+    
+        // Check if input is valid (greater than 10 or equal to 0)
+        if (n_m_size_limit > 10 || n_m_size_limit === 0) {
+            changeSliderText();
+            sendMyRequest();
+        } else {
+            alert("Invalid number. Please enter a value above 10 next time.");
+        }
+    });
+    // Add hover effect with JavaScript
+    valueDisplay.addEventListener('mouseover', () => {
+        valueDisplay.style.textShadow = '0 0 20px cyan, 0 0 40px cyan';
+        if (logged_in_as === "vovker"){
+            valueDisplay.textContent = "Click to enter custom value, vovker";
+        } else {
+            valueDisplay.textContent = "Click to enter custom value";
+        }
+    });
+
+    valueDisplay.addEventListener('mouseout', () => {
+        valueDisplay.style.textShadow = '0 0 5px cyan, 0 0 10px cyan';
+        changeSliderText();
+    });
+    valueDisplay.style.cursor = 'pointer';
     valueDisplay.style.marginTop = '10px';
     valueDisplay.style.textAlign = 'center';
     valueDisplay.style.fontSize = '1.5em';
-    valueDisplay.style.textShadow = '0 0 10px cyan, 0 0 20px cyan'; 
+    valueDisplay.style.textShadow = '0 0 5px cyan, 0 0 10px cyan'; 
 
     function changeSliderText() {
-        let val = parseInt(inputElement.value);
+        let val = n_m_size_limit;
         if (val !== 0) {
             valueDisplay.textContent = `Tiles limit: ${val}`; 
         } else {
