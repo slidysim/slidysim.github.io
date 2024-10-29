@@ -340,7 +340,7 @@ function createNMSlider() {
     
     let inputElement;
     
-    if (logged_in_as === "vovker") {
+    if (false) {
         container.appendChild(document.createTextNode("Epic Vovker Number Input"));
         
         inputElement = document.createElement('input');
