@@ -328,61 +328,92 @@ function createSheet(sortedLists, sheetType) {
 }
 
 function createNMSlider() {
-
-    // Create container for slider
     const container = document.createElement('div');
     container.style.display = 'flex';
     container.style.flexDirection = 'column';
     container.style.alignItems = 'center';
     container.style.justifyContent = 'center';
-    container.style.backgroundColor = '#12121205'; // Dark background
+    container.style.backgroundColor = '#12121205'; 
     container.style.paddingTop = "10px";
     container.style.paddingBottom = "10px";
-    container.style.color = 'cyan'; // Text color
+    container.style.color = 'cyan'; 
     
-    // Create slider element
-    const slider = document.createElement('input');
-    slider.type = 'range';
-    slider.min = 0;
-    slider.max = 500;
-    slider.step = 50;
-    slider.value = n_m_size_limit;
-    slider.style.width = '80%';
-    slider.style.outline = 'none';
-    slider.style.border = 'none';
+    let inputElement;
     
-    // Create a label to display the slider value
+    if (logged_in_as === "vovker") {
+        container.appendChild(document.createTextNode("Epic Vovker Number Input"));
+        
+        inputElement = document.createElement('input');
+        inputElement.type = 'number';
+        inputElement.min = 0;
+        inputElement.value = n_m_size_limit;
+    
+        // Basic styling
+        inputElement.style.width = '10%';
+        inputElement.style.outline = 'none';
+        inputElement.style.border = '2px solid #00FF00';
+        inputElement.style.textAlign = 'center';
+        inputElement.style.background = "black";
+        inputElement.style.color = "#00FF00";
+        inputElement.style.fontFamily = 'monospace';
+        inputElement.style.fontSize = '1.2em';
+    
+        // Epic hacker neon effects
+        inputElement.style.boxShadow = '0 0 10px #00FF00, 0 0 20px #00FF00, 0 0 30px #00FF00';
+        inputElement.style.borderRadius = '5px';
+        inputElement.style.padding = '10px';
+        inputElement.style.transition = '0.3s ease';
+
+
+    }else {
+        inputElement = document.createElement('input');
+        inputElement.type = 'range';
+        inputElement.min = 0;
+        inputElement.max = 500;
+        inputElement.step = 50;
+        inputElement.value = n_m_size_limit;
+        inputElement.style.width = '80%';
+        inputElement.style.outline = 'none';
+        inputElement.style.border = 'none';
+    }
+
     const valueDisplay = document.createElement('div');
     valueDisplay.style.marginTop = '10px';
     valueDisplay.style.textAlign = 'center';
     valueDisplay.style.fontSize = '1.5em';
-    valueDisplay.style.textShadow = '0 0 10px cyan, 0 0 20px cyan'; // Neon effect
-    function changeSliderText(){
-        let val = parseInt(slider.value);
-        if (val !== 0){
-            valueDisplay.textContent = `Tiles limit: ${val}`; // Update displayed value
-        }
-        else {
-            valueDisplay.textContent = `No limit for tiles`; // Update displayed value
+    valueDisplay.style.textShadow = '0 0 10px cyan, 0 0 20px cyan'; 
+
+    function changeSliderText() {
+        let val = parseInt(inputElement.value);
+        if (val !== 0) {
+            valueDisplay.textContent = `Tiles limit: ${val}`; 
+        } else {
+            valueDisplay.textContent = `No limit for tiles`; 
         }
     }
+
     changeSliderText();
-    // Update the global variable and display the value when the slider is changed
-    slider.addEventListener('change', () => {
-        n_m_size_limit = parseInt(slider.value); // Set global variable
-        changeSliderText();
-        sendMyRequest();
+
+    inputElement.addEventListener('change', () => {
+        n_m_size_limit = parseInt(inputElement.value);
+        if (n_m_size_limit > 10 || n_m_size_limit === 0){
+            changeSliderText();
+            sendMyRequest();
+        } else {
+            alert("invalid number");
+        }
     });
-    slider.addEventListener('input', () => {
-        changeSliderText();
-       
-    });
+
+    if (inputElement.type === 'range') {
+        inputElement.addEventListener('input', () => {
+            changeSliderText();
+        });
+    }
     
-    // Append slider and value display to the container
-    container.appendChild(slider);
+    container.appendChild(inputElement);
     container.appendChild(valueDisplay);
     
-    return container; // Return the container with the slider and value display
+    return container; 
 }
 
 //"Public" function to create NxM matrix sheet (can also display PBs)
