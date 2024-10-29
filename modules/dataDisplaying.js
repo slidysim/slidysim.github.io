@@ -370,7 +370,7 @@ function createNMSlider() {
         inputElement.type = 'range';
         inputElement.min = 0;
         inputElement.max = 1000;
-        inputElement.step = 10;
+        inputElement.step = 50;
         inputElement.value = n_m_size_limit;
         inputElement.style.width = '80%';
         inputElement.style.outline = 'none';
