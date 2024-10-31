@@ -9,7 +9,7 @@ var hideEmptyTiers = true; //default value for "Hide empty tiers" in rankings pa
 let tierLimit = "Any"; //default value for "show X tier scores only" (must be one of tierLabels)
 let autoDetectGridsCheckbox_last = false; //default value for "Force fringe" in replays (false = don't force fringe)
 let constantTPSCheckbox_last = false; //default value for "Constant TPS" in replays
-let latestRecordTime = "Unknown"; //default value for latest update time, should usually never show
+let latestRecordTime = new Date(); //default value for latest update time, should usually never show
 var percentageTable = percentageTableTime; //default percentageTable (must be consistent with request)
 let defaultScore = 999999999; //default placeholder for rankings (time / mvc)
 const redGrids = "rgb(200, 103, 103)"; //default value for 1st grids

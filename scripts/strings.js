@@ -98,7 +98,7 @@ const pauseButtonText = "Pause";
 const submitVideoText = "Got a PB on video? Click here to submit!";
 const submitVideoLink = "https://docs.google.com/forms/d/e/1FAIpQLSd14jEa6wVTrRkgiuEBKdC8nvdU4JjRfVuOIuPTtkl1zzzKxA/viewform";
 const leaderboardUpdatesInfoLink = "https://github.com/search?q=repo%3Adphdmn%2FbetterLeaderboard+Update+data+using+script&type=commits&s=committer-date&o=desc";
-const lastLeaderboardUpdateString = "Leaderboard is Live! Latest score entry time:";
+const lastLeaderboardUpdateString = "Leaderboard is Live! Last time updated:";
 const leaderboardUpdatesInfoText = "Not updating? Why? I don't know...";
 const moveTimesButtonText = "Play with custom movetimes";
 const moveTimesAsk = "Enter moveTimes (in MS) separated by commas. WARNING: This is experimental. No checks are being done, make sure your values are correct values from your slidysim db. Make sure that all moves are included. Make sure that format is correct (same as in db). If you change any settings or close the replay, you should load those again.";

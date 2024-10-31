@@ -1622,6 +1622,10 @@ function generateFormattedString(request) {
     `);
     formattedParts.push(`<br><h2>${doneWithString} ` + selectString + displayTypeHeaderString);
     formattedParts.push(`<span class="pinktext" style="font-weight: 700;">${selectControlTypeString}</span> ${controlsTypeHeaderString}</h2>`);
+    let timeAgo = getTimeAgo(latestRecordTime);
+    formattedParts.push(`<span class="leaderboardUpdateSpan">${lastLeaderboardUpdateString} <span style="color: #ffffff">${timeAgo}</span></span>`);
+    clearInterval(window.leaderboardInterval); 
+    window.leaderboardInterval = setInterval(() => document.querySelector(".leaderboardUpdateSpan").innerHTML = `${lastLeaderboardUpdateString} <span style="color: #ffffff">${getTimeAgo(latestRecordTime)}</span>`, 10000);
    // if(latestRecordTime){
    //     let timeAgo = getTimeAgo(new Date(latestRecordTime));
    //     formattedParts.push(`<span class="leaderboardUpdateSpan">${lastLeaderboardUpdateString} <span style="color: #ffffff">${timeAgo}</span></span>`);

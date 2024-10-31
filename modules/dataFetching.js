@@ -27,7 +27,7 @@ function unloadAnimation(loadingAnimation, contentDiv) {
 function updateServer(auth_token, displayType, controlType, pbType) {
     const loadingAnimation = document.getElementById("loadingAnimation");
     const contentDiv = document.getElementById("contentDiv");
-
+    latestRecordTime = new Date();
     loadAnimation(loadingAnimation, contentDiv);
     document.body.style.pointerEvents = 'none';
     getScoresWrapper(auth_token, displayType, controlType, pbType, (error, res) => {
@@ -40,7 +40,6 @@ function updateServer(auth_token, displayType, controlType, pbType) {
             if (initial) {
                 fullUniqueNames = res.userList.sort();
                 addListenersToElements();
-                latestRecordTime = formatTimestampWithTime(getHighestTimestampValue(leaderboardData));
             }
             directUpdate();
 
