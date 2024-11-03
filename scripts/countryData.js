@@ -183,6 +183,7 @@ const userCountryMap = {
     majesticwalrus: 'New Zealand',
     wiserboblouis: 'Australia',
     Arm0nd0: 'Canada',
+    allenbot: 'Singapore'
 };
 
 const countryEmojis = {
