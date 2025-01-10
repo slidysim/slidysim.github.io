@@ -6,23 +6,6 @@ dataFetching.js
 replayGeneration.js
 */
 
-function incrementSize(increase = true) {
-    const width = request.width;
-    const height = request.height;
-
-    // Only proceed if both width and height are numbers
-    if (typeof width === 'number' && Number.isInteger(width) &&
-        typeof height === 'number' && Number.isInteger(height)) {
-        let newWidth = increase ? width + 1 : width - 1;
-        let newHeight = increase ? height + 1 : height - 1;
-
-        // Ensure the new dimensions are at least 2x2
-        if (newWidth >= 2 && newHeight >= 2) {
-            requestProxy.size = [newWidth, newHeight];
-        }
-    }
-}
-
 
 function toggleCountryRanks(){
     countryRanksEnabled = countriesCB.checked;
