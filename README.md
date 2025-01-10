@@ -19,7 +19,7 @@ Welcome to **Open Slidysim**, a community-driven sliding puzzle leaderboard. Aft
 2. **Sign Up**: Head over to [https://slidysim.online/](https://slidysim.online/) and use your token to create an account. 
 
 ## Download & How to Use
-1. **Grab the Records Manager**: [Download Slidysim Records Manager](https://github.com/dphdmn/openslidy/releases).
+1. **Grab the Records Manager**: [Download Slidysim Records Manager](https://github.com/dphdmn/openslidy/releases/tag/1.1.0).
 2. **Set It Up**: Put the downloaded file in the same folder as Slidysim.
 3. **Start Tracking**: Open the manager, and it will take care of tracking your records while you play. It closes automatically when you exit Slidysim.
    - The first upload might take a minute or two, but after that, it’s much faster.
