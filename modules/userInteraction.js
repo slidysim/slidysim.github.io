@@ -6,6 +6,24 @@ dataFetching.js
 replayGeneration.js
 */
 
+function incrementSize(increase = true) {
+    const width = request.width;
+    const height = request.height;
+
+    // Only proceed if both width and height are numbers
+    if (typeof width === 'number' && Number.isInteger(width) &&
+        typeof height === 'number' && Number.isInteger(height)) {
+        let newWidth = increase ? width + 1 : width - 1;
+        let newHeight = increase ? height + 1 : height - 1;
+
+        // Ensure the new dimensions are at least 2x2
+        if (newWidth >= 2 && newHeight >= 2) {
+            requestProxy.size = [newWidth, newHeight];
+        }
+    }
+}
+
+
 function toggleCountryRanks(){
     countryRanksEnabled = countriesCB.checked;
     sendMyRequest();
@@ -147,7 +165,28 @@ function addListenersToElements() {
  //       }
 //
  //   });
+
+ function incrementSize(increase = true, dimension = "both") {
+    const width = request.width, height = request.height;
+    if (typeof width === 'number' && Number.isInteger(width) && typeof height === 'number' && Number.isInteger(height)) {
+        let newWidth = width, newHeight = height;
+        if (dimension !== "height") newWidth = increase ? width + 1 : Math.max(2, width - 1);
+        if (dimension !== "width") newHeight = increase ? height + 1 : Math.max(2, height - 1);
+        if (newWidth !== width || newHeight !== height) {
+            requestProxy.size = [newWidth, newHeight];
+        }
+    }
+}
+
     document.addEventListener("keydown", function (event) {
+        if ((event.ctrlKey || event.altKey) && (event.key === "+" || event.key === "-" || event.key === "=")) {
+            event.preventDefault();
+            const increase = event.key === "+" || event.key === "=";
+            if (event.ctrlKey) incrementSize(increase, "height");
+            else if (event.altKey) incrementSize(increase, "width");
+        } else if (event.key === "+" || event.key === "-" || event.key === "=") {
+            incrementSize(event.key === "+" || event.key === "=", "both");
+        }
         if (event.target.tagName !== "INPUT" && event.target.tagName !== "TEXTAREA") {
             if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
                 var rewindSlider = document.getElementById("rewindSlider");
