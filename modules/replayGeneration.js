@@ -317,10 +317,11 @@ function handleSavedReplay(item, solveData, event, tps, width, height, scoreTitl
     if (item.avglen > 1){
         avgText = ` ao${item.avglen}`;
     }
-    const scoreName = `${width}x${height} ${item.gameMode} ${(formatTime(item.time))} (${movesFormatted} / ${(item.tps/1000).toFixed(3)})${avgText}`;
+    const gameModeNormal = item.gameMode.replace("Everything-up-to relay", "EUT relay");
+    const scoreName = `${width}x${height} ${gameModeNormal} ${(formatTime(item.time))} (${movesFormatted} / ${(item.tps/1000).toFixed(3)})${avgText}`;
     const header = document.createElement('div');
 
-    header.innerHTML = `${scoreTitle.innerHTML}<br>${width}x${height} ${item.gameMode}<br>${(formatTime(item.time))} (${movesFormatted} / ${(item.tps/1000).toFixed(3)})${avgText}`;
+    header.innerHTML = `${scoreTitle.innerHTML}<br>${width}x${height} ${gameModeNormal}<br>${(formatTime(item.time))} (${movesFormatted} / ${(item.tps/1000).toFixed(3)})${avgText}`;
     
     if (!generate_replays) {
         header.innerHTML += "<br>{Solutions not available}";
