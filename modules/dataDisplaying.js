@@ -206,8 +206,9 @@ function createSheet(sortedLists, sheetType) {
                 tableRow.appendChild(nameCellElement);
                 const scoreCellElement = createTableCellScore(scoreString, 'score', "grayColor");
                 tableRow.appendChild(scoreCellElement);
+                tableRow.classList.add("shadowFun");
                 if (!thisScoreInvalid) {
-                    tableRow.classList.add("shadowFun");
+                    
                     if (sheetType !== squaresSheetType || noNameFilter) {
                         nameCellElement.classList.add("clickable");
                         nameCellElement.addEventListener("click", function () {
