@@ -1022,14 +1022,13 @@ function animateMatrix(scoreTitle, matrix, solution, tps, allFringeSchemes, grid
         let lastGridsMoves = 0;
         for (const key of gridNumbers.slice(1)) {
             const button = document.createElement("button");
-            newMoves = parseInt(key, 10) + 1;
-            //console.log(gridsStates[key].mainColors[0].type);
-            if (customMoveTimes !== -1){
-                newTime = customMoveTimes[key]
-                button.textContent = (newMoves).toString() + ` [${(formatTime(newTime))}] | ${newMoves - lastGridsMoves} [${formatTime(newTime - lastGridsTime)}]`;
-                lastGridsTime = newTime; 
-            } else{
-                button.textContent = (newMoves).toString() + ` | ${newMoves - lastGridsMoves}`;
+            let newMoves = parseInt(key, 10) + 1;
+            if (customMoveTimes !== -1) {
+                newTime = customMoveTimes[key];
+                button.textContent = `${formatTime(newTime)} / ${newMoves} (+${formatTime(newTime - lastGridsTime)} / +${newMoves - lastGridsMoves})`;
+                lastGridsTime = newTime;
+            } else {
+                button.textContent = `${newMoves} (+${newMoves - lastGridsMoves})`;
             }
             lastGridsMoves = newMoves;
             button.style.padding = '6px';
@@ -1038,7 +1037,7 @@ function animateMatrix(scoreTitle, matrix, solution, tps, allFringeSchemes, grid
             button.style.marginRight = '1px';
             button.style.display = 'inline';
             button.addEventListener("click", () => {
-                rewindSlider.value = button.textContent.split(' ')[0];
+                rewindSlider.value = newMoves;
                 manualMoving();
             });
             popupContainerSettings.appendChild(button);
