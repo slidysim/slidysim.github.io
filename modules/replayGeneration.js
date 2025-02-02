@@ -1027,7 +1027,6 @@ function animateMatrix(scoreTitle, matrix, solution, tps, allFringeSchemes, grid
                 newTime = customMoveTimes[key];
                 splitTime = newTime - lastGridsTime;
                 splitMoves = newMoves - lastGridsMoves;
-                console.log(splitMoves, splitTime);
                 button.textContent = `${formatTime(newTime)} | ${formatTime(splitTime)} (${splitMoves} / ${(splitMoves*1000/splitTime).toFixed(1)})`;
                 lastGridsTime = newTime;
             } else {
