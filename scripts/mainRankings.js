@@ -144,17 +144,20 @@ const rankListMain = [{
 
 const customRankButtonsExamples = [
 {
+    "DPH 20":"3x3 ao50, 3x3 ao100, 3x3 x42, 4x4 ao12, 4x4 ao50, 4x4 ao100, 4x4 x10, 5x5 ao5, 5x5 ao12, 5x5 ao50, 6x6 single, 6x6 ao5, 6x6 ao12, 7x7 single, 7x7 ao5, 7x7 relay, 8x8 single, 8x8 ao5, 9x9 single, 10x10 single"
+},    
+{
     "MAIN 30":"3x3 ao12, 3x3 ao50, 3x3 ao100, 3x3 x42, 4x4 ao5, 4x4 ao12, 4x4 ao50, 4x4 ao100, 4x4 x10, 5x5 single, 5x5 ao5, 5x5 ao12, 5x5 ao50, 6x6 Single, 6x6 ao5, 6x6 ao12, 6x6 relay, 7x7 Single, 7x7 ao5, 7x7 ao12, 7x7 relay, 8x8 Single, 8x8 ao5, 9x9 Single, 9x9 ao5, 10x10 Single, 10x10 ao5, 12x12 Single, 16x16 Single, 20x20 Single"
 },
 {
-    "DPH 20":"3x3 ao50, 3x3 ao100, 3x3 x42, 4x4 ao12, 4x4 ao50, 4x4 ao100, 4x4 x10, 5x5 ao5, 5x5 ao12, 5x5 ao50, 6x6 single, 6x6 ao5, 6x6 ao12, 7x7 single, 7x7 ao5, 7x7 relay, 8x8 single, 8x8 ao5, 9x9 single, 10x10 single"
+    "EXTENDED 50":"3x3 ao12, 3x3 ao50, 3x3 ao100, 3x3 x10, 3x3 x42, 3x3 x100, 4x4 ao5, 4x4 ao12, 4x4 ao50, 4x4 ao100, 4x4 x10, 4x4 x42, 4x4 Eut, 5x5 single, 5x5 ao5, 5x5 ao12, 5x5 ao50, 5x5 ao100, 5x5 x10, 5x5 relay, 5x5 Eut, 6x6 Single, 6x6 ao5, 6x6 ao12, 6x6 ao50, 6x6 relay, 6x6 Eut, 7x7 Single, 7x7 ao5, 7x7 ao12, 7x7 ao50, 7x7 relay, 7x7 Eut, 8x8 Single, 8x8 ao5, 8x8 ao12, 9x9 Single, 9x9 ao5, 9x9 ao12, 10x10 Single, 10x10 ao5, 10x10 ao12, 10x10 relay, 11x11 Single, 12x12 Single, 13x13 Single, 14x14 Single, 15x15 Single, 16x16 Single, 20x20 Single"
 },
-{
-    "EXT. 40": "3x3 ao12, 3x3 ao50, 3x3 ao100, 3x3 x42, 4x4 ao5, 4x4 ao12, 4x4 ao50, 4x4 ao100, 4x4 x10, 4x4 x42, 5x5 Single, 5x5 ao5, 5x5 ao12, 5x5 ao50, 5x5 ao100, 5x5 x5, 5x5 x10, 5x5 relay, 5x5 Eut, 6x6 Single, 6x6 ao5, 6x6 ao12, 6x6 relay, 7x7 Single, 7x7 ao5, 7x7 ao12, 7x7 relay, 8x8 Single, 8x8 ao5, 8x8 ao12, 8x8 relay, 9x9 Single, 9x9 ao5, 10x10 Single, 10x10 ao5, 10x10 relay, 12x12 Single, 16x16 Single, 20x20 Single, 30x30 Single"
-},
-{
-    "ADV. 69": "3x3 ao12, 3x3 ao50, 3x3 ao100, 3x3 x10, 3x3 x25, 3x3 x42, 3x3 x100, 3x3 bld-ao5, 3x3 bld-ao12, 4x4 ao5, 4x4 ao12, 4x4 ao50, 4x4 ao100, 4x4 x10, 4x4 x25, 4x4 x42, 4x4 x100, 4x4 Eut, 4x4 bld, 5x5 Single, 5x5 ao5, 5x5 ao12, 5x5 ao50, 5x5 ao100, 5x5 x3, 5x5 x5, 5x5 x10, 5x5 relay, 5x5 Eut, 6x6 Single, 6x6 ao5, 6x6 ao12, 6x6 ao50, 6x6 ao100, 6x6 x3, 6x6 x10, 6x6 relay, 6x6 Eut, 7x7 Single, 7x7 ao5, 7x7 ao12, 7x7 ao50, 7x7 x3, 7x7 relay, 7x7 Eut, 8x8 Single, 8x8 ao5, 8x8 ao12, 8x8 x3, 8x8 relay, 9x9 Single, 9x9 ao5, 9x9 ao12, 9x9 relay, 10x10 Single, 10x10 ao5, 10x10 ao12, 10x10 relay, 11x11 Single, 12x12 Single, 13x13 Single, 14x14 Single, 15x15 Single, 16x16 Single, 17x17 Single, 18x18 Single, 19x19 Single, 20x20 Single, 30x30 Single"
-},
+//{
+//    "EXT. 40": "3x3 ao12, 3x3 ao50, 3x3 ao100, 3x3 x42, 4x4 ao5, 4x4 ao12, 4x4 ao50, 4x4 ao100, 4x4 x10, 4x4 x42, 5x5 Single, 5x5 ao5, 5x5 ao12, 5x5 ao50, 5x5 ao100, 5x5 x5, 5x5 x10, 5x5 relay, 5x5 Eut, 6x6 Single, 6x6 ao5, 6x6 ao12, 6x6 relay, 7x7 Single, 7x7 ao5, 7x7 ao12, 7x7 relay, 8x8 Single, 8x8 ao5, 8x8 ao12, 8x8 relay, 9x9 Single, 9x9 ao5, 10x10 Single, 10x10 ao5, 10x10 relay, 12x12 Single, 16x16 Single, 20x20 Single, 30x30 Single"
+//},
+//{
+//    "ADV. 69": "3x3 ao12, 3x3 ao50, 3x3 ao100, 3x3 x10, 3x3 x25, 3x3 x42, 3x3 x100, 3x3 bld-ao5, 3x3 bld-ao12, 4x4 ao5, 4x4 ao12, 4x4 ao50, 4x4 ao100, 4x4 x10, 4x4 x25, 4x4 x42, 4x4 x100, 4x4 Eut, 4x4 bld, 5x5 Single, 5x5 ao5, 5x5 ao12, 5x5 ao50, 5x5 ao100, 5x5 x3, 5x5 x5, 5x5 x10, 5x5 relay, 5x5 Eut, 6x6 Single, 6x6 ao5, 6x6 ao12, 6x6 ao50, 6x6 ao100, 6x6 x3, 6x6 x10, 6x6 relay, 6x6 Eut, 7x7 Single, 7x7 ao5, 7x7 ao12, 7x7 ao50, 7x7 x3, 7x7 relay, 7x7 Eut, 8x8 Single, 8x8 ao5, 8x8 ao12, 8x8 x3, 8x8 relay, 9x9 Single, 9x9 ao5, 9x9 ao12, 9x9 relay, 10x10 Single, 10x10 ao5, 10x10 ao12, 10x10 relay, 11x11 Single, 12x12 Single, 13x13 Single, 14x14 Single, 15x15 Single, 16x16 Single, 17x17 Single, 18x18 Single, 19x19 Single, 20x20 Single, 30x30 Single"
+//},
 {
     "Old 30": "3x3 ao5, 3x3 ao12, 3x3 ao50, 3x3 ao100, 3x3 x10, 3x3 x42, 4x4 single, 4x4 ao5, 4x4 ao12, 4x4 ao50, 4x4 ao100, 4x4 x10, 4x4 x42, 4x4 relay, 5x5 single, 5x5 ao5, 5x5 ao12, 5x5 ao50, 5x5 relay, 6x6 single, 6x6 ao5, 6x6 ao12, 6x6 relay, 7x7 single, 7x7 ao5, 7x7 relay, 8x8 single, 8x8 ao5, 9x9 single, 10x10 single"
 },
