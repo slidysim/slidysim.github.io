@@ -1589,3 +1589,14 @@ function updateScreen(zeroPos, movetype) {
 }
 
 //_________________"Private" functions for makeReplay ends_________________
+
+function loadCustomReplay(replayData) {
+    console.log("Received replay data:", replayData);
+    const customReplayData = decompressStringToArray(replayData);
+    const customSolution = customReplayData[0];
+    const customTPS = customReplayData[1];
+    const customReplayScramble = customReplayData[2];
+    const fakeTimes = customReplayData[3];
+    const customReplayMatrix = scrambleToPuzzle(customReplayScramble);
+    makeReplay(customSolution, -1, customTPS, customReplayMatrix[0].length, customReplayMatrix.length, "Custom", customReplayScramble, fakeTimes);
+}
