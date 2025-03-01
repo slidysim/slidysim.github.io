@@ -127,7 +127,13 @@ function deserializeScoreTitle(scoreTitleHtml) {
 }
 
 function handleSavedReplay(item, solveData, event, tps, width, height, scoreTitle, videoLinkForReplay, scoreTier, isWR) {
-    console.log(window.location.origin + "/replay?r=" + compressArrayToString([item, solveData, event, tps, width, height, serializeScoreTitle(scoreTitle), videoLinkForReplay, scoreTier, isWR]));
+    const link = window.location.origin + "/replay?r=" + compressArrayToString([item, solveData, event, tps, width, height, serializeScoreTitle(scoreTitle), videoLinkForReplay, scoreTier, isWR]);
+    console.log(link);
+    navigator.clipboard.writeText(link).then(() => {
+        console.log("Link copied to clipboard");
+    }).catch(err => {
+        console.error("Failed to copy link: ", err);
+    });
     const data = readSolveData(solveData);
     if (data === -1) {
         alert("Could not get data :(\nYour page is probably outdated.\nRefreshing...");
