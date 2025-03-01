@@ -28,7 +28,7 @@ function readSolveData(input) {
         const binaryData = atob(input);
         const binaryArray = Uint8Array.from(binaryData, (c) => c.charCodeAt(0));
         const decompressed = pako.inflate(binaryArray, { to: 'string' });
-         console.log(decompressed);
+         //console.log(decompressed);
         let moveTimesMatch = decompressed.match(/\[.*?\]/);
         let moveTimes = moveTimesMatch ? moveTimesMatch[0] : -1;
 
@@ -105,15 +105,36 @@ function generateEUTsizes( maxWidth, maxHeight) {
     return sizes;
 }
 
+function handleSavedReplayWrapperDec(decompressedArray) {
+    decompressedArray[6] = deserializeScoreTitle(decompressedArray[6]); // Deserialize scoreTitle at index 6
+    console.log(JSON.stringify(decompressedArray));
+    handleSavedReplay(...decompressedArray);
+}
+
+function handleSavedReplayWrapper(compressedString) {
+    let decompressedArray = decompressStringToArray(compressedString);
+    handleSavedReplayWrapperDec(decompressedArray);
+}
+
+function serializeScoreTitle(scoreTitle) {
+    return scoreTitle instanceof Element ? scoreTitle.outerHTML : scoreTitle;
+}
+
+function deserializeScoreTitle(scoreTitleHtml) {
+    const template = document.createElement('template');
+    template.innerHTML = scoreTitleHtml.trim();
+    return template.content.firstChild;
+}
+
 function handleSavedReplay(item, solveData, event, tps, width, height, scoreTitle, videoLinkForReplay, scoreTier, isWR) {
-
-
+    console.log(compressArrayToString([item, solveData, event, tps, width, height, serializeScoreTitle(scoreTitle), videoLinkForReplay, scoreTier, isWR]));
     const data = readSolveData(solveData);
     if (data === -1) {
         alert("Could not get data :(\nYour page is probably outdated.\nRefreshing...");
         updateServer(user_token, last_displayType, last_controlType, last_pbType);
         return;
     }
+
     let bld_times = [];
     if (item.gameMode === "BLD") {
         bld_times = data.bld_times.split(",");
@@ -561,7 +582,7 @@ function makeReplay(solution, event = -1, tps, width = -1, height = -1, scoreTit
     let showWarning = false;
     currentWindowWidth = window.innerWidth;
     let isCustom = scoreTitle == "Custom";
-    if (event !== -1) {
+    if (event !== -1 && typeof event === 'object' && typeof event.stopPropagation === 'function') {
         event.stopPropagation();
         if (!warningWasShown){
             showWarning = true;
@@ -1593,10 +1614,14 @@ function updateScreen(zeroPos, movetype) {
 function loadCustomReplay(replayData) {
     console.log("Received replay data:", replayData);
     const customReplayData = decompressStringToArray(replayData);
-    const customSolution = customReplayData[0];
-    const customTPS = customReplayData[1];
-    const customReplayScramble = customReplayData[2];
-    const fakeTimes = customReplayData[3];
-    const customReplayMatrix = scrambleToPuzzle(customReplayScramble);
-    makeReplay(customSolution, -1, customTPS, customReplayMatrix[0].length, customReplayMatrix.length, "Custom", customReplayScramble, fakeTimes);
+    if (customReplayData.length < 10){
+        const customSolution = customReplayData[0];
+        const customTPS = customReplayData[1];
+        const customReplayScramble = customReplayData[2];
+        const fakeTimes = customReplayData[3];
+        const customReplayMatrix = scrambleToPuzzle(customReplayScramble);
+        makeReplay(customSolution, -1, customTPS, customReplayMatrix[0].length, customReplayMatrix.length, "Custom", customReplayScramble, fakeTimes);
+    } else {
+        handleSavedReplayWrapperDec(customReplayData);
+    }
 }
