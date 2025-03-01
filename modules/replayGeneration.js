@@ -126,14 +126,31 @@ function deserializeScoreTitle(scoreTitleHtml) {
     return template.content.firstChild;
 }
 
+// Initialize clipboard copy preference
+if (localStorage.getItem('clipboardCopyEnabled') === null) {
+    localStorage.setItem('clipboardCopyEnabled', 'true');
+}
+function toggleClipboardCopy() {
+    const isCopyEnabled = localStorage.getItem('clipboardCopyEnabled');
+    const newState = isCopyEnabled === 'false' ? 'true' : 'false';
+    localStorage.setItem('clipboardCopyEnabled', newState);
+    console.log(`Clipboard copy is now ${newState === 'true' ? 'enabled' : 'disabled'}`);
+    return newState === 'true';
+}
+
 function handleSavedReplay(item, solveData, event, tps, width, height, scoreTitle, videoLinkForReplay, scoreTier, isWR) {
     const link = window.location.origin + "/replay?r=" + compressArrayToString([item, solveData, event, tps, width, height, serializeScoreTitle(scoreTitle), videoLinkForReplay, scoreTier, isWR]);
     console.log(link);
-    navigator.clipboard.writeText(link).then(() => {
-        console.log("Link copied to clipboard");
-    }).catch(err => {
-        console.error("Failed to copy link: ", err);
-    });
+    const isCopyEnabled = localStorage.getItem('clipboardCopyEnabled') === 'true';
+    if (isCopyEnabled) {
+        navigator.clipboard.writeText(link).then(() => {
+            console.log("Link copied to clipboard");
+        }).catch(err => {
+            console.error("Failed to copy link: ", err);
+        });
+    } else {
+        console.log("Clipboard copy is disabled");
+    }
     const data = readSolveData(solveData);
     if (data === -1) {
         alert("Could not get data :(\nYour page is probably outdated.\nRefreshing...");
