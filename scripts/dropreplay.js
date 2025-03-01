@@ -16,12 +16,16 @@ document.documentElement.addEventListener('drop', (e) => {
             sol=event.target.result;
             if (sol.includes("?r=")){
             const customReplayData = decompressStringToArray(new URL(sol).searchParams.get('r'));
-            const customSolution = customReplayData[0];
-            const customTPS = customReplayData[1];
-            const customReplayScramble = customReplayData[2];
-            const fakeTimes = customReplayData[3];
-            const customReplayMatrix = scrambleToPuzzle(customReplayScramble);
-            makeReplay(customSolution, -1, customTPS, customReplayMatrix[0].length, customReplayMatrix.length, "Custom", customReplayScramble, fakeTimes);
+            if (customReplayData.length < 10){
+                const customSolution = customReplayData[0];
+                const customTPS = customReplayData[1];
+                const customReplayScramble = customReplayData[2];
+                const fakeTimes = customReplayData[3];
+                const customReplayMatrix = scrambleToPuzzle(customReplayScramble);
+                makeReplay(customSolution, -1, customTPS, customReplayMatrix[0].length, customReplayMatrix.length, "Custom", customReplayScramble, fakeTimes);
+            } else {
+                handleSavedReplayWrapperDec(customReplayData);
+            }
             return;
         } 
         };
