@@ -127,7 +127,7 @@ function deserializeScoreTitle(scoreTitleHtml) {
 }
 
 function handleSavedReplay(item, solveData, event, tps, width, height, scoreTitle, videoLinkForReplay, scoreTier, isWR) {
-    console.log(compressArrayToString([item, solveData, event, tps, width, height, serializeScoreTitle(scoreTitle), videoLinkForReplay, scoreTier, isWR]));
+    console.log(window.location.origin + "/replay?r=" + compressArrayToString([item, solveData, event, tps, width, height, serializeScoreTitle(scoreTitle), videoLinkForReplay, scoreTier, isWR]));
     const data = readSolveData(solveData);
     if (data === -1) {
         alert("Could not get data :(\nYour page is probably outdated.\nRefreshing...");
