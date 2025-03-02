@@ -185,7 +185,8 @@ const userCountryMap = {
     Arm0nd0: 'Canada',
     allenbot: 'Singapore',
     moceke: 'Russia',
-    robotmania: 'USA'
+    robotmania: 'USA',
+    macandcheese: 'Australia'
 };
 
 const countryEmojis = {
