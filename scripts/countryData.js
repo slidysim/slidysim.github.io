@@ -186,7 +186,8 @@ const userCountryMap = {
     allenbot: 'Singapore',
     moceke: 'Russia',
     robotmania: 'USA',
-    macandcheese: 'Australia'
+    macandcheese: 'Australia',
+    Zip: 'Germany'
 };
 
 const countryEmojis = {
