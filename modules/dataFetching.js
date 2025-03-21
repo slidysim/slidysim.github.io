@@ -44,16 +44,18 @@ function updateServer(auth_token, displayType, controlType, pbType) {
             directUpdate();
 
             if (initial) {
-                radio4.checked = true;
+                //radio4.checked = true;
                 document.getElementById("controlsDiv").style.opacity = "1";
                 customRanksCheck();
                 initial = false;
+                getPowerData();
             }
         }
     });
 }
 
 function directUpdate(){
+    document.getElementById('power-iframe')?.remove();
     last_displayType = request.displayType;
     last_controlType = controlType;
     last_pbType = request.leaderboardType;
@@ -110,7 +112,7 @@ function sendMyRequest() {
             console.log("Updating server");
             updateServer(user_token, new_displayType, controlType, new_pbType);
         } else {
-            console.log("Not doing repeated update");
+            //console.log("Not doing repeated update");
         }
     }
 }

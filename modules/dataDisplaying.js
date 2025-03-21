@@ -663,6 +663,7 @@ function createSheetNxM(WRList) {
 
 //"Public" function to create Rankings sheet
 function createSheetRankings(playerScores) {
+    savedPlayerScores = playerScores;
     let reverse = false;
     if (request.leaderboardType === "tps") {
         reverse = true;
@@ -686,6 +687,7 @@ function createSheetRankings(playerScores) {
     if (playerScores.length === 0) {
         contentDiv.innerHTML = notFoundError;
     } else {
+        if (loadingPower){return;}
         const tableContainer = document.createElement('div');
         tableContainer.classList.add('table-container');
         tableContainer.classList.add('bigContainer');
@@ -1673,6 +1675,9 @@ function generateFormattedString(request) {
             changeNameFilter("");
         });
         nameSpanHeader.appendChild(removeIcon);
+    }
+    if (loadingPower) {
+        leaderboardName.innerHTML = '';
     }
 }
 

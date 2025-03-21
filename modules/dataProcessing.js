@@ -142,7 +142,9 @@ function processRankingsData(cleanedData, rankingsType) {
     let sortedLists;
     let controlsFilteredLists;
     const sheetType = rankingsType;
-    tierLimiterTab.style.display = "block";
+    if (!loadingPower) {
+        tierLimiterTab.style.display = "block";
+    }
     solveTypeDiv.style.display = "none";
     let uniqueNames = getUniqueNames(cleanedData);
     let rankList = [];
@@ -155,7 +157,9 @@ function processRankingsData(cleanedData, rankingsType) {
         rankList = getPopularList(cleanedData, controlType, categories = lastSliderValue, onlySquares = lastSquaresCB);
     }
     if (sheetType === "Rankings3") {
-        rankingTabs.style.display = "block";
+        if (!loadingPower) {
+            rankingTabs.style.display = "block";
+        }
         rankList = customRankList;
     }
     organizedLists = organizeInRanks(cleanedData, rankList);
@@ -616,7 +620,7 @@ function getKinchRankings(uniqueNames, scoresLists, scoreType, percentageTable, 
             });
         const power = getPlayersPower(scores, weight);
         const allScoresAreUnranked = scores.every(scoreObj => scoreObj.scoreTier === "kappa");
-        if (allScoresAreUnranked) {
+        if (allScoresAreUnranked && !loadingPower) {
             return null;
         }
         const tier = getPlayersTier(power);

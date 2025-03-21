@@ -235,6 +235,11 @@ function addListenersToElements() {
                     radio_allGameModsInteresting.checked = true;
                     request.gameMode = "Interesting";
                 }
+                if (radio.value === "POWER") {
+                    rankingTabs.style.display = "none";
+                    getPowerData();
+                    return;
+                }
                 changePuzzleSize(radio.value);
             }
         });

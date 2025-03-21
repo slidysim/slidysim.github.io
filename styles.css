@@ -2,6 +2,7 @@ body {
     background-color: #121212;
     color: #fff;
     font-family: monospace, sans-serif;
+    margin: 0;
 }
 
 .header {
@@ -310,6 +311,11 @@ table.rankingCells td {
     transition: background-color 0.3s, color 0.3s;
 }
 
+#label_rankingsRadioPower {
+    color: #ff00ff;
+    transition: background-color 0.3s, color 0.3s;
+}
+
 #label_rankingsRadio3 {
     color: #00ff00;
     transition: background-color 0.3s, color 0.3s;
@@ -365,6 +371,11 @@ table.rankingCells td {
     color: black;
 }
 
+.form_radio_btn input[type=radio]:checked+#label_rankingsRadioPower {
+    background: #ff00ff;
+    color: black;
+}
+
 .form_radio_btn input[type=radio]:checked+#label_rankingsRadio3 {
     background: #00ff00;
     color: black;
@@ -407,6 +418,11 @@ table.rankingCells td {
 
 #label_rankingsRadio2:hover {
     background: #00ff00;
+    color: #000;
+}
+
+#label_rankingsRadioPower:hover {
+    background: #ff00ff;
     color: #000;
 }
 
@@ -506,7 +522,7 @@ h1 {
 .bigContainer::-webkit-scrollbar,
 html::-webkit-scrollbar,
 body::-webkit-scrollbar {
-    width: 20px;
+    width: 10px;
 }
 
 #scrambleContainer::-webkit-scrollbar-thumb,
@@ -583,7 +599,7 @@ input[type="range"] {
 input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 20px;
+    width: 10px;
     height: 20px;
     background-color: cyan;
     border: 2px solid cyan;
@@ -592,7 +608,7 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 input[type="range"]::-moz-range-thumb {
-    width: 20px;
+    width: 10px;
     height: 20px;
     background-color: cyan;
     border: 2px solid cyan;
@@ -1079,4 +1095,9 @@ img {
     display: inline-flex; /* Makes the link behave like an inline element */
     margin-left: 2px;
     
+}
+iframe {
+    width: 100%;
+    height: 100vh;
+    border: none; /* Remove iframe border */
 }

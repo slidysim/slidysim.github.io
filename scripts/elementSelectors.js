@@ -33,6 +33,7 @@ const popupContainerSettings = document.getElementById('popupContainerSettings')
 const popupContainerCustom = document.getElementById('popupContainerCustom');
 const recOveralyContainer = document.getElementById('recOveralyContainer');
 const customRankingsRadio = document.getElementById('rankingsRadio3');
+const customRankingsRadioPower = document.getElementById('rankingsRadioPower');
 const loadingPlaceHolder = document.getElementById('loadingPlaceHolder');
 const createCustomReplayButton = document.getElementById("createCustomReplayButton");
 const suggestionsContainer = document.getElementById("suggestionsContainer");
