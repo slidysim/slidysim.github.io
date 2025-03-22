@@ -664,7 +664,6 @@ function createSheetNxM(WRList) {
 //"Public" function to create Rankings sheet
 function createSheetRankings(playerScores) {
     savedPlayerScores = playerScores;
-    console.log(savedPlayerScores);
     let reverse = false;
     if (request.leaderboardType === "tps") {
         reverse = true;
@@ -688,7 +687,7 @@ function createSheetRankings(playerScores) {
     if (playerScores.length === 0) {
         contentDiv.innerHTML = notFoundError;
     } else {
-        if (loadingPower){return;}
+        if (loadingPower){loadPower();return;}
         const tableContainer = document.createElement('div');
         tableContainer.classList.add('table-container');
         tableContainer.classList.add('bigContainer');
@@ -1189,7 +1188,9 @@ function makeExampleButtons(customRankButtonsExamples) {
     function createCustomRankButtons(customRankObj, container) {
         function setCustomRanks(string) {
             customRankingsArea.value = string;
-            changeCustomRanks();
+            if (!loadingPower) {
+                changeCustomRanks();
+            }
         }
         for (const key in customRankObj) {
             if (customRankObj.hasOwnProperty(key)) {
@@ -1629,8 +1630,16 @@ function generateFormattedString(request) {
     let timeAgo = getTimeAgo(latestRecordTime);
     formattedParts.push(`<span class="leaderboardUpdateSpan">${lastLeaderboardUpdateString} <span style="color: #ffffff">${timeAgo}</span></span>`);
     clearInterval(window.leaderboardInterval); 
-    window.leaderboardInterval = setInterval(() => document.querySelector(".leaderboardUpdateSpan").innerHTML = `${lastLeaderboardUpdateString} <span style="color: #ffffff">${getTimeAgo(latestRecordTime)}</span>`, 10000);
-   // if(latestRecordTime){
+    window.leaderboardInterval = setInterval(() => {
+        try {
+          const updateSpan = document.querySelector(".leaderboardUpdateSpan");
+          if (updateSpan) {
+            updateSpan.innerHTML = `${lastLeaderboardUpdateString} <span style="color: #ffffff">${getTimeAgo(latestRecordTime)}</span>`;
+          }
+        } catch (error) {
+          // Ignore errors
+        }
+      }, 10000);   // if(latestRecordTime){
    //     let timeAgo = getTimeAgo(new Date(latestRecordTime));
    //     formattedParts.push(`<span class="leaderboardUpdateSpan">${lastLeaderboardUpdateString} <span style="color: #ffffff">${timeAgo}</span></span>`);
    //     if (timeAgo.includes("days")){
@@ -1678,8 +1687,12 @@ function generateFormattedString(request) {
         nameSpanHeader.appendChild(removeIcon);
     }
     if (loadingPower) {
-        leaderboardName.innerHTML = '';
-    }
+        leaderboardName.innerHTML = `
+        <span class="leaderboardUpdateSpan" onclick="getPowerData();" style="cursor: pointer;">
+          ${lastLeaderboardUpdateString} 
+          <span style="color: #ffffff;">${timeAgo}</span>
+        </span>
+      `;    }
 }
 
 function getTextOfSelectLength(mySelect) {

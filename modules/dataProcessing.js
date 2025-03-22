@@ -138,6 +138,7 @@ function processNxMRecordsData(cleanedData) {
 
 //"Public" function to process Kinch Rankings data
 function processRankingsData(cleanedData, rankingsType) {
+   // console.log("processing rankings data");
     let organizedLists;
     let sortedLists;
     let controlsFilteredLists;

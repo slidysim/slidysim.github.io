@@ -31,6 +31,7 @@ function updateServer(auth_token, displayType, controlType, pbType) {
     loadAnimation(loadingAnimation, contentDiv);
     document.body.style.pointerEvents = 'none';
     getScoresWrapper(auth_token, displayType, controlType, pbType, (error, res) => {
+        //console.log("getting scores from server");
         unloadAnimation(loadingAnimation, contentDiv);
         document.body.style.pointerEvents = 'auto';
         if (error) {
@@ -44,18 +45,22 @@ function updateServer(auth_token, displayType, controlType, pbType) {
             directUpdate();
 
             if (initial) {
-                radio4.checked = true;
+                //radio4.checked = true;
                 document.getElementById("controlsDiv").style.opacity = "1";
                 customRanksCheck();
                 initial = false;
-                //getPowerData();
+                
             }
         }
     });
 }
 
 function directUpdate(){
+    //console.log("direct update called");
     document.getElementById('power-iframe')?.remove();
+    if(loadingPower) {
+        controlType = 'unique';
+    }
     last_displayType = request.displayType;
     last_controlType = controlType;
     last_pbType = request.leaderboardType;
@@ -83,6 +88,7 @@ function directUpdate(){
     cleanedData = cleanedData.sort((a, b) => {
         return a["timestamp"] - b["timestamp"];
     });
+    //console.log("Sheet Type ", sheetType);
     if (sheetType === squaresSheetType) {
         processSquareRecordsData(cleanedData, sheetType);
     } else if (sheetType === "All") {
@@ -100,19 +106,25 @@ function directUpdate(){
 
 //"Public" function for sending request for processing data based on request
 function sendMyRequest() {
+    //console.log("sending request");
     closeReplay();
     let new_displayType = request.displayType;
     let new_controlType = controlType;
     let new_pbType = request.leaderboardType;
-    if (new_displayType === last_displayType && new_controlType === last_controlType && new_pbType === last_pbType){
-        directUpdate();
-        console.log("Normal update");
-    } else{
-        if (last_displayType !== -1){
-            console.log("Updating server");
-            updateServer(user_token, new_displayType, controlType, new_pbType);
-        } else {
-            //console.log("Not doing repeated update");
+    if (loadingPower) {
+        //console.log("updating server for power update");
+        updateServer(user_token, new_displayType, controlType, new_pbType);
+    } else {
+        if (new_displayType === last_displayType && new_controlType === last_controlType && new_pbType === last_pbType){
+            directUpdate();
+            //console.log("Normal update");
+        } else{
+            if (last_displayType !== -1){
+                //console.log("Updating server");
+                updateServer(user_token, new_displayType, controlType, new_pbType);
+            } else {
+                //console.log("Not doing repeated update");
+            }
         }
     }
 }
