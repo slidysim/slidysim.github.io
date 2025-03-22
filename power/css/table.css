@@ -155,18 +155,19 @@
 /* tiers OLD */
 [tier="g++OLD"]          { background-color: rgb(30, 30, 30); color: #ff00ff; text-shadow: 0px 0px 10px #ff00ff;} 
 [tier="gamma+OLD"]       { background-color: rgb(30, 30, 30); color: white; } 
-[tier="gammaOLD"]        { background-color: #00ffff; color: black; } 
-[tier="alephOLD"]        { background-color: #00ff2a; color: black; } 
-[tier="ascendedOLD"]     { background-color: #ff2262; color: black; } 
-[tier="novaOLD"]         { background-color: #7900ff; color: black; } 
-[tier="grandmasterOLD"]  { background-color: #ffd700; color: black; } 
-[tier="masterOLD"]       { background-color: #ec44ca; color: black; } 
-[tier="diamondOLD"]      { background-color: #b9f2ff; color: black; }
-[tier="platinumOLD"]     { background-color: #2fcfc2; color: black; }
-[tier="goldOLD"]         { background-color: #cab148; color: black; }
-[tier="silverOLD"]       { background-color: #cbd9e6; color: black; }
-[tier="bronzeOLD"]       { background-color: #b45f06; color: black; }
-[tier="beginnerOLD"]     { background-color: #93c47d; color: black; }
+[tier="gammaOLD"]        { background-color: #00ffff; color: #002626; } /* Deep teal for better contrast */
+[tier="alephOLD"]        { background-color: #00ff2a; color: #002b0b; } /* Dark forest green */
+[tier="ascendedOLD"]     { background-color: #ff2262; color: #330010; } /* Deep burgundy */
+[tier="novaOLD"]         { background-color: #7900ff; color: #e8d9ff; } /* Soft lavender */
+[tier="grandmasterOLD"]  { background-color: #ffd700; color: #4d3b00; } /* Rich brown (matches new gold) */
+[tier="masterOLD"]       { background-color: #ec44ca; color: #3b002e; } /* Deep magenta plum */
+[tier="diamondOLD"]      { background-color: #b9f2ff; color: #003344; } /* Deep teal/navy */
+[tier="platinumOLD"]     { background-color: #2fcfc2; color: #00211d; } /* Dark teal green */
+[tier="goldOLD"]         { background-color: #cab148; color: #4d3d00; } /* Strong brown */
+[tier="silverOLD"]       { background-color: #cbd9e6; color: #1a1a1a; } /* Charcoal */
+[tier="bronzeOLD"]       { background-color: #b45f06; color: #1a0a00; } /* Dark espresso */
+[tier="beginnerOLD"]     { background-color: #93c47d; color: #10210f; } /* Deep green-black */
+[tier="unrankedOLD"]     { background-color: #666666; color: #f0f0f0; } /* Keeping as is */
 [tier="unrankedOLD"]     { background-color: #666666; color: #f0f0f0;}
 
 /* tierf PROPERTIES FOR OLD TIERS */
