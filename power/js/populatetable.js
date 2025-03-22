@@ -7,6 +7,7 @@ let categories;
 let num_tiers;
 let num_categories;
 let oldTiers;
+let userFinalTierMap;
 
 
 function format(time) {
@@ -43,14 +44,6 @@ function result_tier(category, time){
     return tier-1;
 }
 
-function best_result_tier(row){
-    let best_tier = 0;
-    for(let i = 3; i < row.length; i++){
-      let cur_tier = result_tier(i-3, row[i]);
-      if (cur_tier > best_tier) best_tier = cur_tier;
-    }
-    return best_tier;
-}
 
 function populate_table(table){
     var results_table = document.getElementById("results-table");
@@ -179,7 +172,9 @@ function populate_table(table){
             if(user[2] < tier["limit"] || user[2] == 0){ // second condition should not matter, but i want to be sure
                 break;
             }
-            if(best_result_tier(user) < i)break; // best tier isn't high enough
+            if(userFinalTierMap[user[0]] != tier["name"]){
+                break;
+            }
 
             // create a new row and the cells for the username, place, power
             var user_row = document.createElement("tr");
@@ -202,12 +197,12 @@ function populate_table(table){
             name_div.setAttribute("tier", attrName);
             place_div.setAttribute("tier", attrName);
             power_div.setAttribute("tier", attrName);
-            if (i + 1 < tiers.length){
+
                 if(user[2] > tiers[i+1]["limit"]){
                 power_div.setAttribute("class", "player-power power_req_reached");
                 power_div.setAttribute("title", "Missing one score of the higher tier to rank up.");
                 }
-            }
+
 
             tier_table.appendChild(user_row);
             user_row.appendChild(name_div);
@@ -258,10 +253,11 @@ export function show_results_from_date(date){
     }
 }
 window.addEventListener('message', (event) => {
-    const [eventPowerData, eventOldTiers] = event.data;
+    const [eventPowerData, eventOldTiers, eventuserFinalTierMap] = event.data;
     //console.log(eventPowerData, eventOldTiers);
     powerData = eventPowerData;
     oldTiers = eventOldTiers;
+    userFinalTierMap = eventuserFinalTierMap;
     var dates = Object.keys(data);
     var latest = dates[dates.length-1];
     
