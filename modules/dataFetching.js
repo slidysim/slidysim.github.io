@@ -44,11 +44,11 @@ function updateServer(auth_token, displayType, controlType, pbType) {
             directUpdate();
 
             if (initial) {
-                //radio4.checked = true;
+                radio4.checked = true;
                 document.getElementById("controlsDiv").style.opacity = "1";
                 customRanksCheck();
                 initial = false;
-                getPowerData();
+                //getPowerData();
             }
         }
     });

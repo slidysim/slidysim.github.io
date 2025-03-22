@@ -664,6 +664,7 @@ function createSheetNxM(WRList) {
 //"Public" function to create Rankings sheet
 function createSheetRankings(playerScores) {
     savedPlayerScores = playerScores;
+    console.log(savedPlayerScores);
     let reverse = false;
     if (request.leaderboardType === "tps") {
         reverse = true;
