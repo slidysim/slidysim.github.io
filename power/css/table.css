@@ -151,3 +151,37 @@
 [tierf="bronze-i"]        { color: #ffb368; text-shadow: 0px 0px 10px #ffb368; }
 [tierf="beginner"]        { color: #c9daf8; text-shadow: 0px 0px 10px #c9daf8; }
 [tierf="unranked"]        { color: #666666; }
+
+/* tiers OLD */
+[tier="g++OLD"]          { background-color: rgb(30, 30, 30); color: #ff00ff; text-shadow: 0px 0px 10px #ff00ff;} 
+[tier="gamma+OLD"]       { background-color: rgb(30, 30, 30); color: white; } 
+[tier="gammaOLD"]        { background-color: #00ffff; color: black; } 
+[tier="alephOLD"]        { background-color: #00ff2a; color: black; } 
+[tier="ascendedOLD"]     { background-color: #ff2262; color: black; } 
+[tier="novaOLD"]         { background-color: #7900ff; color: black; } 
+[tier="grandmasterOLD"]  { background-color: #ffd700; color: black; } 
+[tier="masterOLD"]       { background-color: #ec44ca; color: black; } 
+[tier="diamondOLD"]      { background-color: #b9f2ff; color: black; }
+[tier="platinumOLD"]     { background-color: #2fcfc2; color: black; }
+[tier="goldOLD"]         { background-color: #cab148; color: black; }
+[tier="silverOLD"]       { background-color: #cbd9e6; color: black; }
+[tier="bronzeOLD"]       { background-color: #b45f06; color: black; }
+[tier="beginnerOLD"]     { background-color: #93c47d; color: black; }
+[tier="unrankedOLD"]     { background-color: #666666; color: #f0f0f0;}
+
+/* tierf PROPERTIES FOR OLD TIERS */
+[tierf="g++OLD"]          { color: #ff00ff; text-shadow: 0px 0px 10px #ff00ff; }
+[tierf="gamma+OLD"]       { color: #ffffff; text-shadow: 0px 0px 10px #ffffff; }
+[tierf="gammaOLD"]        { color: #00ffff; text-shadow: 0px 0px 10px #00ffff; }
+[tierf="alephOLD"]        { color: #00ff2a; text-shadow: 0px 0px 10px #00ff2a; }
+[tierf="ascendedOLD"]     { color: #ff2262; text-shadow: 0px 0px 10px #ff2262; }
+[tierf="novaOLD"]         { color: #7900ff; text-shadow: 0px 0px 10px #7900ff; }
+[tierf="grandmasterOLD"]  { color: #ffd700; text-shadow: 0px 0px 10px #ffd700; }
+[tierf="masterOLD"]       { color: #ec44ca; text-shadow: 0px 0px 10px #ec44ca; }
+[tierf="diamondOLD"]      { color: #b9f2ff; text-shadow: 0px 0px 10px #b9f2ff; }
+[tierf="platinumOLD"]     { color: #2fcfc2; text-shadow: 0px 0px 10px #2fcfc2; }
+[tierf="goldOLD"]         { color: #cab148; text-shadow: 0px 0px 10px #cab148; }
+[tierf="silverOLD"]       { color: #cbd9e6; text-shadow: 0px 0px 10px #cbd9e6; }
+[tierf="bronzeOLD"]       { color: #b45f06; text-shadow: 0px 0px 10px #b45f06; }
+[tierf="beginnerOLD"]     { color: #93c47d; text-shadow: 0px 0px 10px #93c47d; }
+[tierf="unrankedOLD"]     { color: #666666; text-shadow: 0px 0px 10px #666666; }

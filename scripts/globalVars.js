@@ -69,3 +69,4 @@ let updatedInitial = false;
 let n_m_size_limit = 0;
 let savedPlayerScores;
 let loadingPower = false;
+let gettingOldPower = false;

@@ -1,15 +1,13 @@
+
+import { tiersNew, categoriesNew, tiersOld, categoriesOld, data } from "./data.js?v=1.0.107";
+
 let powerData;
-import { tiers, categories, data } from "./data.js";
+let tiers;
+let categories;
+let num_tiers;
+let num_categories;
+let oldTiers;
 
-const num_tiers = tiers.length;
-const num_categories = categories.length;
-
-function decompress(str){
-    const pako = window.pako;
-    var arr = pako.inflate(atob(str));
-    var decoder = new TextDecoder();
-    return decoder.decode(arr);
-}
 
 function format(time) {
     if (time == -1) {
@@ -129,11 +127,14 @@ function populate_table(table){
         tier_name_div.colSpan = num_categories+3;
         tier_name_div.textContent = tier["name"];
         const name = tier["name"].toLowerCase().replace(" ","-");
-
+        let attrName = name;
+        if (oldTiers) {
+            attrName += "OLD";
+        }
         // tier requirements row
         for(var j=0; j<3; j++){
             const tdel = document.createElement("td");
-            tdel.setAttribute("tierf", name);
+            tdel.setAttribute("tierf", attrName);
             tier_req_row.appendChild(tdel);
         }
 
@@ -141,11 +142,14 @@ function populate_table(table){
         tier_req_row.children[0].style.minWidth = "100px";
         tier_req_row.children[1].textContent = tier["power"];
         tier_req_row.children[2].textContent = tier["limit"];
+        if (tier["limit"] == 9999999) {
+            tier_req_row.children[2].textContent = "∞";
+        }
 
         for(var j=0; j<num_categories; j++){
             var div = document.createElement("td");
             div.textContent = format(tier["times"][j]);
-            div.setAttribute("tierf", name);
+            div.setAttribute("tierf", attrName);
             tier_req_row.appendChild(div);
         }
 
@@ -191,14 +195,18 @@ function populate_table(table){
             name_div.className = "player";
             place_div.className = "player-place";
             power_div.className = "player-power";
-
-            name_div.setAttribute("tier", tier_name);
-            place_div.setAttribute("tier", tier_name);
-            power_div.setAttribute("tier", tier_name);
-            
-            if(user[2] > tiers[i+1]["limit"]){
-              power_div.setAttribute("class", "player-power power_req_reached");
-              power_div.setAttribute("title", "Missing one score of the higher tier to rank up.");
+            let attrName = tier_name;
+            if (oldTiers) {
+                attrName += "OLD";
+            }
+            name_div.setAttribute("tier", attrName);
+            place_div.setAttribute("tier", attrName);
+            power_div.setAttribute("tier", attrName);
+            if (i + 1 < tiers.length){
+                if(user[2] > tiers[i+1]["limit"]){
+                power_div.setAttribute("class", "player-power power_req_reached");
+                power_div.setAttribute("title", "Missing one score of the higher tier to rank up.");
+                }
             }
 
             tier_table.appendChild(user_row);
@@ -220,7 +228,11 @@ function populate_table(table){
                 // tier is -1 if below the first rank
                 if(t != -1){
                     const name = tiers[t]["name"].toLowerCase().replace(" ","-");
-                    div.setAttribute("tier", name);
+                    let attrName = name;
+                    if (oldTiers) {
+                        attrName += "OLD";
+                    }
+                    div.setAttribute("tier", attrName);
                 }
             }
 
@@ -238,14 +250,29 @@ export function show_results_from_date(date){
         populate_table(powerData);
         // show the selected date on the button
         var date_button = document.getElementById("date-button");
-        date_button.innerHTML = "Power Rankings";
+        if (oldTiers) {
+            date_button.innerHTML = "Classic Power Rankings";
+        } else {
+            date_button.innerHTML = "Modern Power Rankings";
+        }
     }
 }
 window.addEventListener('message', (event) => {
-    powerData = event.data;
+    const [eventPowerData, eventOldTiers] = event.data;
+    //console.log(eventPowerData, eventOldTiers);
+    powerData = eventPowerData;
+    oldTiers = eventOldTiers;
     var dates = Object.keys(data);
     var latest = dates[dates.length-1];
+    
+    if (oldTiers) {
+        tiers = tiersOld;
+        categories = categoriesOld;
+    } else {
+        tiers = tiersNew;
+        categories = categoriesNew;
+    }
+    num_tiers = tiers.length;
+    num_categories = categories.length;
     show_results_from_date(latest);
 });
-
-

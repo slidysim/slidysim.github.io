@@ -162,6 +162,7 @@ function processRankingsData(cleanedData, rankingsType) {
             rankingTabs.style.display = "block";
         }
         rankList = customRankList;
+        //console.log(rankList);
     }
     organizedLists = organizeInRanks(cleanedData, rankList);
     sortedLists = sortData(organizedLists, request.leaderboardType);

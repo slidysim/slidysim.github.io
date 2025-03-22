@@ -24,40 +24,68 @@ let tierlist = [
     "beginner",
     "unranked"
   ];
-  
+
+  let tierlistOld = [
+    "g+OLD",      
+    "gamma+OLD",  
+    "gammaOLD",
+    "alephOLD",
+    "ascendedOLD",
+    "novaOLD",
+    "grandmasterOLD",
+    "masterOLD",
+    "diamondOLD",
+    "platinumOLD",
+    "goldOLD",
+    "silverOLD",
+    "bronzeOLD",
+    "beginnerOLD",
+    "unrankedOLD"
+  ];
+
+
   const switchBtn = document.getElementById("switch");
+  let mainList = tierlist;
   
   switchBtn.addEventListener("change", () => {
-    tierlist.forEach((tier) => {
-      changeTable(tier);
-    });
+      if (document.getElementById("date-button").textContent === 'Classic Power Rankings') {
+          mainList = tierlistOld;
+      } else {
+          mainList = tierlist;
+      }
+      mainList.forEach((tier) => {
+          changeTable(tier);
+      });
   });
   
   function changeTable(tier_table) {
-    const elements = document.querySelectorAll(`#${tier_table}-table .player-row > *`);
-    
+    const escapedTierTable = tier_table.replace(/\+/g, "\\+").replace("OLD", "");
+    const selector = `#${escapedTierTable}-table .player-row > *`;
+    const elements = document.querySelectorAll(selector);
+
     elements.forEach((element) => {
-      const tier = element.getAttribute("tier");
-  
-      if (tier) {
-        if (tierlist.indexOf(tier) <= tierlist.indexOf(tier_table)) {
-          if (tierlist.indexOf(tier) < tierlist.indexOf(tier_table)) {
-            if (switchBtn.checked) {
-              element.style.fontWeight = "800";
+        const tier = element.getAttribute("tier");
+
+        if (tier) {
+
+            if (mainList.indexOf(tier) <= mainList.indexOf(tier_table)) {
+                if (mainList.indexOf(tier) < mainList.indexOf(tier_table)) {
+                    if (switchBtn.checked) {
+                        element.style.fontWeight = "800";
+                    } else {
+                        element.style.fontWeight = "";
+                    }
+                }
             } else {
-              element.style.fontWeight = "";
+                if (switchBtn.checked) {
+                    element.style.backgroundColor = "grey";
+                } else {
+                    element.style.backgroundColor = "";
+                }
             }
-          }
-        } else {
-          if (switchBtn.checked) {
-            element.style.backgroundColor = "grey";
-          } else {
-            element.style.backgroundColor = "";
-          }
         }
-      }
     });
-  }
+}
   
   const switchBtnReqs = document.getElementById("switch-reqs");
   

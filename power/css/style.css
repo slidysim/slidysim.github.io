@@ -3,8 +3,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Commissioner:wght@100;200;300;400;500;600;700;800;900&display=swap"); /* font family "Commissioner" */
 @import url("header.css");
 @import url("menu.css");
-@import url("scrollbar.css?v=1.0.10");
-@import url("table.css");
+@import url("scrollbar.css?v=1.0.101");
+@import url("table.css?v=1.0.103");
 
 * {
   font-family: monospace;
