@@ -1,5 +1,5 @@
 
-import { tiersNew, categoriesNew, tiersOld, categoriesOld, data } from "./data.js?v=1.0.107";
+import { tiersNew, categoriesNew, tiersOld, categoriesOld, data } from "./data.js?v=1.0.108";
 
 let powerData;
 let tiers;
