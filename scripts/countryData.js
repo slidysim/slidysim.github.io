@@ -191,7 +191,8 @@ const userCountryMap = {
     Zip: 'Germany',
     hkg11khanh: 'Vietnam',
     Alumina: 'USA',
-    Enzo1098: 'Philippines'
+    Enzo1098: 'Philippines',
+    wrist: 'Czech Republic',
 };
 
 const countryEmojis = {
