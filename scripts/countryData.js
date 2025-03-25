@@ -190,7 +190,8 @@ const userCountryMap = {
     macandcheese: 'Australia',
     Zip: 'Germany',
     hkg11khanh: 'Vietnam',
-    Alumina: 'USA'
+    Alumina: 'USA',
+    Enzo1098: 'Philippines'
 };
 
 const countryEmojis = {
