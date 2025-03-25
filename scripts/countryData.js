@@ -45,7 +45,8 @@ const userCountryMap = {
     Brazil: 'Brazil',
     Norway: 'Norway',
     'New Zealand': 'New Zealand',
-
+    Vietnam: 'Vietnam',
+    
     Tronamo: 'Australia',
     Brendan7625: 'Australia',
     lekh2003: 'Australia',
