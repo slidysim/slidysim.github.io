@@ -1184,7 +1184,6 @@ function makeExampleButtons(customRankButtonsExamples) {
     const h1Container = document.createElement("h1");
     h1Container.style.margin = "0";
     rankingTabs.appendChild(h1Container);
-    rankingTabs.appendChild(buttonShare);
     function createCustomRankButtons(customRankObj, container) {
         function setCustomRanks(string) {
             customRankingsArea.value = string;
@@ -1209,6 +1208,7 @@ function makeExampleButtons(customRankButtonsExamples) {
     for (const customRankObj of customRankButtonsExamples) {
         createCustomRankButtons(customRankObj, rankingTabs);
     }
+    rankingTabs.appendChild(buttonShare);
 }
 
 //"Public" function to calculate percentage of the score based on best value
