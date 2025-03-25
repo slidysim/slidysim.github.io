@@ -187,7 +187,8 @@ const userCountryMap = {
     moceke: 'Russia',
     robotmania: 'USA',
     macandcheese: 'Australia',
-    Zip: 'Germany'
+    Zip: 'Germany',
+    hkg11khanh: 'Vietnam'
 };
 
 const countryEmojis = {
@@ -221,4 +222,5 @@ const countryEmojis = {
     Brazil: '🇧🇷',
     Norway: '🇳🇴',
     'New Zealand': '🇳🇿',
+    Vietnam: '🇻🇳'
 };
