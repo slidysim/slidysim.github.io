@@ -46,7 +46,7 @@ const userCountryMap = {
     Norway: 'Norway',
     'New Zealand': 'New Zealand',
     Vietnam: 'Vietnam',
-    
+
     Tronamo: 'Australia',
     Brendan7625: 'Australia',
     lekh2003: 'Australia',
@@ -189,7 +189,8 @@ const userCountryMap = {
     robotmania: 'USA',
     macandcheese: 'Australia',
     Zip: 'Germany',
-    hkg11khanh: 'Vietnam'
+    hkg11khanh: 'Vietnam',
+    Alumina: 'USA'
 };
 
 const countryEmojis = {
