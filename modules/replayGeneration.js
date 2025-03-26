@@ -748,10 +748,10 @@ function renderMatrix(matrix, allFringeSchemes, state, isCustom=false, showWarni
                 square.style.fontSize = `${parseInt(minSquareWidthPx/2)}px`;
             }
             else{
-                if (width > 10 || height > 10) {
+                if (width >= 10 || height >= 10) {
                     const maxSize = Math.max(width, height);
-                    const calculatedSquareSize = 35 / maxSize + "vw";
-                    const caclulatedFontSize = 17 / maxSize + "vw";
+                    const calculatedSquareSize = 30 / maxSize + "vw";
+                    const caclulatedFontSize = 15 / maxSize + "vw";
                     square.style.width = `max(${calculatedSquareSize}, ${minSquareWidthPx}px)`;
                     square.style.height = `max(${calculatedSquareSize}, ${minSquareWidthPx}px)`;
                     square.style.fontSize = `max(${caclulatedFontSize}, ${parseInt(minSquareWidthPx/2)}px)`;
