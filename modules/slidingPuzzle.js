@@ -4,6 +4,10 @@
 None
 */
 
+function getCubicEstimate(time, N, M) {
+    return Math.floor(2000*time/(N*M*(N+M)))
+}
+
 //"Public" function to get MD value based on puzzleMatrix
 function calculateManhattanDistance(scrambledMatrix) {
     const height = scrambledMatrix.length;
