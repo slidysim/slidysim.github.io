@@ -1026,7 +1026,7 @@ function animateMatrix(scoreTitle, matrix, solution, tps, allFringeSchemes, grid
     rewindSliderMovesTable.appendChild(timeRow);
     if (solution !== "") {
         popupContainerSettings.appendChild(rewindSliderMovesTable);
-        if (width > 10 && height > 10) {
+        if (width * height > 100) {
             const cubicEstSpan = document.createElement('div');
             cubicEstSpan.textContent = "Cubic estimate (10x10): " + formatTime(getCubicEstimate(fakeTimes[solLen-1], width, height));
             cubicEstSpan.style.fontSize = '12px';
