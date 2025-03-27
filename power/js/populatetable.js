@@ -208,7 +208,17 @@ function populate_table(table){
             user_row.appendChild(name_div);
             user_row.appendChild(place_div);
             user_row.appendChild(power_div);
-
+            if (oldTiers) {
+                const dynamicSum = getDynamicSum(user.slice(3));
+                if (dynamicSum > 10000){
+                    if (dynamicSum > 500000){
+                        power_div.innerHTML += `<br><span style="fontSize=10px;color:cyan">${dynamicSum}</span>`;
+                    } else {
+                        power_div.innerHTML += `<br><span style="fontSize=10px;">${dynamicSum}</span>`;
+                    }
+                }
+                
+            }
             // add the users results
             for(var j=0; j<num_categories; j++){
                 let time = user[j+3];
