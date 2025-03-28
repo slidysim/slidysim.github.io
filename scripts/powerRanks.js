@@ -1,5 +1,8 @@
 let userFinalTierMap = {}; // Player name -> Final Tier name
 
+const trueGammaPlayers = ['vovker', 'dphdmn'];
+const funTiers = ['Gamma+', 'G++'];
+
 function getScoreTier(time, index, tiers) {
     for (let i = tiers.length - 1; i >= 0; i--) {
         const tier = tiers[i];
@@ -27,7 +30,11 @@ function calculatePlayerPower(savedPlayerScores, tiers) {
             } else {
                 playerTimes.push(time);
                 const tier = getScoreTier(time, index, tiers);
-                totalPower += tier.power;
+                let addedPower = tier.power;
+                if (funTiers.includes(tier.name) && !trueGammaPlayers.includes(player.name)){
+                    addedPower = 10101;
+                }
+                totalPower += addedPower;
                 highestScoreTiers.push(tier);
             }
         });
