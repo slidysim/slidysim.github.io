@@ -258,7 +258,7 @@ export function show_results_from_date(date){
         if (oldTiers) {
             date_button.innerHTML = "Classic Power Rankings";
         } else {
-            date_button.innerHTML = "Modern Power Rankings";
+            date_button.innerHTML = "Eggag Power Rankings";
         }
     }
 }
@@ -281,4 +281,189 @@ window.addEventListener('message', (event) => {
     num_tiers = tiers.length;
     num_categories = categories.length;
     show_results_from_date(latest);
+    
+    // Egg tier replacements
+const eggTiers = {
+    'Beginner': 'Rotten Egg',
+    'Bronze I': 'Soft-Boiled I',
+    'Bronze II': 'Soft-Boiled II',
+    'Bronze III': 'Soft-Boiled III',
+    'Silver I': 'Hard-Boiled I',
+    'Silver II': 'Hard-Boiled II',
+    'Silver III': 'Hard-Boiled III',
+    'Gold I': 'Scrambled I',
+    'Gold II': 'Scrambled II',
+    'Gold III': 'Scrambled III',
+    'Platinum I': 'Sunny Side I',
+    'Platinum II': 'Sunny Side II',
+    'Platinum III': 'Sunny Side III',
+    'Diamond I': 'Omelette I',
+    'Diamond II': 'Omelette II',
+    'Diamond III': 'Omelette III', // Typo kept for character :)
+    'Master I': 'Poached I',
+    'Master II': 'Poached II',
+    'Master III': 'Poached III',
+    'Grandmaster I': 'Egg I',
+    'Grandmaster II': 'Egg II',
+    'Grandmaster III': 'Egg III',
+    'Ascended': 'Eggag'
+};
+
+// Find all tier cells by checking content
+document.querySelectorAll('td').forEach(td => {
+    // Get text content with spaces instead of <br>
+    const text = td.innerText.replace(/\n/g, ' ').trim();
+    
+    // Check if this is one of our tier names
+    if (eggTiers[text]) {
+        // Split the replacement at the first space
+        const [first, ...rest] = eggTiers[text].split(' ');
+        const second = rest.join(' ');
+        
+        // Rebuild with <br> if needed
+        td.innerHTML = first + (second ? '<br>' + second : '');
+    }
+});
+
+const eggStyle = document.createElement('style');
+eggStyle.textContent = `
+/* Egg-themed color overrides */
+[tier="ascended"], [tierf="ascended"] {
+    background: linear-gradient(135deg, #ffcccc, #ff6666) !important;
+    color: #330000 !important;
+    text-shadow: 0 0 8px #ff9999 !important;
+}
+
+[tier="grandmaster-iii"], [tierf="grandmaster-iii"] {
+    background: linear-gradient(135deg, #ffccff, #ff99ff) !important;
+    color: #4d004d !important;
+}
+
+[tier="grandmaster-ii"], [tierf="grandmaster-ii"] {
+    background: linear-gradient(135deg, #ffddff, #ffbbff) !important;
+    color: #660066 !important;
+}
+
+[tier="grandmaster-i"], [tierf="grandmaster-i"] {
+    background: linear-gradient(135deg, #ffeeff, #ffddff) !important;
+    color: #800080 !important;
+}
+
+/* Master tiers - Poached egg whites */
+[tier="master-iii"], [tierf="master-iii"] {
+    background: linear-gradient(135deg, #ffffff, #f0f0f0) !important;
+    color: #666666 !important;
+    text-shadow: 0 0 5px rgba(0,0,0,0.1) !important;
+}
+
+[tier="master-ii"], [tierf="master-ii"] {
+    background: linear-gradient(135deg, #f8f8f8, #e8e8e8) !important;
+    color: #555555 !important;
+}
+
+[tier="master-i"], [tierf="master-i"] {
+    background: linear-gradient(135deg, #f0f0f0, #e0e0e0) !important;
+    color: #444444 !important;
+}
+
+/* Diamond tiers - Omelette yellows */
+[tier="diamond-iii"], [tierf="diamond-iii"] {
+    background: linear-gradient(135deg, #fffae6, #ffeb99) !important;
+    color: #664400 !important;
+}
+
+[tier="diamond-ii"], [tierf="diamond-ii"] {
+    background: linear-gradient(135deg, #fff5cc, #ffe066) !important;
+    color: #663300 !important;
+}
+
+[tier="diamond-i"], [tierf="diamond-i"] {
+    background: linear-gradient(135deg, #fff0b3, #ffd633) !important;
+    color: #662200 !important;
+}
+
+/* Platinum tiers - Sunny side up */
+[tier="platinum-iii"], [tierf="platinum-iii"] {
+    background: linear-gradient(135deg, #fff5e6, #ffcc80) !important;
+    color: #803300 !important;
+}
+
+[tier="platinum-ii"], [tierf="platinum-ii"] {
+    background: linear-gradient(135deg, #ffebcc, #ffb84d) !important;
+    color: #802600 !important;
+}
+
+[tier="platinum-i"], [tierf="platinum-i"] {
+    background: linear-gradient(135deg, #ffe0b3, #ffa31a) !important;
+    color: #801a00 !important;
+}
+
+/* Gold tiers - Scrambled eggs */
+[tier="gold-iii"], [tierf="gold-iii"] {
+    background: linear-gradient(135deg, #fff2cc, #ffdb4d) !important;
+    color: #4d3800 !important;
+}
+
+[tier="gold-ii"], [tierf="gold-ii"] {
+    background: linear-gradient(135deg, #ffe699, #ffcc00) !important;
+    color: #4d3300 !important;
+}
+
+[tier="gold-i"], [tierf="gold-i"] {
+    background: linear-gradient(135deg, #ffd966, #ffbf00) !important;
+    color: #4d2e00 !important;
+}
+
+/* Silver tiers - Egg shells */
+[tier="silver-iii"], [tierf="silver-iii"] {
+    background: linear-gradient(135deg, #f5f5f5, #d9d9d9) !important;
+    color: #333333 !important;
+}
+
+[tier="silver-ii"], [tierf="silver-ii"] {
+    background: linear-gradient(135deg, #f0f0f0, #cccccc) !important;
+    color: #3d3d3d !important;
+}
+
+[tier="silver-i"], [tierf="silver-i"] {
+    background: linear-gradient(135deg, #ebebeb, #bfbfbf) !important;
+    color: #474747 !important;
+}
+
+/* Bronze tiers - Brown eggs */
+[tier="bronze-iii"], [tierf="bronze-iii"] {
+    background: linear-gradient(135deg, #f2e6d9, #d9b38c) !important;
+    color: #331a00 !important;
+}
+
+[tier="bronze-ii"], [tierf="bronze-ii"] {
+    background: linear-gradient(135deg, #ebd9c6, #cc9966) !important;
+    color: #3d1f00 !important;
+}
+
+[tier="bronze-i"], [tierf="bronze-i"] {
+    background: linear-gradient(135deg, #e6ccb3, #bf8040) !important;
+    color: #472300 !important;
+}
+
+/* Beginner - Rotten egg */
+[tier="beginner"], [tierf="beginner"] {
+    background: linear-gradient(135deg, #e6f2e6, #99cc99) !important;
+    color: #003300 !important;
+}
+
+/* Unranked - Raw egg */
+[tier="unranked"], [tierf="unranked"] {
+    background: linear-gradient(135deg, #f9f9f9, #e6e6e6) !important;
+    color: #666666 !important;
+}
+
+tr.req-row {
+    opacity: 0.9 !important;
+}
+
+`;
+document.head.appendChild(eggStyle);
+
+
 });
