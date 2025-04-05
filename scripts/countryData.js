@@ -193,7 +193,8 @@ const userCountryMap = {
     Alumina: 'USA',
     Enzo1098: 'Philippines',
     wrist: 'Czech Republic',
-    Duysen: 'Vietnam'
+    Duysen: 'Vietnam',
+    TOOFAST: 'Australia'
 };
 
 const countryEmojis = {

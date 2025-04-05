@@ -139,18 +139,36 @@ function toggleClipboardCopy() {
 }
 
 function handleSavedReplay(item, solveData, event, tps, width, height, scoreTitle, videoLinkForReplay, scoreTier, isWR) {
-    const link = window.location.origin + "/replay?r=" + compressArrayToString([item, solveData, event, tps, width, height, serializeScoreTitle(scoreTitle), videoLinkForReplay, scoreTier, isWR]);
-    console.log(link);
-    const isCopyEnabled = localStorage.getItem('clipboardCopyEnabled') === 'true';
-    if (isCopyEnabled) {
-        navigator.clipboard.writeText(link).then(() => {
-            console.log("Link copied to clipboard");
-        }).catch(err => {
-            console.error("Failed to copy link: ", err);
-        });
-    } else {
-        console.log("Clipboard copy is disabled");
+    // Create and handle replay link (with clear error logging)
+    try {
+        const link = window.location.origin + "/replay?r=" + 
+            compressArrayToString([
+                item, 
+                solveData, 
+                event, 
+                tps, 
+                width, 
+                height, 
+                serializeScoreTitle(scoreTitle), 
+                videoLinkForReplay, 
+                scoreTier, 
+                isWR
+            ]);
+        
+        console.log("[Replay] Generated link:", link);
+
+        const isCopyEnabled = localStorage.getItem('clipboardCopyEnabled') === 'true';
+        if (isCopyEnabled) {
+            navigator.clipboard.writeText(link)
+                .then(() => console.log("[Replay] Successfully copied to clipboard"))
+                .catch(err => console.error("[Replay] Clipboard write failed:", err));
+        } else {
+            console.log("[Replay] Clipboard disabled in settings");
+        }
+    } catch (linkError) {
+        console.error("[Replay] Failed to generate link:", linkError);
     }
+    //continue with the function
     const data = readSolveData(solveData);
     if (data === -1) {
         alert("Could not get data :(\nYour page is probably outdated.\nRefreshing...");
