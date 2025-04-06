@@ -45,6 +45,7 @@ const userCountryMap = {
     Brazil: 'Brazil',
     Norway: 'Norway',
     'New Zealand': 'New Zealand',
+    Indonesia: 'Indonesia',
     Vietnam: 'Vietnam',
 
     Tronamo: 'Australia',
@@ -197,10 +198,12 @@ const userCountryMap = {
     TOOFAST: 'Australia',
     Sarenard: 'France',
     bambinex: 'France',
-    frederick: 'Canada'
+    frederick: 'Canada',
+    Berries1111: 'Indonesia'
 };
 
 const countryEmojis = {
+    Indonesia: '🇮🇩',
     Australia: '🇦🇺',
     Belarus: '🇧🇾',
     Belgium: '🇧🇪',
