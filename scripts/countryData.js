@@ -195,7 +195,8 @@ const userCountryMap = {
     wrist: 'Czech Republic',
     Duysen: 'Vietnam',
     TOOFAST: 'Australia',
-    Sarenard: 'France'
+    Sarenard: 'France',
+    frederick: 'Canada'
 };
 
 const countryEmojis = {
