@@ -196,6 +196,7 @@ const userCountryMap = {
     Duysen: 'Vietnam',
     TOOFAST: 'Australia',
     Sarenard: 'France',
+    bambinex: 'France',
     frederick: 'Canada'
 };
 
