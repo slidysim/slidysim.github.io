@@ -153,6 +153,7 @@
 [tierf="unranked"]        { color: #666666; }
 
 /* tiers OLD */
+[tier="eggOLD"]          { background-color: rgb(30, 30, 30); color: yellow; text-shadow: 0px 0px 10px yellow;} 
 [tier="g++OLD"]          { background-color: rgb(30, 30, 30); color: #ff00ff; text-shadow: 0px 0px 10px #ff00ff;} 
 [tier="gamma+OLD"]       { background-color: rgb(30, 30, 30); color: white; } 
 [tier="gammaOLD"]        { background-color: #00ffff; color: #002626; } /* Deep teal for better contrast */
@@ -171,6 +172,7 @@
 [tier="unrankedOLD"]     { background-color: #666666; color: #f0f0f0;}
 
 /* tierf PROPERTIES FOR OLD TIERS */
+[tierf="eggOLD"]          { color: yellow; text-shadow: 0px 0px 10px yellow; }
 [tierf="g++OLD"]          { color: #ff00ff; text-shadow: 0px 0px 10px #ff00ff; }
 [tierf="gamma+OLD"]       { color: #ffffff; text-shadow: 0px 0px 10px #ffffff; }
 [tierf="gammaOLD"]        { color: #00ffff; text-shadow: 0px 0px 10px #00ffff; }
