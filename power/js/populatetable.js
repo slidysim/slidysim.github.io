@@ -1,5 +1,5 @@
 
-import { tiersNew, categoriesNew, tiersOld, categoriesOld, data } from "./data.js?v=1.0.114";
+import { tiersNew, categoriesNew, tiersOld, categoriesOld, data } from "./data.js?v=1.0.108";
 
 let powerData;
 let tiers;
@@ -210,9 +210,9 @@ function populate_table(table){
             user_row.appendChild(power_div);
             if (oldTiers) {
                 const dynamicSum = getDynamicSum(user.slice(3));
-                if (dynamicSum > 303030){
+                if (dynamicSum > 10000){
                     if (dynamicSum > 500000){
-                        //power_div.innerHTML += `<br><span style="fontSize=10px;color:cyan">${dynamicSum}</span>`;
+                        power_div.innerHTML += `<br><span style="fontSize=10px;color:cyan">${dynamicSum}</span>`;
                     } else {
                         power_div.innerHTML += `<br><span style="fontSize=10px;">${dynamicSum}</span>`;
                     }
