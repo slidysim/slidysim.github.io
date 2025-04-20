@@ -14,7 +14,7 @@ function toggleSettingsVisibility() {
     if (popupContainerSettings.style.display === "none") {
         popupContainerSettings.style.display = "block";
         settingsButton.textContent = hideStatsText;
-        if (window.innerWidth < 1000){
+        if (window.innerWidth < 1300){
             changeOveralyStyle(mobile=true, showWarning=!warningWasShown);
         }
     } else {
@@ -746,7 +746,7 @@ function renderMatrix(matrix, allFringeSchemes, state, isCustom=false, showWarni
     width = matrix[0].length;
     height = matrix.length;
     const minSquareWidthPx = 32;
-    if (width >= 20 ||  height >= 20 || (currentWindowWidth < 1000 && (height > 10 || width > 10 || isCustom))){
+    if (width >= 20 ||  height >= 20 || (currentWindowWidth < 1300 && (height > 10 || width > 10 || isCustom))){
         changeOveralyStyle(mobile=true, showWarning=showWarning);
     } else {
         changeOveralyStyle(mobile=false)
