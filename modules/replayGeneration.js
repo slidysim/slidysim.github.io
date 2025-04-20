@@ -841,7 +841,7 @@ function changeOveralyStyle(mobile=true, showWarning=false){
         overlay.style.transform= "none";
         overlay.style.padding= "0%";
         overlay.scrollIntoView({behavior: "smooth", block: "start", inline: "start"});
-        if (window.matchMedia("(min-width: 1280px)").matches) {
+        if (window.matchMedia("(min-width: 1350px)").matches) {
             overlay.style.position = "relative";
             overlay.style.left = "50%";
             overlay.style.transform = "translateX(-50%)";
