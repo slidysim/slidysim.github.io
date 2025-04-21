@@ -199,7 +199,8 @@ const userCountryMap = {
     Sarenard: 'France',
     bambinex: 'France',
     frederick: 'Canada',
-    Berries1111: 'Indonesia'
+    Berries1111: 'Indonesia',
+    RZBAKA: 'Czech Republic'
 };
 
 const countryEmojis = {
