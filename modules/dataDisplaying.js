@@ -1701,36 +1701,37 @@ function getTextOfSelectLength(mySelect) {
 
 
 function appendFlagIconToNickname(nickname) {
-    function getEmojiImageLinkSync(emoji) {
-        return `https://emojicdn.elk.sh/${encodeURIComponent(emoji)}`;
-    }
-
     const lowerCaseNickname = nickname.toLowerCase();
-    let emoji = defaultCounryEmoji;
+    let country = null;
 
+    // Try to find the country for this nickname
     for (const user in userCountryMap) {
         if (user.toLowerCase() === lowerCaseNickname) {
-            const country = userCountryMap[user];
-            emoji = countryEmojis[country] || emoji;
+            country = userCountryMap[user];
             break;
         }
     }
 
-    const flagIconLink = getEmojiImageLinkSync(emoji);
+    const flagIconLink = country && countryEmojis[country] 
+        ? countryEmojis[country] 
+        : "images/flags/default.png"; // fixed default path
+
     const isDonator = donatorsList.some(donator => donator.toLowerCase() === lowerCaseNickname);
     const donatorIcon = isDonator ? `<a href="/donate" class="gold-icon-link">
-    <img class="emoji" draggable="false" alt="gold" src="images/gold.png" 
-    style=" border-radius: 50%;"
-    title="✨ This user supported Open Leaderboard! &#10;💛 Very Egg-cellent! &#10;(click for more info)">
+        <img class="emoji" draggable="false" alt="gold" src="images/gold.png" 
+        style="border-radius: 50%;"
+        title="✨ This user supported Open Leaderboard! &#10;💛 Very Egg-cellent! &#10;(click for more info)">
     </a>` : '';
 
     const isAdminOrDeveloper = adminsList.some(user => user.toLowerCase() === lowerCaseNickname);
     const roleIcon = isAdminOrDeveloper ? `<a href="/donate" class="admin-icon-link"  
-    title="🛠️ This user is an Admin/Developer! &#10;They build and maintain the system. &#10;(click for more info)">🛠️
+        title="🛠️ This user is an Admin/Developer! &#10;They build and maintain the system. &#10;(click for more info)">🛠️
     </a>` : '';
 
-    return `<img class="emoji" draggable="false" alt="${emoji}" src="${flagIconLink}?style=twitter">${nickname}${roleIcon}${donatorIcon}`;
+    return `<img class="emoji" draggable="false" alt="${country || 'unknown'}" src="${flagIconLink}">${nickname}${roleIcon}${donatorIcon}`;
 }
+
+
 
 
 //_________________"Private" functions (multiple usage) ends_________________
