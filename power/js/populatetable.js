@@ -198,7 +198,7 @@ function populate_table(table){
             place_div.setAttribute("tier", attrName);
             power_div.setAttribute("tier", attrName);
 
-                if(user[2] > tiers[i+1]["limit"]){
+                if((i !== tiers.length - 1) && (user[2] > tiers[i+1]["limit"])){
                 power_div.setAttribute("class", "player-power power_req_reached");
                 power_div.setAttribute("title", "Missing one score of the higher tier to rank up.");
                 }
