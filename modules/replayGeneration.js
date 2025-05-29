@@ -138,6 +138,11 @@ function toggleClipboardCopy() {
     return newState === 'true';
 }
 
+function isProbablyPhone() {
+    return (('ontouchstart' in window || navigator.maxTouchPoints > 1) &&
+            window.innerWidth <= 768);
+}
+
 function handleSavedReplay(item, solveData, event, tps, width, height, scoreTitle, videoLinkForReplay, scoreTier, isWR) {
     // Create and handle replay link (with clear error logging)
     try {
@@ -158,10 +163,10 @@ function handleSavedReplay(item, solveData, event, tps, width, height, scoreTitl
         console.log("[Replay] Generated link:", link);
 
         const isCopyEnabled = localStorage.getItem('clipboardCopyEnabled') === 'true';
-        if (isCopyEnabled) {
+        if (isCopyEnabled && !isProbablyPhone()) {
             navigator.clipboard.writeText(link)
-                .then(() => console.log("[Replay] Successfully copied to clipboard"))
-                .catch(err => console.error("[Replay] Clipboard write failed:", err));
+            .then(() => console.log("[Replay] Successfully copied to clipboard"))
+            .catch(err => console.error("[Replay] Clipboard write failed:", err));
         } else {
             console.log("[Replay] Clipboard disabled in settings");
         }
