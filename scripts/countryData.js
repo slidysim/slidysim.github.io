@@ -50,8 +50,6 @@ const userCountryMap = {
     Iceland: 'Iceland',
     Scotland: 'Scotland',
 
-    iota: 'Scotland',
-
     kaxymonoxy: 'Iceland',
 
     Tronamo: 'Australia',
@@ -182,6 +180,7 @@ const userCountryMap = {
     Berkmann18: 'UK',
     sam596: 'UK',
     luca: 'UK',
+    iota: 'UK',
   
     HoHo: 'Japan',
   
