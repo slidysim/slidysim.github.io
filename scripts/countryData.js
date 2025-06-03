@@ -48,6 +48,9 @@ const userCountryMap = {
     Indonesia: 'Indonesia',
     Vietnam: 'Vietnam',
     Iceland: 'Iceland',
+    Scotland: 'Scotland',
+
+    iota: 'Scotland',
 
     kaxymonoxy: 'Iceland',
 
@@ -187,7 +190,7 @@ const userCountryMap = {
     faugore: 'Ukraine',
     Notobiv: 'Ukraine',
   
-    iota: 'USA',
+    man142: 'USA',
     Magentawolf27YT: 'USA',
     R14: 'USA',
     xsedim: 'USA',
