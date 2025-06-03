@@ -47,7 +47,10 @@ const userCountryMap = {
     'New Zealand': 'New Zealand',
     Indonesia: 'Indonesia',
     Vietnam: 'Vietnam',
-  
+    Iceland: 'Iceland',
+
+    kaxymonoxy: 'Iceland',
+
     Tronamo: 'Australia',
     Brendan7625: 'Australia',
     lekh2003: 'Australia',
@@ -182,7 +185,9 @@ const userCountryMap = {
     IgorTarasov: 'Ukraine',
     oliynykmax: 'Ukraine',
     faugore: 'Ukraine',
+    Notobiv: 'Ukraine',
   
+    iota: 'USA',
     Magentawolf27YT: 'USA',
     R14: 'USA',
     xsedim: 'USA',
