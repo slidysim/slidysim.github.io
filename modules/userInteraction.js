@@ -227,12 +227,21 @@ function addListenersToElements() {
                 }
                 if (radio.value === "POWER") {
                     gettingOldPower = false;
+                    gettingFMCPower = false;
                     rankingTabs.style.display = "none";
                     getPowerData();
                     return;
                 }
                 if (radio.value === "POWEROLD") {
                     gettingOldPower = true;
+                    gettingFMCPower = false;
+                    rankingTabs.style.display = "none";
+                    getPowerData();
+                    return;
+                }
+                if (radio.value === "POWERFMC") {
+                    gettingOldPower = false;
+                    gettingFMCPower = true;
                     rankingTabs.style.display = "none";
                     getPowerData();
                     return;

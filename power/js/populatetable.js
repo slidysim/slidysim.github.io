@@ -1,5 +1,5 @@
 
-import { tiersNew, categoriesNew, tiersOld, categoriesOld, data } from "./data.js?v=1.0.115";
+import {FMCtiers, tiersNew, categoriesNew, tiersOld, categoriesOld, categoriesFMC, data } from "./data.js?v=1.0.121";
 
 let powerData;
 let tiers;
@@ -8,6 +8,7 @@ let num_tiers;
 let num_categories;
 let oldTiers;
 let userFinalTierMap;
+let fmcPower;
 
 
 function format(time) {
@@ -258,16 +259,21 @@ export function show_results_from_date(date){
         if (oldTiers) {
             date_button.innerHTML = "Classic Power Rankings";
         } else {
-            date_button.innerHTML = "Modern Power Rankings";
+            if (fmcPower){
+                date_button.innerHTML = "FMC Power Rankings";
+            } else {
+                date_button.innerHTML = "Modern Power Rankings";
+            }
         }
     }
 }
 window.addEventListener('message', (event) => {
-    const [eventPowerData, eventOldTiers, eventuserFinalTierMap] = event.data;
+    const [eventPowerData, eventOldTiers, gettingFMCPower, eventuserFinalTierMap] = event.data;
     //console.log(eventPowerData, eventOldTiers);
     powerData = eventPowerData;
     oldTiers = eventOldTiers;
     userFinalTierMap = eventuserFinalTierMap;
+    fmcPower = gettingFMCPower;
     var dates = Object.keys(data);
     var latest = dates[dates.length-1];
     
@@ -275,8 +281,13 @@ window.addEventListener('message', (event) => {
         tiers = tiersOld;
         categories = categoriesOld;
     } else {
+        if (fmcPower) {
+            tiers = FMCtiers;
+            categories = categoriesFMC;
+        } else {
         tiers = tiersNew;
         categories = categoriesNew;
+        }
     }
     num_tiers = tiers.length;
     num_categories = categories.length;

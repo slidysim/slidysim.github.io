@@ -319,6 +319,10 @@ table.rankingCells td {
     color: #ff00ff;
     transition: background-color 0.3s, color 0.3s;
 }
+#label_rankingsRadioPowerFMC {
+    color: #ff00ff;
+    transition: background-color 0.3s, color 0.3s;
+}
 
 #label_rankingsRadio3 {
     color: #00ff00;
@@ -383,6 +387,10 @@ table.rankingCells td {
     background: #ff00ff;
     color: black;
 }
+.form_radio_btn input[type=radio]:checked+#label_rankingsRadioPowerFMC {
+    background: #ff00ff;
+    color: black;
+}
 
 .form_radio_btn input[type=radio]:checked+#label_rankingsRadio3 {
     background: #00ff00;
@@ -434,6 +442,10 @@ table.rankingCells td {
     color: #000;
 }
 #label_rankingsRadioPowerOLD:hover {
+    background: #ff00ff;
+    color: #000;
+}
+#label_rankingsRadioPowerFMC:hover {
     background: #ff00ff;
     color: #000;
 }
