@@ -1,5 +1,5 @@
 
-import {FMCtiers, tiersNew, categoriesNew, tiersOld, categoriesOld, categoriesFMC, data } from "./data.js?v=1.0.122";
+import {FMCtiers, tiersNew, categoriesNew, tiersOld, categoriesOld, categoriesFMC, data } from "./data.js?v=1.0.123";
 
 let powerData;
 let tiers;

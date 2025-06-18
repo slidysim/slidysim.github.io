@@ -171,7 +171,10 @@ const customRankButtonsExamples = [
     "Old 100": "3x3 ao5, 3x3 ao12, 3x3 ao50, 3x3 ao100, 3x3 x5, 3x3 x10, 3x3 x42, 3x3 x100, 3x3 rel-ao5, 3x3 rel-ao12, 3x3 Wrel-ao5, 3x3 Wrel-ao12, 3x3 Hrel-ao5, 3x3 Hrel-ao12, 3x3 Eut-ao5, 3x3 Eut-ao12, 3x3 Eut-ao50, 4x4 single, 4x4 ao5, 4x4 ao12, 4x4 ao50, 4x4 ao100, 4x4 x5, 4x4 x10, 4x4 x42, 4x4 x100, 4x4 relay, 4x4 rel-ao5, 4x4 rel-ao12, 4x4 Wrel, 4x4 Wrel-ao5, 4x4 Wrel-ao12, 4x4 Hrel, 4x4 Hrel-ao5, 4x4 Hrel-ao12, 4x4 Eut, 4x4 Eut-ao5, 4x4 Eut-ao12, 5x5 single, 5x5 ao5, 5x5 ao12, 5x5 ao50, 5x5 ao100, 5x5 x5, 5x5 x10, 5x5 x42, 5x5 relay, 5x5 rel-ao5, 5x5 rel-ao12, 5x5 Wrel, 5x5 Wrel-ao5, 5x5 Wrel-ao12, 5x5 Hrel, 5x5 Hrel-ao5, 5x5 Hrel-ao12, 5x5 Eut, 5x5 Eut-ao5, 5x5 Eut-ao12, 6x6 single, 6x6 ao5, 6x6 ao12, 6x6 ao50, 6x6 ao100, 6x6 x5, 6x6 x10, 6x6 relay, 6x6 rel-ao5, 6x6 Wrel, 6x6 Wrel-ao5, 6x6 Hrel, 6x6 Hrel-ao5, 6x6 Eut, 6x6 Eut-ao5, 7x7 single, 7x7 ao5, 7x7 ao12, 7x7 ao50, 7x7 x5, 7x7 relay, 7x7 rel-ao5, 7x7 Wrel, 7x7 Wrel-ao5, 7x7 Hrel, 7x7 Hrel-ao5, 8x8 single, 8x8 ao5, 8x8 ao12, 8x8 x5, 8x8 relay, 8x8 Wrel, 8x8 Hrel, 9x9 single, 9x9 ao5, 9x9 relay, 10x10 single, 10x10 ao5, 10x10 relay, 12x12 single, 16x16 single, 20x20 single"
 },
 {
-    "Simplified": "3x3 ao12, 3x3 ao50, 3x3 ao100, 4x4 ao5, 4x4 ao12, 4x4 ao50, 5x5 ao5, 5x5 ao12, 6x6 single, 6x6 ao5, 6x6 ao12, 7x7 single, 7x7 ao5, 8x8 single, 9x9 single, 10x10 single"
+    "Simple": "3x3 ao12, 3x3 ao50, 3x3 ao100, 4x4 ao5, 4x4 ao12, 4x4 ao50, 5x5 ao5, 5x5 ao12, 6x6 single, 6x6 ao5, 6x6 ao12, 7x7 single, 7x7 ao5, 8x8 single, 9x9 single, 10x10 single"
+},
+{
+    "FMC": "3x3 ao50, 3x3 ao100, 4x4 ao12, 4x4 ao50, 4x4 ao100, 5x5 ao5, 5x5 ao12, 6x6 single, 6x6 ao5, 7x7 single, 7x7 ao5, 8x8 single, 9x9 single, 10x10 single, 16x16 single"
 },
 {
     "11 - 20": "11x11, 12x12, 13x13, 14x14, 15x15, 16x16, 17x17, 18x18, 19x19, 20x20"
