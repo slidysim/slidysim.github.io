@@ -12,7 +12,7 @@ async function main(bypass = false) {
     if (loadingDataNormally) {
         try {
             await verifyLogin(); // Wait for the async function to finish
-            if (logged_in_as === "vovker" || logged_in_as === "dphdmn"){
+            if (logged_in_as === "vovker" || logged_in_as === "dphdmn" || logged_in_as === "daanbe"){
                // document.getElementById("enableDebugMode").style.display = "inline";
                 document.getElementById("admin_link").style.display = "inline";
             }

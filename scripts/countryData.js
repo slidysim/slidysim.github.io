@@ -9,7 +9,8 @@ const donatorsList = [
 
 const adminsList = [
     "dphdmn",
-    "vovker"
+    "vovker",
+    "daanbe"
 ];
 
 //countries list and emoji for users to add flags

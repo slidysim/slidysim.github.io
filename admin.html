@@ -203,7 +203,7 @@
         });
         verifyLogin().then((result) => {
             console.log(logged_in_as);
-            if (logged_in_as === "vovker" || logged_in_as === "dphdmn"){
+            if (logged_in_as === "vovker" || logged_in_as === "dphdmn" || logged_in_as === "daanbe"){
                 document.getElementById("authToken").value = user_token;
             }
             else{
