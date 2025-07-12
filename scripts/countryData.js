@@ -122,6 +122,7 @@ const userCountryMap = {
     imvelox: 'Italy',
     Nabbissimux: 'Italy',
     DedolCubing: 'Italy',
+    chettocri: 'Italy',
   
     thelegendary08: 'Malaysia',
   
