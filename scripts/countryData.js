@@ -111,6 +111,7 @@ const userCountryMap = {
     RedstoneTim: 'Germany',
     Corpllwacquirerrichmf: 'Germany',
     Zip: 'Germany',
+    JonasCuber11: 'Germany',
   
     Rouxles: 'Hong Kong',
   
