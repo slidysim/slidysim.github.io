@@ -232,6 +232,7 @@ const userCountryMap = {
     July2nd: 'USA',
     robotmania: 'USA',
     Alumina: 'USA',
+    Spliffey: 'USA',
   
     Sakinuto: 'Brazil',
     PedroAM: 'Brazil',
