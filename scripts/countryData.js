@@ -113,6 +113,7 @@ const userCountryMap = {
     Corpllwacquirerrichmf: 'Germany',
     Zip: 'Germany',
     JonasCuber11: 'Germany',
+    dani2: 'Germany',
   
     Rouxles: 'Hong Kong',
   
