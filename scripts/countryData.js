@@ -63,6 +63,7 @@ const userCountryMap = {
     TOOFAST: 'Australia',
     wiserboblouis: 'Australia',
     macandcheese: 'Australia',
+    Ton618: 'Australia',
   
     Utochka: 'Belarus',
   
