@@ -6,7 +6,8 @@ const donatorsList = [
     "XLII",
     "VanillaGawr",
     "Blueoanaoa",
-    "OCEshadow"
+    "OCEshadow",
+    "iota",
 ];
 
 const adminsList = [
