@@ -239,6 +239,8 @@ const userCountryMap = {
     Alumina: 'USA',
     Spliffey: 'USA',
     zander: 'USA',
+    xishu: 'USA',
+    justnnotyou: 'USA',
   
     Sakinuto: 'Brazil',
     PedroAM: 'Brazil',
