@@ -636,7 +636,6 @@ function calculatePlayerPower(savedPlayerScores, tiers, fmc=false) {
             userFinalTierMap[player.name] = tiers[0].name;
             finalTierIndex = 0; // For sorting
         }
-
         // Store player info
         players.push({
             name: player.name,
@@ -655,8 +654,8 @@ function calculatePlayerPower(savedPlayerScores, tiers, fmc=false) {
         }
         return b.totalPower - a.totalPower;
     });
-
-    // Return formatted output (unchanged structure)
+    
+        // Return formatted output (unchanged structure)
     return players.map((player, index) => [
         player.name,
         index + 1,
@@ -770,8 +769,8 @@ let tiersOld = [{"name": "Unranked", "alias": "u", "power": 0, "limit": 0, "time
 
 function getPowerData(){
     loadingPower = true;
-    request.displayType = "Standard";
-    controlType = "unique";
+    //request.displayType = "Standard";
+    //controlType = "unique";
     request.width = "Rankings3";
     request.height = "Rankings3";
     request.leaderboardType = "time";

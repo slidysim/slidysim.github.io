@@ -15,7 +15,9 @@ function toggleCountryRanks(){
 //"Public" function to change control type
 function changeControls(newtype) {
     controlType = newtype;
-    sendMyRequest();
+    if (!loadingPower){
+        sendMyRequest();
+    }
 }
 
 //"Public" function to change filter for the name
@@ -275,7 +277,9 @@ var requestProxy = new Proxy(request, {
         } else {
             target[key] = value;
         }
-        sendMyRequest();
+        if (!loadingPower){
+            sendMyRequest();
+        }
         return true;
     },
 });

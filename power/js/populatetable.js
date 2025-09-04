@@ -170,11 +170,11 @@ function populate_table(table){
                 break;
             }
             // if the user's power is too low, stop adding new rows
-            if(user[2] < tier["limit"] || user[2] == 0){ // second condition should not matter, but i want to be sure
+            if(user[2] < tier["limit"] && tier["limit"]>1){ 
                 break;
             }
             if(userFinalTierMap[user[0]] != tier["name"]){
-                break;
+              //  break;
             }
 
             // create a new row and the cells for the username, place, power

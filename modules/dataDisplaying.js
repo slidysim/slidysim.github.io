@@ -1615,13 +1615,13 @@ function generateFormattedString(request) {
                 transition: box-shadow 0.3s;
                 outline: none;
             }
-    
+
             .glow-button:hover {
                 background-color: white;
                 box-shadow: 0 0 50px cyan;
             }
         </style>
-        <button class="glow-button" onclick="updateServer(user_token, last_displayType, last_controlType, last_pbType)">
+        <button class="glow-button" onclick="${loadingPower ? 'loadingPower  = true; ' : ''}updateServer(user_token, last_displayType, last_controlType, last_pbType)">
             <span style="font-size: 24px; color: white;">&#x267B;</span> <!-- Unicode for refresh icon -->
         </button>
     `);
@@ -1666,6 +1666,21 @@ function generateFormattedString(request) {
         changeControls(currentValue);
         controlTypeSelect.style.width = `${getTextOfSelectLength(controlTypeSelect) + 1}ch`;
     }
+    if (loadingPower) {
+        const originalDisplayTypeChanged = displayTypeChanged;
+        displayTypeChanged = function() {
+            loadingPower = true;
+            originalDisplayTypeChanged();
+            getPowerData();
+        };
+        
+        const originalControlTypeChanged = controlTypeChanged;
+        controlTypeChanged = function() {
+            loadingPower = true;
+            originalControlTypeChanged();
+            getPowerData();
+        };
+    }
     displayTypeSelect = document.getElementById("displayType");
     displayTypeSelect.addEventListener("change", displayTypeChanged);
     displayTypeSelect.value = request.displayType;
@@ -1686,13 +1701,18 @@ function generateFormattedString(request) {
         });
         nameSpanHeader.appendChild(removeIcon);
     }
-    if (loadingPower) {
-        leaderboardName.innerHTML = `
-        <span class="leaderboardUpdateSpan" onclick="getPowerData();" style="cursor: pointer;">
-          ${lastLeaderboardUpdateString} 
-          <span style="color: #ffffff;">${timeAgo}</span>
-        </span>
-      `;    }
+    if (loadingPower){
+        header = document.getElementById("leaderboardName");
+        header.removeChild(header.firstChild);
+        header.removeChild(header.firstChild);
+        header.removeChild(header.firstChild);
+        header.firstChild.textContent = header.firstChild.textContent.replace(
+            "sliding puzzles", 
+            "Slidysim Power Rankings"
+        );
+        
+    }
+
 }
 
 function getTextOfSelectLength(mySelect) {

@@ -58,9 +58,9 @@ function updateServer(auth_token, displayType, controlType, pbType) {
 function directUpdate(){
     //console.log("direct update called");
     document.getElementById('power-iframe')?.remove();
-    if(loadingPower) {
-        controlType = 'unique';
-    }
+    //if(loadingPower) {
+    //    controlType = 'unique';
+    //}
     last_displayType = request.displayType;
     last_controlType = controlType;
     last_pbType = request.leaderboardType;
