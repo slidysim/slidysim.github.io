@@ -174,7 +174,11 @@ function populate_table(table){
                 break;
             }
             if(userFinalTierMap[user[0]] != tier["name"]){
-              //  break;
+                //don't add users if no scores for valid tier
+                if (tier["name"] != "Beginner") {
+                    break;
+                }
+                
             }
 
             // create a new row and the cells for the username, place, power
