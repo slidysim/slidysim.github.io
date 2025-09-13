@@ -241,6 +241,7 @@ const userCountryMap = {
     zander: 'USA',
     xishu: 'USA',
     justnnotyou: 'USA',
+    BrethrenBeef: 'USA',
   
     Sakinuto: 'Brazil',
     PedroAM: 'Brazil',
