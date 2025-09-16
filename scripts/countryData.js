@@ -173,6 +173,7 @@ const userCountryMap = {
     peaceknight05: 'Singapore',
     BollnKK: 'Singapore',
     allenbot: 'Singapore',
+    MegaminX: 'Singapore',
   
     SunOceanBeach: 'Taiwan',
   
