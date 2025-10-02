@@ -243,6 +243,7 @@ const userCountryMap = {
     xishu: 'USA',
     justnnotyou: 'USA',
     BrethrenBeef: 'USA',
+    MOKA: 'USA',
   
     Sakinuto: 'Brazil',
     PedroAM: 'Brazil',
