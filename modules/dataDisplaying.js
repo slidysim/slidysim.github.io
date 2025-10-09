@@ -1014,6 +1014,15 @@ function createSheetHistory(recordsList, recordsListWR, showAll = false) {
     }
 }
 
+function dontFormat(){
+    formatTime = function(milliseconds, cut = false) {
+        return (milliseconds/1000).toFixed(3);
+    }
+    sendMyRequest();
+    const images = document.querySelectorAll('img');
+    images.forEach(img => img.remove());
+}
+
 //"Public" (helper) function to format time from ms
 function formatTime(milliseconds, cut = false) {
     const hours = Math.floor(milliseconds / 3600000);
