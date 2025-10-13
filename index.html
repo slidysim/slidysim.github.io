@@ -1,21 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <link rel="icon" href="images/egg.png" type="image/png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Primary Open Graph Tags -->
     <meta property="og:title" content="SlidySim Leaderboard 🏆 | Compete in 15 Puzzle Speed Solves">
-    <meta property="og:description" content="Join the Egg Club! 🥚 Race against the fastest sliding puzzle solvers on the global SlidySim leaderboard. Can you top the rankings?">
+    <meta property="og:description"
+        content="Join the Egg Club! 🥚 Race against the fastest sliding puzzle solvers on the global SlidySim leaderboard. Can you top the rankings?">
     <meta property="og:image" content="https://slidysim.online/images/15puzzle.gif">
-    <meta property="og:url" content="https://slidysim.online/">  
+    <meta property="og:url" content="https://slidysim.online/">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Open Slidysim">
 
     <!-- Twitter Card (for better cross-platform support) -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="SlidySim Leaderboard 🏆 | Compete in 15 Puzzle Speed Solves">
-    <meta name="twitter:description" content="Join the Egg Club! 🥚 Race against the fastest sliding puzzle solvers on the global SlidySim leaderboard.">
+    <meta name="twitter:description"
+        content="Join the Egg Club! 🥚 Race against the fastest sliding puzzle solvers on the global SlidySim leaderboard.">
     <meta name="twitter:image" content="https://slidysim.online/images/15puzzle.gif">
     <meta name="twitter:creator" content="@dphdmn"> <!-- Optional -->
 
@@ -47,7 +50,8 @@
             box-shadow: 0px 0px 20px cyan;
         }
 
-        h1, h2 {
+        h1,
+        h2 {
             color: cyan;
             border-bottom: 2px solid cyan;
             margin-bottom: 10px;
@@ -84,7 +88,8 @@
             margin-bottom: 20px;
         }
 
-        input[type="text"], input[type="password"] {
+        input[type="text"],
+        input[type="password"] {
             width: 100%;
             background: black;
             color: cyan;
@@ -125,41 +130,58 @@
             height: 50px;
             overflow-y: auto;
         }
-        .image-container {
-        text-align: center;
-    }
 
-    .image-container img {
-        max-width: 95%;
-        height: auto;
-        margin-top: auto;
-        margin-bottom: auto;
-        display: block;
-    }
+        .image-container {
+            text-align: center;
+        }
+
+        .image-container img {
+            max-width: 95%;
+            height: auto;
+            margin-top: auto;
+            margin-bottom: auto;
+            display: block;
+        }
+
+        .note {
+            font-weight: bold;
+            color: rgb(255, 0, 255);
+            font-size: 40px;
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Open Slidysim Leaderboard</h1>
-        <p>Welcome to the the <strong>alternative</strong> Slidysim leaderboard for competitive 15-puzzle speedsliding!</p>
-        
-        <p>Already registered? <a href="lb">Check the Leaderboard</a> to see your rank.</p>
-        
-        <p>New to <a href="https://slidysim.com/">Slidysim</a>? It’s a 15-puzzle simulator. Download it from the official website first!</p>
-
-        <p><a href="https://www.mediafire.com/file/j2xj89gs3ghiojp/slidysim_v29.1-1.zip/file">Windows version download</a> (in case link does not work)</p>
-        
-        <p>To submit records:<br>  
-        1. Request a token by contacting <strong>dphdmn</strong> or <strong>vovker</strong> on Discord<br>  
-        2. Register here — your token will be linked to your username<br>  
-        3. Download the <a href="https://github.com/dphdmn/openslidy/releases/download/1.1.0/Slidysim30.0_v1.1.exe">PBs Manager</a><br>  
-        4. Place it in your Slidysim folder and run it<br>  
-        5. Log in using your password (only required on first run)<br>  
-        6. You're now ready to submit records to the <a href="lb">leaderboard</a>
+        <div class="note">
+            Please update to <a href="https://github.com/dphdmn/openslidy/releases/download/1.3/SlidysimRecordsManager1.3.exe">PBs Manager</a> version 1.3.
+        </div>
+        <p>Welcome to the the <strong>alternative</strong> Slidysim leaderboard for competitive 15-puzzle speedsliding!
         </p>
 
-        <p>Want to support us? <a href="donate" style="color: yellow; text-shadow: 0px 0px 10px yellow;">Donate here</a> to keep the leaderboard running!</p>
-        
+        <p>Already registered? <a href="lb">Check the Leaderboard</a> to see your rank.</p>
+
+        <p>New to <a href="https://slidysim.com/">Slidysim</a>? It’s a 15-puzzle simulator. Download it from the
+            official website first!</p>
+
+        <p><a href="https://www.mediafire.com/file/j2xj89gs3ghiojp/slidysim_v29.1-1.zip/file">Windows version
+                download</a> (in case link does not work)</p>
+
+        <p>To submit records:<br>
+            1. Request a token by contacting <strong>dphdmn</strong> or <strong>vovker</strong> on Discord<br>
+            2. Register here — your token will be linked to your username<br>
+            3. Download the <a
+                href="https://github.com/dphdmn/openslidy/releases/download/1.3/SlidysimRecordsManager1.3.exe">PBs
+                Manager</a><br>
+            4. Place it in your Slidysim folder and run it<br>
+            5. Log in using your password (only required on first run)<br>
+            6. You're now ready to submit records to the <a href="lb">leaderboard</a>
+        </p>
+
+        <p>Want to support us? <a href="donate" style="color: yellow; text-shadow: 0px 0px 10px yellow;">Donate here</a>
+            to keep the leaderboard running!</p>
+
         <p>Still confused? Join our <a href="https://discord.gg/7vXrWAS3yZ">Discord Server</a>.</p>
 
         <div class="section">
@@ -169,25 +191,43 @@
                     <div class="image-container">
                         <img src="images/faq/better.png" alt="FAQ Image">
                     </div>
-                    <p>Access the leaderboard by visiting <a href="lb">Open Leaderboard</a> and entering your username and password. Your login credentials will be saved locally in your browser for easier future access.</p>
-        
+                    <p>Access the leaderboard by visiting <a href="lb">Open Leaderboard</a> and entering your username
+                        and password. Your login credentials will be saved locally in your browser for easier future
+                        access.</p>
+
                     <p>Don't have an account? Create one! It's completely free.<br>
-                    Want to see without an account? Use alternative sources (not updated 24/7):<br>
-                    - Join <a href="https://discord.gg/7vXrWAS3yZ"><strong>Speedsliding Discord Server</strong></a> and use bot commands such as !getwr or !rank<br>
-                    - <a href="https://docs.google.com/spreadsheets/d/18bPh1NatNamQAHRtp05zXBVkjjo5_yTtPyPZ8uR7mYg/edit?gid=1070674467#gid=1070674467">Main Slidysim Sheet</a> (note: more old archives in "Useful Links" page)<br>
-                    - <a href="https://docs.google.com/spreadsheets/d/1miFV_yV1f1Ik1VZY-Aa-HDfwT0fuRSLON_5eAh34eoo/edit#gid=877040199">6x6 - 10x10 Top 10 Leaderboard</a> (combined rankings with mobile)<br>
-                    - <a href="https://docs.google.com/spreadsheets/d/1hfKhUu10fQWMUaayHfJxNuQg5PfUJTWiddOlluqjqrg/edit?gid=1209149659#gid=1209149659">Slidysim Cool Solves</a> 4x4 - 10x10 best solves collection by 5 top players<br>
-                    - <a href="https://slidy-lb.neocities.org/">Older Power Website</a> (still auto-updating as of 2025)<br>
-                    - <a href="https://dphdmn.github.io/slidyranksfork/">Power Website Mirror</a> (updated at least 28.07.2025)<br>
-                    - <a href="https://docs.google.com/spreadsheets/d/1rLoXMkhsMpFkSICEEaRK07D8xwjC-f41tPEqHT4TN8c/edit?gid=1209638339#gid=1209638339">WR History Sheet for many categories</a> (actively updated as of 2025)<br>
-                    - <a href="https://drive.google.com/file/d/14c4i48S-ndPhgk7mRZrWALRiAOzFuBII/view">Power Rankings backup</a> (Screenshot as of 24.06.2025)<br>
-                    - <a href="https://dphdmn.github.io/betterLeaderboard/">Leaderboard archive as of 2024.10.01</a> (outdated version of this website)<br></p>
+                        Want to see without an account? Use alternative sources (not updated 24/7):<br>
+                        - Join <a href="https://discord.gg/7vXrWAS3yZ"><strong>Speedsliding Discord Server</strong></a>
+                        and use bot commands such as !getwr or !rank<br>
+                        - <a
+                            href="https://docs.google.com/spreadsheets/d/18bPh1NatNamQAHRtp05zXBVkjjo5_yTtPyPZ8uR7mYg/edit?gid=1070674467#gid=1070674467">Main
+                            Slidysim Sheet</a> (note: more old archives in "Useful Links" page)<br>
+                        - <a
+                            href="https://docs.google.com/spreadsheets/d/1miFV_yV1f1Ik1VZY-Aa-HDfwT0fuRSLON_5eAh34eoo/edit#gid=877040199">6x6
+                            - 10x10 Top 10 Leaderboard</a> (combined rankings with mobile)<br>
+                        - <a
+                            href="https://docs.google.com/spreadsheets/d/1hfKhUu10fQWMUaayHfJxNuQg5PfUJTWiddOlluqjqrg/edit?gid=1209149659#gid=1209149659">Slidysim
+                            Cool Solves</a> 4x4 - 10x10 best solves collection by 5 top players<br>
+                        - <a href="https://slidy-lb.neocities.org/">Older Power Website</a> (still auto-updating as of
+                        2025)<br>
+                        - <a href="https://dphdmn.github.io/slidyranksfork/">Power Website Mirror</a> (updated at least
+                        28.07.2025)<br>
+                        - <a
+                            href="https://docs.google.com/spreadsheets/d/1rLoXMkhsMpFkSICEEaRK07D8xwjC-f41tPEqHT4TN8c/edit?gid=1209638339#gid=1209638339">WR
+                            History Sheet for many categories</a> (actively updated as of 2025)<br>
+                        - <a href="https://drive.google.com/file/d/14c4i48S-ndPhgk7mRZrWALRiAOzFuBII/view">Power
+                            Rankings backup</a> (Screenshot as of 24.06.2025)<br>
+                        - <a href="https://dphdmn.github.io/betterLeaderboard/">Leaderboard archive as of 2024.10.01</a>
+                        (outdated version of this website)<br></p>
                     <p>Full leaderboard archives in JSON (Unique controls / Standard Display Type):<br>
-                    - <a href="https://drive.google.com/file/d/1cVoiIq9jp8mOdqTMVIFw76rMAVxgOgwk/view?usp=drive_link">29.07.2025</a><br>
-                    Note: Solve Data, such as solve replays, is not archived as of now.<br>
-                    How to use JSON archive?<br>
-                    - For developers: Modify <a href="https://github.com/dphdmn/openslidy/blob/c8caaa7c0b7dec165f6659fcd0c18c72fc2954f3/modules/apiRequests.js#L287">this function</a> to use JSON archive instead of API call<br>
-                    - For regular users: No easy way to view JSON leaderboard archive for now<br>
+                        - <a
+                            href="https://drive.google.com/file/d/1cVoiIq9jp8mOdqTMVIFw76rMAVxgOgwk/view?usp=drive_link">29.07.2025</a><br>
+                        Note: Solve Data, such as solve replays, is not archived as of now.<br>
+                        How to use JSON archive?<br>
+                        - For developers: Modify <a
+                            href="https://github.com/dphdmn/openslidy/blob/c8caaa7c0b7dec165f6659fcd0c18c72fc2954f3/modules/apiRequests.js#L287">this
+                            function</a> to use JSON archive instead of API call<br>
+                        - For regular users: No easy way to view JSON leaderboard archive for now<br>
                     </p>
                 </div>
             </div>
@@ -196,46 +236,56 @@
                 <div class="faq-content">
                     <p>Optional extras to enhance your Slidysim experience:</p>
 
-                    - <a href="https://github.com/dphdmn/slidysimSessionTracker/releases/download/v2.0.0/SSTv2.0.0.7z"><strong>Slidysim Session Tracker</strong></a><br>
-                    Track your Slidysim session in real time, search for older solves, and share movetime-accurate replays of pretty much everything you want.  
+                    - <a href="https://github.com/dphdmn/slidysimSessionTracker/releases/download/v2.0.0/SSTv2.0.0.7z"><strong>Slidysim
+                            Session Tracker</strong></a><br>
+                    Track your Slidysim session in real time, search for older solves, and share movetime-accurate
+                    replays of pretty much everything you want.
                     It also can export and analyze your stats.<br>
-                    More info: <a href="https://github.com/dphdmn/slidysimSessionTracker/blob/main/README.md">SST README</a><br><br>
+                    More info: <a href="https://github.com/dphdmn/slidysimSessionTracker/blob/main/README.md">SST
+                        README</a><br><br>
 
-                    - <a href="https://greasyfork.org/en/scripts/527856-slidysim-online-long-replay-links-fix"><strong>Slidysim Online Long Replay Links Fix</strong></a><br>
-                    Official userscript to fix the issue with very long replay links.  
-                    Very useful in case you are using SST or trying to access other people's replays from Discord / WR history sheet.<br><br>
+                    - <a href="https://greasyfork.org/en/scripts/527856-slidysim-online-long-replay-links-fix"><strong>Slidysim
+                            Online Long Replay Links Fix</strong></a><br>
+                    Official userscript to fix the issue with very long replay links.
+                    Very useful in case you are using SST or trying to access other people's replays from Discord / WR
+                    history sheet.<br><br>
                 </div>
             </div>
-                <div class="faq-item">
+            <div class="faq-item">
                 <h3>Does not work?</h3>
                 <div class="faq-content">
                     <p>Important notes (to avoid file permission and other issues):</p>
                     <p>
-                    - Avoid placing files in "Program Files", the C:\ root directory, or other protected folders<br> 
-                    - Extract all files to an easily accessible location (like a folder on your desktop)<br> 
-                    - Do not run any program directly from the archive — always extract first<br>  
-                    - Do not run the PBs Manager via the Windows search bar<br>
-                    - Open it from its folder directly (or create a shortcut for it)<br>  
-                    - The PBs Manager is named "Slidysim30.0_v1.1.exe"<br> 
-                    - Make sure it's in the same folder as your other Slidysim files<br> 
-                    - Do not confuse it with "slidysim.exe", it does not replace it<br>  
-                    - Do not manually modify Slidysim files</p>
+                        - Avoid placing files in "Program Files", the C:\ root directory, or other protected folders<br>
+                        - Extract all files to an easily accessible location (like a folder on your desktop)<br>
+                        - Do not run any program directly from the archive — always extract first<br>
+                        - Do not run the PBs Manager via the Windows search bar<br>
+                        - Open it from its folder directly (or create a shortcut for it)<br>
+                        - The PBs Manager is named "Slidysim30.0_v1.1.exe"<br>
+                        - Make sure it's in the same folder as your other Slidysim files<br>
+                        - Do not confuse it with "slidysim.exe", it does not replace it<br>
+                        - Do not manually modify Slidysim files</p>
                 </div>
             </div>
             <div class="faq-item">
                 <h3>What is this?</h3>
                 <div class="faq-content">
-                    <p>This is a fully independent sliding puzzle leaderboard based on Slidysim version 29.1, the sliding puzzle simulator. It operates separately from the original Slidysim leaderboard, which is no longer active.</p>
+                    <p>This is a fully independent sliding puzzle leaderboard based on Slidysim version 29.1, the
+                        sliding puzzle simulator. It operates separately from the original Slidysim leaderboard, which
+                        is no longer active.</p>
                 </div>
             </div>
             <div class="faq-item">
                 <h3>How do I get access?</h3>
                 <div class="faq-content">
-                    <p>Request a registration token by contacting <strong>dphdmn</strong> or <strong>vovker</strong> via Discord, or <strong>dphdmn</strong> through Telegram. (You can also use <a href="https://forms.gle/B1FFwCovtt3B3mmf7">Google Form</a>).</p>
-        
+                    <p>Request a registration token by contacting <strong>dphdmn</strong> or <strong>vovker</strong> via
+                        Discord, or <strong>dphdmn</strong> through Telegram. (You can also use <a
+                            href="https://forms.gle/B1FFwCovtt3B3mmf7">Google Form</a>).</p>
+
                     <p>Token registration helps prevent impersonation, multi-accounting, and duplicated results.</p>
-        
-                    <p>Register your account using the form on this page with your unique token. The token is linked to your username.</p>
+
+                    <p>Register your account using the form on this page with your unique token. The token is linked to
+                        your username.</p>
 
                     <p>Still confused? Join our <a href="https://discord.gg/7vXrWAS3yZ">Discord Server</a>.</p>
                 </div>
@@ -246,9 +296,16 @@
                     <div class="image-container">
                         <img src="images/faq/upload_manager.png" alt="FAQ Image">
                     </div>
-                    <p>Download the Slidysim Records Manager tool from <a href="https://github.com/dphdmn/openslidy/releases/download/1.1.0/Slidysim30.0_v1.1.exe">GitHub</a>. It’s currently tested only on Windows, but a Linux version may be released in the future.</p>
-        
-                    <p>Place the executable in the same folder as Slidysim and run it. It will automatically launch Slidysim and track your records in real-time, it will close when you exit Slidysim for a seamless experience. Manual updates are available if needed (you don't even have to run it when playing if you don't want to, just run it occasionally to upload records). Initial record uploads might take 1-2 minutes, but subsequent uploads should take only a few seconds. Avoid modifying Slidysim files manually and contact us if you encounter any issues.</p>
+                    <p>Download the Slidysim Records Manager tool from <a
+                            href="https://github.com/dphdmn/openslidy/releases/download/1.3/SlidysimRecordsManager1.3.exe">GitHub</a>.
+                        It’s currently tested only on Windows, but a Linux version may be released in the future.</p>
+
+                    <p>Place the executable in the same folder as Slidysim and run it. It will automatically launch
+                        Slidysim and track your records in real-time, it will close when you exit Slidysim for a
+                        seamless experience. Manual updates are available if needed (you don't even have to run it when
+                        playing if you don't want to, just run it occasionally to upload records). Initial record
+                        uploads might take 1-2 minutes, but subsequent uploads should take only a few seconds. Avoid
+                        modifying Slidysim files manually and contact us if you encounter any issues.</p>
                 </div>
             </div>
             <div class="faq-item">
@@ -257,9 +314,18 @@
                     <div class="image-container">
                         <img src="images/faq/leaderboard_nuked.png" alt="FAQ Image">
                     </div>
-                    <p>At the end of September 2024, the creator of Slidysim restricted access to the leaderboard due to personal conflicts with a certain top player. Initially, some results were removed, making the leaderboard unreliable. Later, the API for leaderboard access broke, disrupting custom ranking sites like the <a href="https://dphdmn.github.io/betterLeaderboard/">Better Leaderboard</a> and Power Rankings.</p>
-        
-                    <p>Soon after, the leaderboard data became corrupted with random noise, rendering it unusable. Eventually, the official leaderboard access was completely blocked, causing the game to crash when attempting to view it. The creator has attempted to shift the blame for this disruption on the player he had conflict with, but we believe it is unjustified. Our goal is to keep the Slidysim rankings open for everyone, providing a reliable and independent alternative to the original leaderboard.</p>
+                    <p>At the end of September 2024, the creator of Slidysim restricted access to the leaderboard due to
+                        personal conflicts with a certain top player. Initially, some results were removed, making the
+                        leaderboard unreliable. Later, the API for leaderboard access broke, disrupting custom ranking
+                        sites like the <a href="https://dphdmn.github.io/betterLeaderboard/">Better Leaderboard</a> and
+                        Power Rankings.</p>
+
+                    <p>Soon after, the leaderboard data became corrupted with random noise, rendering it unusable.
+                        Eventually, the official leaderboard access was completely blocked, causing the game to crash
+                        when attempting to view it. The creator has attempted to shift the blame for this disruption on
+                        the player he had conflict with, but we believe it is unjustified. Our goal is to keep the
+                        Slidysim rankings open for everyone, providing a reliable and independent alternative to the
+                        original leaderboard.</p>
                 </div>
             </div>
             <div class="faq-item">
@@ -267,17 +333,22 @@
                 <div class="faq-content">
                     <p>Here are some advantages of the new leaderboard:</p>
                     <ul>
-                        <li>It's web-based with server-side updates, offering real-time leaderboard and ranking views.</li>
+                        <li>It's web-based with server-side updates, offering real-time leaderboard and ranking views.
+                        </li>
                         <li>It features a structured design, not just a bunch of tables.</li>
                         <li>Includes cool features like records history and an NxM records matrix spreadsheet.</li>
                         <li>View world records in separate tabs or explore specific players' PBs.</li>
                         <li>Enjoy move-time accurate replays based on database info, for nearly any puzzle.</li>
-                        <li>Supports move-time replays for averages, marathons, relays, and an auto-play feature with extensive stats.</li>
-                        <li>Custom rankings using any categories you like with an advanced kinch system, plus community-created presets.</li>
+                        <li>Supports move-time replays for averages, marathons, relays, and an auto-play feature with
+                            extensive stats.</li>
+                        <li>Custom rankings using any categories you like with an advanced kinch system, plus
+                            community-created presets.</li>
                         <li>Replay-generator function allows you to edit and share custom solutions.</li>
-                        <li>Features grid-detection for easy viewing of puzzle solutions, even up to 20x20, 30x30, or 50x2 puzzles.</li>
+                        <li>Features grid-detection for easy viewing of puzzle solutions, even up to 20x20, 30x30, or
+                            50x2 puzzles.</li>
                         <li>It’s mobile-friendly, not perfect, but usable!</li>
-                        <li>You can now add videos for any of your solutions, as long as you're registered on the leaderboard.</li>
+                        <li>You can now add videos for any of your solutions, as long as you're registered on the
+                            leaderboard.</li>
                         <li>And much more... Did I mention optimal solver for 4x4?</li>
                     </ul>
                     <p>Join us, we don’t bite. And don’t worry, it's not a virus!</p>
@@ -301,27 +372,27 @@
             </form>
         </div>
     </div>
-    
+
     <script src="modules/apiRequests.js"></script>
     <script>
-		document.querySelectorAll('.faq-item h3').forEach(item => {
-			item.addEventListener('click', () => {
-				document.querySelectorAll('.faq-item .faq-content').forEach(content => {
-					content.style.display = 'none';
-				});
-				const content = item.nextElementSibling;
-				content.style.display = content.style.display === 'block' ? 'none' : 'block';
-			});
-		});
+        document.querySelectorAll('.faq-item h3').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.faq-item .faq-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                const content = item.nextElementSibling;
+                content.style.display = content.style.display === 'block' ? 'none' : 'block';
+            });
+        });
 
-        document.getElementById('registration-form').addEventListener('submit', function(event) {
+        document.getElementById('registration-form').addEventListener('submit', function (event) {
             event.preventDefault();
-            
+
             const token = document.getElementById('token').value;
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
             const statusElement = document.getElementById('registration-status');
-            
+
             statusElement.textContent = 'Processing registration...';
 
             if (password !== confirmPassword) {
@@ -341,18 +412,19 @@
                 },
                 body: JSON.stringify(requestData)
             })
-            .then(response => response.text())
-            .then(data => {
-                statusElement.textContent = data;
-                if (data.includes("Registered as")) {
-                    console.log("Registration successful:", data);
-                }
-            })
-            .catch(error => {
-                statusElement.textContent = 'Error during registration: ' + error.message;
-            });
+                .then(response => response.text())
+                .then(data => {
+                    statusElement.textContent = data;
+                    if (data.includes("Registered as")) {
+                        console.log("Registration successful:", data);
+                    }
+                })
+                .catch(error => {
+                    statusElement.textContent = 'Error during registration: ' + error.message;
+                });
         });
     </script>
     <script src="scripts/matrx.js"></script>
 </body>
+
 </html>
