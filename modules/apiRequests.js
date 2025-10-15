@@ -1,4 +1,4 @@
-const dblink = "https://slidysim.ru";
+const dblink = "https://185.185.68.210.sslip.io";
 let user_token = "";
 let logged_in_as = "";
 
