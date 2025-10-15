@@ -588,7 +588,7 @@ function createSheetNxM(WRList) {
                                     videoLinkForReplay = videolink;
                                     cell.firstChild.innerHTML = redEggElement + cell.firstChild.textContent;
                                 } else {
-                                    cell.firstChild.innerHTML = eggElement + cell.firstChild.textContent;
+                                    //cell.firstChild.innerHTML = eggElement + cell.firstChild.textContent;
                                 }
                                 cell.classList.add("clickable");
                                 
