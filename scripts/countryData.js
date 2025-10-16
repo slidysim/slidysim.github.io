@@ -257,7 +257,10 @@ const userCountryMap = {
     Berries1111: 'Indonesia',
   
     hkg11khanh: 'Vietnam',
-    Duysen: 'Vietnam'
+    Duysen: 'Vietnam',
+
+    mouse: 'cheat',
+    tablet: 'cheat'
   };
   
 
@@ -553,5 +556,6 @@ const countryEmojis = {
     'Western Sahara': 'images/flags/Western-Sahara.png',
     Yemen: 'images/flags/Yemen.png',
     Zambia: 'images/flags/Zambia.png',
-    Zimbabwe: 'images/flags/Zimbabwe.png'
+    Zimbabwe: 'images/flags/Zimbabwe.png',
+    cheat: 'images/flags/cheat.png'
 };
