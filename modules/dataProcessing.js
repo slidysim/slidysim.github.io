@@ -6,6 +6,17 @@ dataFetching.js
 userInteractions.js
 */
 
+function removePlayerScores(nameFilter) {
+    leaderboardData = leaderboardData.filter(score => score.nameFilter !== nameFilter);
+}
+
+function renamePlayerScores(oldNameFilter, newNameFilter) {
+    leaderboardData.forEach(score => {
+        if (score.nameFilter === oldNameFilter) {
+            score.nameFilter = newNameFilter;
+        }
+    });
+}
 
 function getCountryScores() {
     // Step 1: Define variables.

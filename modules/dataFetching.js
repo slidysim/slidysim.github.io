@@ -38,6 +38,12 @@ function updateServer(auth_token, displayType, controlType, pbType) {
             console.log("Error:", error);
         } else {
             leaderboardData = res.scoresParsed;
+            if(logged_in_as !== "dphdmn"){
+                removePlayerScores("mouse");
+            } else {
+                //removePlayerScores("dphdmn");
+                //renamePlayerScores("mouse", "dphdmn");
+            }
             if (initial) {
                 fullUniqueNames = res.userList.sort();
                 addListenersToElements();
