@@ -6,7 +6,11 @@ const helpMessage = `- Specify size in "12x34" format. Click buttons for more fo
 - Only one display type is supported globally (check settings in header!).
 - Use spacebar once and only after puzzle size (recommended for better look).
 - Input format isn't checked, so if it can't be detected, it will be ignored.
-- Player's final Kinch ranking is weighted with N = 10: AVG(X^N)^1/N (customization of it is probably not very important, but may change later).`;
+- Player's final Kinch ranking is simply the Mean value of all Kinch %. 
+
+Please note that before v3.12, Kinch used a special formula, AVG(X^10)^(1/10), which was less punishing for players with missing scores, although it ultimately caused a lot of ambiguity in ranking value interpretation by relying on arbitrary weight values (in this case, 10). I tried to fix it by using even more formulas that take the number of categories into account, but a simple mean value just feels like a more natural choice here after all. And yes, I understand that it now pushes a lot of high-skill players lower and highly prioritizes slower players who have more scores, but that's kind of the point of the extended ranking presented here. It would just be boring if the same player who is just fast at the 10 most popular categories also dominated a list of 50 meme categories without having done even half of them. With more specific lists of categories, it works like a charm and does not have any ambiguity in the interpretations. For more balanced main rankings, you can always use the Power system / Popular categories.
+`;
+
 const tooltipText = "Interesting records exclude the following:<br>• N≠M solves<br>• Averages for non-Standard control types (except for BLD)<br>• Marathons that are not x10, x42, or >= 100";
 const PBTypeStrings = ["Time", "Moves", "TPS"];
 const controlTypeSelectStrings = ["Mouse & Keyboard (Unique)", "Mouse & Keyboard", "Mouse only", "Keyboard only"];

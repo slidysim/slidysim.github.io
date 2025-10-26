@@ -15,7 +15,7 @@ let defaultScore = 999999999; //default placeholder for rankings (time / mvc)
 const redGrids = "rgb(200, 103, 103)"; //default value for 1st grids
 const blueGrids = "rgb(141, 179, 255)"; //default value for 2nd grids
 const pinkNullColor = "rgb(248, 24, 148)"; //default value for latest element in grids-fringe
-const weight = 10; //default value for kinch weight
+const weight = 1; //default value for kinch weight
 var debugMode = false;
 const youtubeLogoLink="images/youtube.ico";
 const youtubeElement = `<img class="emoji" src="${youtubeLogoLink}" alt="YouTube video available"></img>`
