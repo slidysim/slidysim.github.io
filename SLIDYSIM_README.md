@@ -48,7 +48,11 @@ Updated version written by dphdmn of a [classic Slidysim Readme](https://185.185
 
 ``Mouse wheel`` - Scroll vertically
 
+``Mouse wheel and SHIFT`` - Scroll vertically Faster
+
 ``Mouse wheel and Alt`` - Scroll horizontally
+
+``Mouse wheel and Alt and SHIFT`` - Scroll horizontally Faster
 
 > [!TIP]
 > You can always use your mouse on stats section and drag it to hide or resize stats. So in fake fullscreen mode you can hide your stats completely if that's your goal. Slidysim does not, however, support centering the puzzle, so both fullscreen modes may be completely useless.
@@ -429,7 +433,7 @@ Slidysim solver is impossible to make optimal for anything above 3x3, please use
 > [!WARNING]
 > Configuring Slidysim multiplayer is a rather annoying task, that requires opening ports on your PC or using external tools such as Radmin. Old's readme Multiplayer guide is rather outdated, and no one really uses Multiplayer nowadays, because features of it are quite limited and better be replaced with [discord](https://discord.gg/7vXrWAS3yZ) chat.
 
-Ultimately, if you manage to open connection to your IP, you simply have to press ``Multiplayer -> Start server``, and share your IP with others to join.
+Ultimately, if you manage to open connection to your IP, you simply have to press ``Multiplayer -> Start server``, and share your IP with others to join. Make sure to open port ``1234`` when hosting.
 
 **Features of multiplayer:** (in case someone actually hosts it)
 
