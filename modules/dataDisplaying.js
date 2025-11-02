@@ -178,8 +178,8 @@ function createSheet(sortedLists, sheetType) {
                             isWRforReplay = true;
                             tableRow.classList.add("WRPB");
                         } else {
-                           // displayedName = `${tierName.charAt(0).toUpperCase()}${tierName.slice(1)} ${percentage.toFixed(1)}%`;
-                           displayedName = `${percentage.toFixed(3)}%`;
+                            // displayedName = `${tierName.charAt(0).toUpperCase()}${tierName.slice(1)} ${percentage.toFixed(1)}%`;
+                            displayedName = `${percentage.toFixed(3)}%`;
                         }
                     } else {
                         isWRforReplay = true;
@@ -208,7 +208,7 @@ function createSheet(sortedLists, sheetType) {
                 tableRow.appendChild(scoreCellElement);
                 tableRow.classList.add("shadowFun");
                 if (!thisScoreInvalid) {
-                    
+
                     if (sheetType !== squaresSheetType || noNameFilter) {
                         nameCellElement.classList.add("clickable");
                         nameCellElement.addEventListener("click", function () {
@@ -239,26 +239,26 @@ function createSheet(sortedLists, sheetType) {
                 tableRow.addEventListener('mouseover', () => {
                     tableRow.classList.add("highlightedCell");
                 });
-                if (!debugMode){
+                if (!debugMode) {
                     const videolink = videoLinkCheck(item.videolink);
                     makeyoutubelink = false;
-                    if (videolink){
+                    if (videolink) {
                         scoreCellElement.classList.add("clickable");
                         scoreCellElement.firstChild.innerHTML = youtubeElement + scoreCellElement.firstChild.textContent;
                         makeyoutubelink = true;
                     }
                     if (true//request.gameMode === "Standard"// && !isAverage//
-                        ) {
-                       // const solution = getSolutionForScore(item);
+                    ) {
+                        // const solution = getSolutionForScore(item);
                         if (item.solve_data_available) {
                             makeyoutubelink = false;
                             scoreCellElement.classList.add("clickable");
                             let videoLinkForReplay = -1;
-                            if (videolink){
+                            if (videolink) {
                                 videoLinkForReplay = videolink;
                                 scoreCellElement.firstChild.innerHTML = redEggElement + scoreCellElement.firstChild.textContent;
                             }
-                            else{
+                            else {
                                 scoreCellElement.firstChild.innerHTML = eggElement + scoreCellElement.firstChild.textContent;
                             }
                             const scoreTitle = getScoreTitle(videoLinkForReplay, item.width, item.height, item.displayType, item.nameFilter, item.controls, item.timestamp, tierNameForReplay, isWRforReplay, scoreType);
@@ -270,7 +270,7 @@ function createSheet(sortedLists, sheetType) {
                                         //makeReplay(solution, event, item.tps, item.width, item.height, scoreTitle);
                                         handleSavedReplay(item, solveData, event, item.tps, item.width, item.height, scoreTitle, videoLinkForReplay, tierNameForReplay, isWRforReplay);
                                     }
-                                });    
+                                });
                             });
                         }
                     }
@@ -278,9 +278,9 @@ function createSheet(sortedLists, sheetType) {
                         scoreCellElement.addEventListener('click', function () {
                             window.open(videolink, '_blank');
                         });
-                    }   
-                } else{
-                    if (item.nameFilter === logged_in_as || logged_in_as === "vovker" || logged_in_as === "dphdmn"){
+                    }
+                } else {
+                    if (item.nameFilter === logged_in_as || logged_in_as === "vovker" || logged_in_as === "dphdmn") {
                         scoreCellElement.classList.add("clickable");
                         scoreCellElement.firstChild.textContent = getScoreIDIcon + scoreCellElement.firstChild.textContent;
                         scoreCellElement.addEventListener('click', function () {
@@ -334,21 +334,21 @@ function createNMSlider() {
     container.style.flexDirection = 'column';
     container.style.alignItems = 'center';
     container.style.justifyContent = 'center';
-    container.style.backgroundColor = '#12121205'; 
+    container.style.backgroundColor = '#12121205';
     container.style.paddingTop = "10px";
     container.style.paddingBottom = "10px";
-    container.style.color = 'cyan'; 
-    
+    container.style.color = 'cyan';
+
     let inputElement;
-    
+
     if (false) {
         container.appendChild(document.createTextNode("Epic Vovker Number Input"));
-        
+
         inputElement = document.createElement('input');
         inputElement.type = 'number';
         inputElement.min = 0;
         inputElement.value = n_m_size_limit;
-    
+
         // Basic styling
         inputElement.style.width = '10%';
         inputElement.style.outline = 'none';
@@ -358,7 +358,7 @@ function createNMSlider() {
         inputElement.style.color = "#00FF00";
         inputElement.style.fontFamily = 'monospace';
         inputElement.style.fontSize = '1.2em';
-    
+
         // Epic hacker neon effects
         inputElement.style.boxShadow = '0 0 10px #00FF00, 0 0 20px #00FF00, 0 0 30px #00FF00';
         inputElement.style.borderRadius = '5px';
@@ -366,7 +366,7 @@ function createNMSlider() {
         inputElement.style.transition = '0.3s ease';
 
 
-    }else {
+    } else {
         inputElement = document.createElement('input');
         inputElement.type = 'range';
         inputElement.min = 0;
@@ -383,7 +383,7 @@ function createNMSlider() {
         // Prompt user for a number input, ensuring it's above 10
         const userInput = prompt("Enter a custom limit (must be above 10):");
         n_m_size_limit = parseInt(userInput, 10);
-    
+
         // Check if input is valid (greater than 10 or equal to 0)
         if (n_m_size_limit > 10 || n_m_size_limit === 0) {
             changeSliderText();
@@ -395,7 +395,7 @@ function createNMSlider() {
     // Add hover effect with JavaScript
     valueDisplay.addEventListener('mouseover', () => {
         valueDisplay.style.textShadow = '0 0 20px cyan, 0 0 40px cyan';
-        if (logged_in_as === "vovker"){
+        if (logged_in_as === "vovker") {
             valueDisplay.textContent = "Click to enter custom value, vovker";
         } else {
             valueDisplay.textContent = "Click to enter custom value";
@@ -410,14 +410,14 @@ function createNMSlider() {
     valueDisplay.style.marginTop = '10px';
     valueDisplay.style.textAlign = 'center';
     valueDisplay.style.fontSize = '1.5em';
-    valueDisplay.style.textShadow = '0 0 5px cyan, 0 0 10px cyan'; 
+    valueDisplay.style.textShadow = '0 0 5px cyan, 0 0 10px cyan';
 
     function changeSliderText() {
         let val = n_m_size_limit;
         if (val !== 0) {
-            valueDisplay.textContent = `Tiles limit: ${val}`; 
+            valueDisplay.textContent = `Tiles limit: ${val}`;
         } else {
-            valueDisplay.textContent = `No limit for tiles`; 
+            valueDisplay.textContent = `No limit for tiles`;
         }
     }
 
@@ -425,7 +425,7 @@ function createNMSlider() {
 
     inputElement.addEventListener('change', () => {
         n_m_size_limit = parseInt(inputElement.value);
-        if (n_m_size_limit > 10 || n_m_size_limit === 0){
+        if (n_m_size_limit > 10 || n_m_size_limit === 0) {
             changeSliderText();
             sendMyRequest();
         } else {
@@ -438,11 +438,11 @@ function createNMSlider() {
             changeSliderText();
         });
     }
-    
+
     container.appendChild(inputElement);
     container.appendChild(valueDisplay);
-    
-    return container; 
+
+    return container;
 }
 
 //"Public" function to create NxM matrix sheet (can also display PBs)
@@ -571,27 +571,27 @@ function createSheetNxM(WRList) {
                     cell.setAttribute("class", "");
                 } else {
                     let newSize = result.width + "x" + result.height;
-                    if (!debugMode){
+                    if (!debugMode) {
                         const videolink = videoLinkCheck(result.videolink);
                         let makeyoutubelink = false;
-                        if (videolink){
+                        if (videolink) {
                             cell.classList.add("clickable");
                             cell.firstChild.innerHTML = youtubeElement + cell.firstChild.textContent;
                             makeyoutubelink = true;
                         }
                         if (true//request.gameMode === "Standard") {
-                        ){//const solution = getSolutionForScore(result);
+                        ) {//const solution = getSolutionForScore(result);
                             if (result.solve_data_available) {
                                 makeyoutubelink = false;
                                 let videoLinkForReplay = -1;
-                                if (videolink){
+                                if (videolink) {
                                     videoLinkForReplay = videolink;
                                     cell.firstChild.innerHTML = redEggElement + cell.firstChild.textContent;
                                 } else {
                                     //cell.firstChild.innerHTML = eggElement + cell.firstChild.textContent;
                                 }
                                 cell.classList.add("clickable");
-                                
+
                                 const scoreTitle = getScoreTitle(videoLinkForReplay, result.width, result.height, result.displayType, result.nameFilter, result.controls, result.timestamp, tierName, isWR, scoreType);
                                 cell.addEventListener('click', function (event) {
                                     getSolutionForScore(result, (error, solveData) => {
@@ -601,7 +601,7 @@ function createSheetNxM(WRList) {
                                             //makeReplay(solution, event, result.tps, result.width, result.height, scoreTitle);
                                             handleSavedReplay(result, solveData, event, result.tps, result.width, result.height, scoreTitle, videoLinkForReplay, tierName, isWR);
                                         }
-                                    });     
+                                    });
                                 });
                             }
                         }
@@ -609,10 +609,10 @@ function createSheetNxM(WRList) {
                             cell.addEventListener('click', function () {
                                 window.open(videolink, '_blank');
                             });
-                        } 
+                        }
                     }
-                    else{
-                        if (result.nameFilter === logged_in_as || logged_in_as === "vovker" || logged_in_as === "dphdmn"){
+                    else {
+                        if (result.nameFilter === logged_in_as || logged_in_as === "vovker" || logged_in_as === "dphdmn") {
                             cell.classList.add("clickable");
                             cell.firstChild.textContent = getScoreIDIcon + cell.firstChild.textContent;
                             cell.addEventListener('click', function () {
@@ -624,7 +624,7 @@ function createSheetNxM(WRList) {
                     if (scoreType === "Time" && result.time > 59999) {
                         extraInfo = " " + formatTime(result.time);
                     }
-                    if (request.nameFilter !== ""){
+                    if (request.nameFilter !== "") {
                         if (isWR) {
                             extraInfo += "<br>WR";
                         } else {
@@ -648,7 +648,7 @@ function createSheetNxM(WRList) {
                 }
             } else {
                 cell.textContent = NxMstyleDPH ? `${height}x${width}` : `${width}x${height}`;
-                if (n_m_size_limit > 0 && width * height > n_m_size_limit){
+                if (n_m_size_limit > 0 && width * height > n_m_size_limit) {
                     cell.style.opacity = 0;
                 }
                 cell.style.color = "#555";
@@ -687,7 +687,7 @@ function createSheetRankings(playerScores) {
     if (playerScores.length === 0) {
         contentDiv.innerHTML = notFoundError;
     } else {
-        if (loadingPower){loadPower();return;}
+        if (loadingPower) { loadPower(); return; }
         const tableContainer = document.createElement('div');
         tableContainer.classList.add('table-container');
         tableContainer.classList.add('bigContainer');
@@ -821,21 +821,21 @@ function createSheetRankings(playerScores) {
                                 scoreCell.classList.add("no-box-shadow");
                                 scoreCell.innerHTML = "-";
                             } else {
-                                if (!debugMode){
+                                if (!debugMode) {
                                     const videolink = videoLinkCheck(item.videolink);
                                     let makeyoutubelink = false;
-                                    if (videolink){
+                                    if (videolink) {
                                         scoreCell.classList.add("clickable");
                                         scoreCell.firstChild.innerHTML = youtubeElement + scoreCell.firstChild.textContent;
                                         makeyoutubelink = true;
                                     }
                                     if (true//item.gameMode === "Standard" //&& !isAverage
-                                        ) {
+                                    ) {
                                         //const solution = getSolutionForScore(item);
                                         if (item.solve_data_available) {
                                             makeyoutubelink = false;
                                             let videoLinkForReplay = -1;
-                                            if (videolink){
+                                            if (videolink) {
                                                 videoLinkForReplay = videolink;
                                                 scoreCell.innerHTML = redEggElement + scoreCell.textContent;
                                             } else {
@@ -851,7 +851,7 @@ function createSheetRankings(playerScores) {
                                                         //makeReplay(solution, event, item.tps, item.width, item.height, scoreTitle);
                                                         handleSavedReplay(item, solveData, event, item.tps, item.width, item.height, scoreTitle, videoLinkForReplay, scoreData.scoreTier, scoreData.scorePercentage === 100);
                                                     }
-                                                });   
+                                                });
                                             });
                                         }
                                     }
@@ -859,10 +859,10 @@ function createSheetRankings(playerScores) {
                                         scoreCell.addEventListener('click', function () {
                                             window.open(videolink, '_blank');
                                         });
-                                    }   
-                                } else{
+                                    }
+                                } else {
 
-                                    if (item.nameFilter === logged_in_as || logged_in_as === "vovker" || logged_in_as === "dphdmn"){
+                                    if (item.nameFilter === logged_in_as || logged_in_as === "vovker" || logged_in_as === "dphdmn") {
                                         scoreCell.classList.add("clickable");
                                         scoreCell.firstChild.textContent = getScoreIDIcon + scoreCell.firstChild.textContent;
                                         scoreCell.addEventListener('click', function () {
@@ -1014,9 +1014,9 @@ function createSheetHistory(recordsList, recordsListWR, showAll = false) {
     }
 }
 
-function dontFormat(){
-    formatTime = function(milliseconds, cut = false) {
-        return (milliseconds/1000).toFixed(3);
+function dontFormat() {
+    formatTime = function (milliseconds, cut = false) {
+        return (milliseconds / 1000).toFixed(3);
     }
     sendMyRequest();
     const images = document.querySelectorAll('img');
@@ -1078,7 +1078,7 @@ function getTimeAgo(timestamp) {
 
     // Convert time difference to seconds
     const seconds = Math.floor(timeDifference / 1000);
-    
+
     if (seconds < 60) {
         return `${seconds} second${seconds === 1 ? '' : 's'} ago`;
     }
@@ -1208,7 +1208,7 @@ function makeExampleButtons(customRankButtonsExamples) {
                 button.textContent = buttonText;
                 button.addEventListener("click", () => setCustomRanks(ranksText));
                 container.appendChild(button);
-                if (buttonText === "MAIN 30"){
+                if (buttonText === "MAIN 30") {
                     button.click();
                 }
             }
@@ -1273,11 +1273,11 @@ function getScoreTitle(videolink, width, height, displayType, username, controls
         tierTitleSpan.appendChild(tierTitleSpanWR);
     }
     let display_type_string = ""
-    if (displayType !== "Standard"){
+    if (displayType !== "Standard") {
         display_type_string = `${displayType} display type `
     }
     tierTitleSpan.innerHTML += `${display_type_string}Solve by ${username}<br>${scoreType} PB | ${controls} | ${formatTimestamp(timestamp)}`;
-    if (videolink !== -1){
+    if (videolink !== -1) {
         tierTitleSpan.classList.add("clickable");
         tierTitleSpan.addEventListener('click', function () {
             window.open(videolink, '_blank');
@@ -1636,26 +1636,76 @@ function generateFormattedString(request) {
     `);
     formattedParts.push(`<br><h2>${doneWithString} ` + selectString + displayTypeHeaderString);
     formattedParts.push(`<span class="pinktext" style="font-weight: 700;">${selectControlTypeString}</span> ${controlsTypeHeaderString}</h2>`);
-    let timeAgo = getTimeAgo(latestRecordTime);
-    formattedParts.push(`<span class="leaderboardUpdateSpan">${lastLeaderboardUpdateString} <span style="color: #ffffff">${timeAgo}</span></span>`);
-    clearInterval(window.leaderboardInterval); 
-    window.leaderboardInterval = setInterval(() => {
-        try {
-          const updateSpan = document.querySelector(".leaderboardUpdateSpan");
-          if (updateSpan) {
-            updateSpan.innerHTML = `${lastLeaderboardUpdateString} <span style="color: #ffffff">${getTimeAgo(latestRecordTime)}</span>`;
-          }
-        } catch (error) {
-          // Ignore errors
+    if (archiveDate === "LIVE") {
+        // Live leaderboard: dynamic time ago
+        let timeAgo = getTimeAgo(latestRecordTime);
+        formattedParts.push(`<span class="leaderboardUpdateSpan">${lastLeaderboardUpdateString} <span style="color: #ffffff">${timeAgo}</span></span>`);
+
+        clearInterval(window.leaderboardInterval);
+        window.leaderboardInterval = setInterval(() => {
+            try {
+                const updateSpan = document.querySelector(".leaderboardUpdateSpan");
+                if (updateSpan) {
+                    updateSpan.innerHTML = `${lastLeaderboardUpdateString} <span style="color: #ffffff">${getTimeAgo(latestRecordTime)}</span>`;
+                }
+            } catch (error) { }
+        }, 10000);
+    } else {
+        // Archive mode: show dropdown selector for available archives
+        formattedParts.push(`<span class="leaderboardUpdateSpan">Archive from </span>`);
+        // Initialize archive selector
+        function initArchiveSelector(containerSelector, loadingPower) {
+            if (!availableArchives || availableArchives.length === 0) return;
+
+            // Format YYYYMMDD -> "MMM D, YYYY"
+            function formatDisplayDate(dateStr) {
+                const year = dateStr.slice(0, 4);
+                const month = parseInt(dateStr.slice(4, 6), 10) - 1;
+                const day = parseInt(dateStr.slice(6, 8), 10);
+                const date = new Date(year, month, day);
+                return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+            }
+
+            const container = document.querySelector(containerSelector);
+            if (!container) return;
+
+            // Remove any existing select (for re-render)
+            const existingSelect = container.querySelector("select");
+            if (existingSelect) existingSelect.remove();
+
+            const select = document.createElement("select");
+            select.style.marginLeft = "5px";
+            select.style.color = "#ffffff";
+            select.style.background = "#333";
+            select.style.border = "1px solid #aaa";
+
+            availableArchives.forEach(archive => {
+                const option = document.createElement("option");
+                option.value = archive; // YYYYMMDD format
+                option.textContent = formatDisplayDate(archive); // user-friendly
+                if (archive === archiveDate) option.selected = true;
+                select.appendChild(option);
+            });
+            if (loadingPower) {
+                select.addEventListener("change", () => {
+                    archiveDate = select.value;
+                    getPowerData();
+                });
+            } else {
+                select.addEventListener("change", () => {
+                    archiveDate = select.value;
+                    sendMyRequest();
+                });
+            }
+
+
+            container.appendChild(select);
         }
-      }, 10000);   // if(latestRecordTime){
-   //     let timeAgo = getTimeAgo(new Date(latestRecordTime));
-   //     formattedParts.push(`<span class="leaderboardUpdateSpan">${lastLeaderboardUpdateString} <span style="color: #ffffff">${timeAgo}</span></span>`);
-   //     if (timeAgo.includes("days")){
-   //         formattedParts.push(`<span class="leaderboardUpdateSpan"><p style="color: red">${leaderboardUpdatesInfoText}</p></span>`);
-   //     }
-   // }
-    //formattedParts.push(`<span class="leaderboardUpdateSpan"><a style="color: #FF88BB" href="${submitVideoLink}">${submitVideoText}</a></span>`);
+        const lp = loadingPower; // capture current value
+        setTimeout(() => initArchiveSelector(".leaderboardUpdateSpan", lp), 0);
+    }
+
+
     const finalString = `${formattedParts.join(' ')}`;
     leaderboardName.innerHTML = finalString;
     function displayTypeChanged() {
@@ -1677,14 +1727,14 @@ function generateFormattedString(request) {
     }
     if (loadingPower) {
         const originalDisplayTypeChanged = displayTypeChanged;
-        displayTypeChanged = function() {
+        displayTypeChanged = function () {
             loadingPower = true;
             originalDisplayTypeChanged();
             getPowerData();
         };
-        
+
         const originalControlTypeChanged = controlTypeChanged;
-        controlTypeChanged = function() {
+        controlTypeChanged = function () {
             loadingPower = true;
             originalControlTypeChanged();
             getPowerData();
@@ -1710,16 +1760,16 @@ function generateFormattedString(request) {
         });
         nameSpanHeader.appendChild(removeIcon);
     }
-    if (loadingPower){
+    if (loadingPower) {
         header = document.getElementById("leaderboardName");
         header.removeChild(header.firstChild);
         header.removeChild(header.firstChild);
         header.removeChild(header.firstChild);
         header.firstChild.textContent = header.firstChild.textContent.replace(
-            "sliding puzzles", 
+            "sliding puzzles",
             "Slidysim Power Rankings"
         );
-        
+
     }
 
 }
@@ -1741,8 +1791,8 @@ function appendFlagIconToNickname(nickname) {
         }
     }
 
-    const flagIconLink = country && countryEmojis[country] 
-        ? countryEmojis[country] 
+    const flagIconLink = country && countryEmojis[country]
+        ? countryEmojis[country]
         : "images/flags/default.png"; // fixed default path
 
     const isDonator = donatorsList.some(donator => donator.toLowerCase() === lowerCaseNickname);
@@ -1819,7 +1869,7 @@ function getScoreStringNxM(time, moves, tps, scoreType, isAverage, username) {
 
 
 function getClosestAllowedValue(value, allowedValues) {
-    return allowedValues.reduce((prev, curr) => 
+    return allowedValues.reduce((prev, curr) =>
         Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
     );
 }
@@ -2045,7 +2095,7 @@ function populateTableHistory(records, recordsListWR, scoreType, table, reverse)
                 changePuzzleSize(newSize);
             });
             const gamemodeCell = document.createElement('td');
-            gamemodeCell.innerHTML = item.gameMode.replace(" ", "<br>").replace("Everything-up-to","EUT");
+            gamemodeCell.innerHTML = item.gameMode.replace(" ", "<br>").replace("Everything-up-to", "EUT");
             dataRow.appendChild(gamemodeCell);
             const displayedName = item.nameFilter;
             const playerNameCell = document.createElement("td");
@@ -2061,28 +2111,28 @@ function populateTableHistory(records, recordsListWR, scoreType, table, reverse)
             const scoreCell = createTableCellScore(scoreString, 'score', "grayColor");
             const tier = tierInfo[1];
             const bestValue = tierInfo[2];
-            if (!debugMode){
-                    let makeyoutubelink = false;
-                    const videolink = videoLinkCheck(item.videolink);
-                    if (videolink){
-                        scoreCell.classList.add("clickable");
-                        scoreCell.firstChild.innerHTML = youtubeElement + scoreCell.firstChild.textContent;
-                        makeyoutubelink = true;
-                    }           
+            if (!debugMode) {
+                let makeyoutubelink = false;
+                const videolink = videoLinkCheck(item.videolink);
+                if (videolink) {
+                    scoreCell.classList.add("clickable");
+                    scoreCell.firstChild.innerHTML = youtubeElement + scoreCell.firstChild.textContent;
+                    makeyoutubelink = true;
+                }
                 if (true//item.gameMode === "Standard"// && !isAverage
-                    ) {
+                ) {
                     //const solution = getSolutionForScore(item);
                     if (item.solve_data_available) {
                         makeyoutubelink = false;
                         let videoLinkForReplay = -1;
-                        if (videolink){
+                        if (videolink) {
                             videoLinkForReplay = videolink;
                             scoreCell.firstChild.innerHTML = redEggElement + scoreCell.firstChild.textContent;
                         } else {
                             scoreCell.firstChild.innerHTML = eggElement + scoreCell.firstChild.textContent;
                         }
                         scoreCell.classList.add("clickable");
-                        
+
                         const scoreTitle = getScoreTitle(videoLinkForReplay, item.width, item.height, item.displayType, item.nameFilter, item.controls, item.timestamp, tier, percentage === 100, scoreType);
                         scoreCell.addEventListener('click', (event) => {
                             getSolutionForScore(item, (error, solveData) => {
@@ -2093,7 +2143,7 @@ function populateTableHistory(records, recordsListWR, scoreType, table, reverse)
                                     handleSavedReplay(item, solveData, event, item.tps, item.width, item.height, scoreTitle, videoLinkForReplay, tier, percentage === 100);
                                 }
                             });
-                           // makeReplay(solution, event, item.tps, item.width, item.height, scoreTitle);
+                            // makeReplay(solution, event, item.tps, item.width, item.height, scoreTitle);
                         });
                     }
                 }
@@ -2101,9 +2151,9 @@ function populateTableHistory(records, recordsListWR, scoreType, table, reverse)
                     scoreCell.addEventListener('click', function () {
                         window.open(videolink, '_blank');
                     });
-                }   
-            } else{
-                if (item.nameFilter === logged_in_as || logged_in_as === "vovker" || logged_in_as === "dphdmn"){
+                }
+            } else {
+                if (item.nameFilter === logged_in_as || logged_in_as === "vovker" || logged_in_as === "dphdmn") {
                     scoreCell.classList.add("clickable");
                     scoreCell.firstChild.textContent = getScoreIDIcon + scoreCell.firstChild.textContent;
                     scoreCell.addEventListener('click', function () {

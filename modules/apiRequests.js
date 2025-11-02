@@ -70,7 +70,7 @@ function videoLinkCheck(link) {
 }
 async function addVideo(authToken, time, moves, timestamp, videolink) {
     videolink = videoLinkCheck(videolink);
-    if (!videolink){
+    if (!videolink) {
         return "Link is invalid, can't send this to server.";
     }
     try {
@@ -105,11 +105,11 @@ async function addVideo(authToken, time, moves, timestamp, videolink) {
 
 function promptForVideoLink(time, moves, timestamp) {
     const message = "Please enter the YouTube video link to add\n" +
-                    "Use -1 to remove the existing video\n" +
-                    "Note: Only YouTube links are accepted.\n" +
-                    "Abuse of the system may result in a ban from the leaderboard.";
+        "Use -1 to remove the existing video\n" +
+        "Note: Only YouTube links are accepted.\n" +
+        "Abuse of the system may result in a ban from the leaderboard.";
     const videolink = prompt(message);
-    
+
     if (videolink) {
         addVideo(user_token, time, moves, timestamp, videolink)
             .then(result => alert(result))
@@ -133,45 +133,45 @@ function getUsernameFromToken(token) {
 }
 
 async function getSolveData(authToken, time, moves, timestamp) {
-    if (time === null){
+    if (time === null) {
         time = 0;
     }
-    if (moves === null){
+    if (moves === null) {
         moves = 0;
     }
     const url = `${dblink}/api/getSolveData`;
-  
+
     const headers = {
-      "Authorization": authToken,
-      "Content-Type": "application/json"
+        "Authorization": authToken,
+        "Content-Type": "application/json"
     };
-  
+
     const body = JSON.stringify({
-      time: time,
-      moves: moves,
-      timestamp: timestamp
+        time: time,
+        moves: moves,
+        timestamp: timestamp
     });
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: headers,
-        body: body
-      });
-  
-      if (response.ok) {
-        const data = await response.text();
-        return data;
-      } else if (response.status === 404) {
-        return "-1";
-      } else {
-        const errorText = await response.text();
-        return errorText || "Unknown error occurred";
-      }
+        const response = await fetch(url, {
+            method: "POST",
+            headers: headers,
+            body: body
+        });
+
+        if (response.ok) {
+            const data = await response.text();
+            return data;
+        } else if (response.status === 404) {
+            return "-1";
+        } else {
+            const errorText = await response.text();
+            return errorText || "Unknown error occurred";
+        }
     } catch (error) {
-      console.error("Error fetching solve data:", error);
-      return "An error occurred while fetching solve data.";
+        console.error("Error fetching solve data:", error);
+        return "An error occurred while fetching solve data.";
     }
-  }
+}
 
 async function callGetScores(auth_token, display_type_text, control_type_text, pb_type_text) {
     const display_type = display_type_map[display_type_text];
@@ -179,8 +179,8 @@ async function callGetScores(auth_token, display_type_text, control_type_text, p
     const pb_type = pb_type_map[pb_type_text];
 
     if (
-        display_type === undefined || 
-        control_type === undefined || 
+        display_type === undefined ||
+        control_type === undefined ||
         pb_type === undefined
     ) {
         throw new Error('Invalid display_type, control_type, or pb_type provided.');
@@ -217,30 +217,39 @@ async function callGetScores(auth_token, display_type_text, control_type_text, p
 
 
 async function getScores(auth_token, display_type, control_type, pb_type) {
-    const url = `${dblink}/api/getScores`;
+    let textData;
 
     try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Authorization': auth_token,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                display_type: display_type,
-                control_type: control_type,
-                pb_type: pb_type
-            })
-        });
+        if (archiveDate === "LIVE") {
+            // Fetch live data from server
+            const url = `${dblink}/api/getScores`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': auth_token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    display_type: display_type,
+                    control_type: control_type,
+                    pb_type: pb_type
+                })
+            });
 
-        if (!response.ok) {
-            return {
-                status: false,
-                message: `Error: ${response.status} ${response.statusText}`
-            };
+            if (!response.ok) {
+                return {
+                    status: false,
+                    message: `Error: ${response.status} ${response.statusText}`
+                };
+            }
+
+            textData = await response.text();
+        } else {
+            // Fetch archive data
+            textData = await getScoresArch(archiveDate, display_type, control_type, pb_type);
         }
 
-        const textData = await response.text();
+        // Process textData (common logic)
         const [userMapLine, ...scoreLines] = textData.split(';').filter(line => line.trim() !== '');
         const usermap = userMapLine.split(',').reduce((map, pair) => {
             const [username, id] = pair.split(':');
@@ -250,18 +259,23 @@ async function getScores(auth_token, display_type, control_type, pb_type) {
             return map;
         }, {});
         const userList = Object.values(usermap);
+
         const scoreFields = [
             'size_n', 'size_m', 'pb_type', 'control_type', 'userid',
             'solve_type', 'marathon_length', 'average_type', 'time',
-            'moves', 'tps', 'timestamp', 'solution_available','videolink'
+            'moves', 'tps', 'timestamp', 'solution_available', 'videolink'
         ];
+
         const scores = scoreLines.map(line => {
             const values = line.split(',');
             const scoreObject = {};
 
             scoreFields.forEach((field, index) => {
-                if (field === "videolink"){
+                if (field === "videolink") {
                     scoreObject[field] = values[index];
+                } else if (field === "solution_available" && archiveDate !== "LIVE") {
+                    // If archive, always false
+                    scoreObject[field] = false;
                 } else {
                     scoreObject[field] = parseInt(values[index]) || null;
                 }
@@ -270,12 +284,14 @@ async function getScores(auth_token, display_type, control_type, pb_type) {
             return scoreObject;
         });
 
+
         return {
             status: true,
             usermap,
             userList,
             scores
         };
+
     } catch (error) {
         return {
             status: false,
@@ -283,6 +299,7 @@ async function getScores(auth_token, display_type, control_type, pb_type) {
         };
     }
 }
+
 
 function getScoresWrapper(auth_token, displayType, controlType, pbType, callback) {
     callGetScores(auth_token, displayType, controlType, pbType)
@@ -297,38 +314,66 @@ function getScoresWrapper(auth_token, displayType, controlType, pbType, callback
 
 async function verifyLogin() {
     const storedToken = localStorage.getItem('user_token');
-    if (storedToken) {
-        const response = await fetch(`${dblink}/api/protected`, {
-            method: 'GET',
-            headers: {
-                'Authorization': storedToken
-            }
-        });
 
-        if (response.ok) {
-            user_token = storedToken;
-            logged_in_as = getUsernameFromToken(user_token);
-            const userlinkel = document.getElementById("user_logged_in");
-            userlinkel.textContent = logged_in_as;
-            
-            userlinkel.addEventListener("click", function () {
-                try{
-                    usernameInput.value = logged_in_as;
-                    radioNxNWRs.checked = true;
-                    changePuzzleSize("NxN WRs");
-                    changeNameFilter(logged_in_as);
-                } catch (error){
-                    console.log(error);
+    if (storedToken) {
+        try {
+            const response = await fetch(`${dblink}/api/protected`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': storedToken
                 }
             });
-            
-            return;
-        } else {
-            console.log("Stored token is invalid. Proceeding to prompt for credentials.");
+
+            if (response.ok) {
+                user_token = storedToken;
+                logged_in_as = getUsernameFromToken(user_token);
+                const userlinkel = document.getElementById("user_logged_in");
+                userlinkel.textContent = logged_in_as;
+
+                userlinkel.addEventListener("click", function () {
+                    try {
+                        usernameInput.value = logged_in_as;
+                        radioNxNWRs.checked = true;
+                        changePuzzleSize("NxN WRs");
+                        changeNameFilter(logged_in_as);
+                    } catch (error) {
+                        console.log(error);
+                    }
+                });
+
+                return;
+            } else if (response.status === 401) {
+                console.log("Stored token is invalid.");
+            } else {
+                console.log("Unexpected server response. You can try /archive page.");
+                if (confirm("Server might be temporarily unavailable. Open the archive page instead? If not, page will simply reload. Check our Discord for updates.")) {
+                    window.location.href = '/archive';
+                    return;
+                } else {
+                    window.location.reload();
+                    return;
+                }
+            }
+        } catch (error) {
+            console.log("Server unreachable:", error);
+            if (confirm("Server might be temporarily unavailable. Open the archive page instead? If not, page will simply reload. Check our Discord for updates.")) {
+                window.location.href = '/archive';
+                return;
+            } else {
+                    window.location.reload();
+                    return;
+                }
         }
     }
 
+    // If no stored token or invalid token
     while (true) {
+        const choice = confirm("No valid login found.\nPress OK to login with credentials, or Cancel to use archive page (no solve replays).");
+        if (!choice) {
+            window.location.href = '/archive';
+            return;
+        }
+
         const username = prompt("Enter your username (or cancel to exit):");
         if (username === null) {
             window.location.href = '/';
@@ -352,25 +397,22 @@ async function verifyLogin() {
             });
 
             if (response.ok) {
-                const message = await response.text();
                 user_token = token;
-
                 localStorage.setItem('user_token', user_token);
                 console.log("Login successful. Token saved to local storage.");
-                setTimeout(function() {
-                    window.location.reload();
-                }, 2000);
+                setTimeout(() => window.location.reload(), 2000);
                 break;
             } else if (response.status === 401) {
                 alert("Login failed. Please try again.");
             } else {
-                alert("An error occurred. Please try again later.");
+                alert("An error occurred. You can try the archive page.");
             }
         } catch (error) {
-            alert("Error: " + error.message);
+            alert("Server error. You might try the archive page. Error: " + error.message);
         }
     }
 }
+
 
 async function adminApiRequest(endpoint, authToken, username) {
     const response = await fetch(`${dblink}/api/admin/${endpoint}`, {
@@ -420,7 +462,7 @@ async function deleteUserScores(authToken, username) {
     return await adminApiRequest('deleteScores', authToken, username);
 }
 
-function logout(){
+function logout() {
     localStorage.setItem('user_token', "");
     window.location.reload();
 }

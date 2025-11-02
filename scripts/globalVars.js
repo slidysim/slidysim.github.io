@@ -71,3 +71,7 @@ let savedPlayerScores;
 let loadingPower = false;
 let gettingOldPower = false;
 let gettingFMCPower = false;
+let archivePage = false;
+let archiveDate = "LIVE";
+let archiveLoader = null;
+let availableArchives = [];
