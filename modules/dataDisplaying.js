@@ -1694,7 +1694,7 @@ function generateFormattedString(request) {
             } else {
                 select.addEventListener("change", () => {
                     archiveDate = select.value;
-                    sendMyRequest();
+                    updateServer(user_token, last_displayType, last_controlType, last_pbType)
                 });
             }
 
