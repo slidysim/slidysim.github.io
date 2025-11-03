@@ -51,42 +51,24 @@
             <label for="radio-10x10">10x10</label>
           </div>
           <div class="form_radio_btn">
-            <input id="radio-11x11" type="radio" name="puzzleSize" value="11x11" />
-            <label for="radio-11x11">11x11</label>
-          </div>
-          <div class="form_radio_btn">
             <input id="radio-12x12" type="radio" name="puzzleSize" value="12x12" />
             <label for="radio-12x12">12x12</label>
-          </div>
-          <div class="form_radio_btn">
-            <input id="radio-13x13" type="radio" name="puzzleSize" value="13x13" />
-            <label for="radio-13x13">13x13</label>
-          </div>
-          <div class="form_radio_btn">
-            <input id="radio-14x14" type="radio" name="puzzleSize" value="14x14" />
-            <label for="radio-14x14">14x14</label>
-          </div>
-          <div class="form_radio_btn">
-            <input id="radio-15x15" type="radio" name="puzzleSize" value="15x15" />
-            <label for="radio-15x15">15x15</label>
           </div>
           <div class="form_radio_btn">
             <input id="radio-16x16" type="radio" name="puzzleSize" value="16x16" />
             <label for="radio-16x16">16x16</label>
           </div>
           <div class="form_radio_btn">
-            <input id="radio-custom-size" type="radio" name="puzzleSize" value="20x20" />
+            <input id="radio-20x20" type="radio" name="puzzleSize" value="20x20" />
+            <label for="radio-20x20">20x20</label>
+          </div>
+          <div class="form_radio_btn">
+            <input id="radio-custom-size" type="radio" name="puzzleSize" value="30x30" />
             <label for="radio-custom-size">Custom</label>
-            <input class="inputText" style="max-width: 60px;" type="text" id="customInputSize" placeholder="Size" value="20x20"/>
-            <span style="font-size: 15px; opacity:0.25;" title="Did you know?&#10;You can use + or - to adjust size.&#10;Use it with Shift or Ctrl keys to change only one side&#10;Just like in Slidysim">+/-</span>
+            <input class="inputText" style="max-width: 40px;" type="text" id="customInputSize" placeholder="Size" value="30x30"/>
+            <span id="logged_in_container"><a id="user_logged_in" style="color: white; font-weight: bold; text-shadow: 0px 0px 10px white; text-decoration: underline;"></a> mode</span>
           </div>
           <br>
-          <!--
-          <div class="form_radio_btn">
-            <input id="rankingsRadio" type="radio" name="puzzleSize" value="Rankings" />
-            <label id="label_rankingsRadio" for="rankingsRadio">Main Ranks</label>
-          </div>
-        -->
         <div class="form_radio_btn">
           <input id="rankingsRadioPower" type="radio" name="puzzleSize" value="POWER" checked/>
           <label id="label_rankingsRadioPower" for="rankingsRadioPower">Power</label>
@@ -121,7 +103,7 @@
             <label id="label_all-Singles" for="all-Singles">NxM</label>
           </div>
           <div class="form_radio_btn">
-            <input class="inputText" type="text" id="username" placeholder="PBs by Username..." style="display:none"
+            <input class="inputText" type="text" id="username" placeholder="Username" style="display:none"
               autocomplete="off" />
             <div id="suggestionsContainer"></div>
           </div>
@@ -130,20 +112,12 @@
             <span class="checkbox-text">Country</span>
         </label>
           <button id="createCustomReplayButton">Replay</button>
-          <!--<button id="createCustomReplayButtonLink" style="display: none;">Replay Link</button> -->
           <button id="enableDebugMode">Video</button>
 
-
-          
-          <span><a id="user_logged_in" style="color: white; font-weight: bold; text-shadow: 0px 0px 10px white; text-decoration: underline;"></a></span>
           <a style="color: cyan; font-weight: bold; text-shadow: 0px 0px 10px cyan;" href="/">Main</a>
-          <a style="color: rgb(0, 255, 0); font-weight: bold; text-shadow: 0px 0px 10px rgb(0, 255, 0);" href="/lb">LB</a>
+          <a style="color: rgb(0, 255, 0); font-weight: bold; text-shadow: 0px 0px 10px rgb(0, 255, 0);" href="/lb">Live LB</a>
           <a style="color: rgb(0, 255, 0); font-weight: bold; display: none; text-shadow: 0px 0px 10px rgb(0, 255, 0);" href="admin" id="admin_link">Admin</a>
           <a style="color: yellow; font-weight: bold; text-shadow: 0px 0px 10px yellow;" href="donate">Donate</a>
-          <!--
-          <br><br><a style="color: magenta; font-weight: bold; text-shadow: 0px 0px 10px magenta;" href="https://github.com/dphdmn/openslidy/releases/download/1.1.0/Slidysim30.0_v1.1.exe">Please download latest version of the upload Manager (1.1.0).</a>
-          <br>If you did any solves, or uploaded any old scores with old version, use the fourth option in the menu to "Reupload All Scores to Server."
-        -->
         </div>
         
         <div id="solveTypeDiv">
