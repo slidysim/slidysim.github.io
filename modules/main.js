@@ -27,7 +27,7 @@ async function main(bypass = false) {
                 // Archive mode: skip login
                 user_token = "notoken";
                 logged_in_as = "Archive Enjoyer";
-                document.getElementById("user_logged_in").textContent = logged_in_as;
+                document.getElementById("user_logged_in").textContent = "Archive";
                 console.log("Running in archive mode as", logged_in_as);
             }
 
