@@ -73,6 +73,7 @@ const userCountryMap = {
     larsvdb97: 'Belgium',
   
     luybo: 'Bulgaria',
+    'v_perm': 'Bulgaria',
   
     ap: 'Canada',
     vcuber13: 'Canada',
@@ -196,6 +197,7 @@ const userCountryMap = {
     sam596: 'UK',
     luca: 'UK',
     iota: 'UK',
+    Waldi: 'UK',
   
     HoHo: 'Japan',
     Ncuber: 'Japan',
