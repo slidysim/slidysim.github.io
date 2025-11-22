@@ -55,6 +55,7 @@ const userCountryMap = {
     Vietnam: 'Vietnam',
     Iceland: 'Iceland',
     Scotland: 'Scotland',
+    Slovenia: 'Slovenia',
 
     kaxymonoxy: 'Iceland',
 
@@ -179,6 +180,8 @@ const userCountryMap = {
     BollnKK: 'Singapore',
     allenbot: 'Singapore',
     MegaminX: 'Singapore',
+
+    gr21xx: 'Slovenia',
   
     SunOceanBeach: 'Taiwan',
   
