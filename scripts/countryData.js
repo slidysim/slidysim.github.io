@@ -122,6 +122,7 @@ const userCountryMap = {
     Zip: 'Germany',
     JonasCuber11: 'Germany',
     dani2: 'Germany',
+    HawaiiBlue: 'Germany',
   
     Rouxles: 'Hong Kong',
   
