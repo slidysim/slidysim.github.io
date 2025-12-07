@@ -255,6 +255,7 @@ const userCountryMap = {
     justnnotyou: 'USA',
     BrethrenBeef: 'USA',
     MOKA: 'USA',
+    theepossum: 'USA',
   
     Sakinuto: 'Brazil',
     PedroAM: 'Brazil',
@@ -267,6 +268,7 @@ const userCountryMap = {
   
     hkg11khanh: 'Vietnam',
     Duysen: 'Vietnam',
+    nguywn: 'Vietnam',
 
     mouse: 'cheat',
     tablet: 'cheat',
