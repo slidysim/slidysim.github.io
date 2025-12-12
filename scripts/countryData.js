@@ -256,6 +256,8 @@ const userCountryMap = {
     BrethrenBeef: 'USA',
     MOKA: 'USA',
     theepossum: 'USA',
+    ryan5: 'USA',
+
   
     Sakinuto: 'Brazil',
     PedroAM: 'Brazil',
