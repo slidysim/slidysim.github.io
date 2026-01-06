@@ -1,6 +1,6 @@
 # Slidysim Readme 2025
 
-Updated version written by dphdmn of a [classic Slidysim Readme](https://185.185.68.210.sslip.io/readme.txt) txt file.
+Updated version written by dphdmn of a [classic Slidysim Readme](https://91.184.253.245.nip.io/readme.txt) txt file.
 
 ## Controls
 
