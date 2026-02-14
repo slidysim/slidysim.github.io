@@ -102,8 +102,9 @@ function filterScoresByCountry(countryParam) {
 
     // Step 2: Iterate through each score in leaderboardData.
     for (let score of scores) {
-        // Step 3: Get the country of the player using nameFilter.
-        let playerCountry = countries[score.nameFilter];
+        let playerCountry = countries[Object.keys(countries).find(key => 
+            key.toLowerCase() === score.nameFilter.toLowerCase()
+        )];
         
         // Step 4: Skip scores for players that don't have an associated country.
         if (!playerCountry) continue;
