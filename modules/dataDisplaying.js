@@ -2246,9 +2246,9 @@ function getLimitString(bestValue, item, avgpart, gameMode, reverse, isAverage, 
     const limit = getScoreLimitExact(100, bestValue, reverse);
     const limitVisual = getScoreLimit(100, bestValue, reverse, scoreType, isAverage);
     if (limit !== limitVisual) {
-        limitsString += `<p><span class="alpha WRPB">WR: ${limitVisual} (${limit})</span></p>`;
+        limitsString += `<p><span class="alpha WRPB">100%: ${limitVisual} (${limit})</span></p>`;
     } else {
-        limitsString += `<p><span class="alpha WRPB">WR: ${limitVisual}</span></p>`;
+        limitsString += `<p><span class="alpha WRPB">100%: ${limitVisual}</span></p>`;
     }
 
     for (const key in percentageTable) {
