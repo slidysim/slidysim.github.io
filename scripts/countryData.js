@@ -259,7 +259,7 @@ const userCountryMap = {
     ryan5: 'USA',
     WillTRM: 'USA',
     clementinebedsheets: 'USA',
-
+    lopsidedhampter: 'USA',
   
     Sakinuto: 'Brazil',
     PedroAM: 'Brazil',
