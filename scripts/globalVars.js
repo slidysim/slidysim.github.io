@@ -75,3 +75,6 @@ let archivePage = false;
 let archiveDate = "LIVE";
 let archiveLoader = null;
 let availableArchives = [];
+let currentCountry = "worldwide";
+let countrySelect;
+let lastLoadWasPower = true;

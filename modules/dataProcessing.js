@@ -18,6 +18,134 @@ function renamePlayerScores(oldNameFilter, newNameFilter) {
     });
 }
 
+function createCountrySelect() {
+    const container = document.createElement('div');
+    container.style.cssText = 'position:relative;display:inline-block;width:150px; padding-left: 5px;';
+    
+    const selected = document.createElement('div');
+    selected.style.cssText = 'padding:2px 5px;border:1px solid #444;cursor:pointer;background:#222;color:white;border-radius:3px;display:flex;align-items:center;gap:3px;font-size:12px;height:22px;';
+    
+    const options = document.createElement('div');
+    options.style.cssText = 'display:none;position:absolute;top:100%;left:0;right:0;background:#222;z-index:1000;max-height:150px;overflow-y:auto;border:1px solid #444;margin-top:1px;font-size:12px;scrollbar-width:thin;scrollbar-color:#888 #333;';
+    
+    // Webkit scrollbar styles
+    const style = document.createElement('style');
+    style.textContent = `
+        .country-select-options::-webkit-scrollbar {
+            width: 8px;
+        }
+        .country-select-options::-webkit-scrollbar-track {
+            background: #333;
+        }
+        .country-select-options::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        .country-select-options::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
+        }
+    `;
+    document.head.appendChild(style);
+    options.className = 'country-select-options';
+    
+    let currentValue = 'worldwide';
+    let countryCounts = getCountryPlayerCounts();
+    
+    // Worldwide option
+    const worldOpt = document.createElement('div');
+    worldOpt.style.cssText = 'padding:2px 5px;cursor:pointer;display:flex;align-items:center;gap:3px;color:white;height:20px;';
+    worldOpt.innerHTML = `<img src="images/flags/default.png" style="width:16px;height:12px;margin:2px;"> Worldwide (${fullUniqueNames.length})`;
+    worldOpt.onmouseover = () => worldOpt.style.background = '#333';
+    worldOpt.onmouseout = () => worldOpt.style.background = 'none';
+    worldOpt.onclick = () => { 
+        currentValue = 'worldwide'; 
+        selected.innerHTML = worldOpt.innerHTML; 
+        options.style.display = 'none';
+        container.dispatchEvent(new Event('change'));
+    };
+    options.appendChild(worldOpt);
+    
+    // Country options
+    countryCounts.forEach(([country, count]) => {
+        const opt = document.createElement('div');
+        opt.style.cssText = 'padding:2px 5px;cursor:pointer;display:flex;align-items:center;gap:3px;color:white;height:20px;';
+        opt.innerHTML = `<img src="${countryEmojis?.[country] || 'images/flags/default.png'}" style="width:16px;height:12px;margin:2px;"> ${country} (${count})`;
+        opt.onmouseover = () => opt.style.background = '#333';
+        opt.onmouseout = () => opt.style.background = 'none';
+        opt.onclick = () => { 
+            currentValue = country; 
+            selected.innerHTML = opt.innerHTML; 
+            options.style.display = 'none';
+            container.dispatchEvent(new Event('change'));
+        };
+        options.appendChild(opt);
+    });
+    
+    selected.innerHTML = worldOpt.innerHTML;
+    selected.onclick = (e) => { e.stopPropagation(); options.style.display = options.style.display === 'none' ? 'block' : 'none'; };
+    options.onclick = (e) => e.stopPropagation();
+    document.addEventListener('click', () => options.style.display = 'none');
+    
+    Object.defineProperty(container, 'value', { get: () => currentValue });
+    
+    container.appendChild(selected);
+    container.appendChild(options);
+    return container;
+}
+
+
+function filterScoresByCountry(countryParam) {
+    // Step 1: Define variables.
+    let scores = leaderboardData; // List of player scores.
+    let countries = userCountryMap; // Map of {nameFilter: country}.
+    let filteredScores = []; // Final list of scores filtered by country.
+
+    // Step 2: Iterate through each score in leaderboardData.
+    for (let score of scores) {
+        // Step 3: Get the country of the player using nameFilter.
+        let playerCountry = countries[score.nameFilter];
+        
+        // Step 4: Skip scores for players that don't have an associated country.
+        if (!playerCountry) continue;
+
+        // Step 5: Check if the player's country matches the provided parameter.
+        if (playerCountry === countryParam) {
+            // Step 6: If it matches, add the score to filteredScores.
+            filteredScores.push(score);
+        }
+    }
+
+    // Step 7: Return the filtered list of scores.
+    return filteredScores;
+}
+
+function getCountryPlayerCounts() {
+    // Step 1: Create an object to store country counts.
+    let countryCounts = {};
+    
+    // Step 2: Iterate through each entry in userCountryMap.
+    for (let [key, country] of Object.entries(userCountryMap)) {
+        // Step 3: Skip entries where the key equals the value (like "Norway": "Norway").
+        if (key === country) continue;
+        
+        // Step 4: Increment the count for this country.
+        if (countryCounts[country]) {
+            countryCounts[country]++;
+        } else {
+            countryCounts[country] = 1;
+        }
+    }
+    
+    // Step 5: Convert the object to an array of [country, count] pairs.
+    let countryArray = Object.entries(countryCounts);
+    
+    // Step 6: Sort the array by count in descending order (highest to lowest).
+    countryArray.sort((a, b) => b[1] - a[1]);
+    
+    // Step 8: Return the sorted array.
+    return countryArray;
+}
+
 function getCountryScores() {
     // Step 1: Define variables.
     let scores = leaderboardData; // List of player scores.

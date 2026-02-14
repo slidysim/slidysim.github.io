@@ -274,9 +274,6 @@ const userCountryMap = {
     Duysen: 'Vietnam',
     nguywn: 'Vietnam',
 
-    mouse: 'cheat',
-    tablet: 'cheat',
-    cheat: 'cheat'
   };
   
 

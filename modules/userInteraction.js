@@ -6,10 +6,23 @@ dataFetching.js
 replayGeneration.js
 */
 
+function reload() {
+    if (lastLoadWasPower){
+        loadingPower = true;
+        getPowerData();
+    } else {
+        sendMyRequest();
+    }
+}
+
+function toggleCurrentCountry(){
+    currentCountry = countrySelect.value;
+    reload();
+}
 
 function toggleCountryRanks(){
     countryRanksEnabled = countriesCB.checked;
-    sendMyRequest();
+    reload();
 }
 
 //"Public" function to change control type
@@ -223,6 +236,7 @@ function addListenersToElements() {
     puzzleSizeRadios.forEach((radio) => {
         radio.addEventListener("change", () => {
             if (radio.checked) {
+                lastLoadWasPower = false;
                 if (radio.value === "History") {
                     radio_allGameModsInteresting.checked = true;
                     request.gameMode = "Interesting";
@@ -230,6 +244,7 @@ function addListenersToElements() {
                 if (radio.value === "POWER") {
                     gettingOldPower = false;
                     gettingFMCPower = false;
+                    lastLoadWasPower = true;
                     rankingTabs.style.display = "none";
                     getPowerData();
                     return;
@@ -237,6 +252,7 @@ function addListenersToElements() {
                 if (radio.value === "POWEROLD") {
                     gettingOldPower = true;
                     gettingFMCPower = false;
+                    lastLoadWasPower = true;
                     rankingTabs.style.display = "none";
                     getPowerData();
                     return;
@@ -244,6 +260,7 @@ function addListenersToElements() {
                 if (radio.value === "POWERFMC") {
                     gettingOldPower = false;
                     gettingFMCPower = true;
+                    lastLoadWasPower = true;
                     rankingTabs.style.display = "none";
                     getPowerData();
                     return;
@@ -262,6 +279,11 @@ function addListenersToElements() {
     customRankingsArea.placeholder = helpMessage;
     makeExampleButtons(customRankButtonsExamples);
     addTooltip(radio_allGameModsLabelInteresting, tooltipText);
+
+    let container = document.getElementById('logged_in_container');
+    countrySelect = createCountrySelect();
+    container.insertAdjacentElement('afterend', countrySelect);
+    countrySelect.addEventListener("change", toggleCurrentCountry);
 }
 
 //_________________End of "Public" functions of this module_________________//

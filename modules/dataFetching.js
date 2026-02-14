@@ -90,7 +90,14 @@ function directUpdate(){
     if (countryRanksEnabled) {
         cleanedData = filterDataByRequest(getCountryScores(leaderboardData), request);
     } else{
-        cleanedData = filterDataByRequest(leaderboardData, request);
+        if (currentCountry === "worldwide"){
+            cleanedData = filterDataByRequest(leaderboardData, request);
+        } else {
+            console.log("Filtering scores by country");
+            console.log("Current country: ", currentCountry);
+            console.log(filterScoresByCountry(currentCountry));
+            cleanedData = filterDataByRequest(filterScoresByCountry(currentCountry), request);
+        }
     }
     cleanedData = cleanedData.sort((a, b) => {
         return a["timestamp"] - b["timestamp"];
