@@ -1555,6 +1555,12 @@ function getScoreLimit(precentage, bestscore, reverse, scoreType, isAverage) {
 }
 
 function generateFormattedString(request) {
+    let worldRecordsOnNMstring = worldRecordsOnNM;
+    let worldRecordsOnNNstring = worldRecordsOnNN;
+    if (currentCountry !== 'worldwide') {
+        worldRecordsOnNMstring = worldRecordsOnNM.replace("World", currentCountry);
+        worldRecordsOnNNstring = worldRecordsOnNN.replace("World", currentCountry);
+    }
     function generateSelect(id, values, texts) {
         if (values.length !== texts.length) {
             console.error("Values and texts arrays must have the same length.");
@@ -1582,7 +1588,7 @@ function generateFormattedString(request) {
     }
     if (request.width === squaresSheetType) {
         if (request.nameFilter.length === 0) {
-            formattedParts.push(`<span class="epsilon" style="font-weight: 900;">${worldRecordsOnNN}</span> ${slidingPuzzleString}`);
+            formattedParts.push(`<span class="epsilon" style="font-weight: 900;">${worldRecordsOnNNstring}</span> ${slidingPuzzleString}`);
             if (NxMSelected !== totalWRsAmount) {
                 formattedParts.push(`${byString}<span class="pinktext">${NxMSelected}</span>`);
             }
@@ -1591,7 +1597,7 @@ function generateFormattedString(request) {
         }
     } else if (request.width === "All") {
         if (request.nameFilter.length === 0) {
-            formattedParts.push(`<span class="alpha" style="font-weight: 900;">${worldRecordsOnNM}</span> ${slidingPuzzleString}</span>`);
+            formattedParts.push(`<span class="alpha" style="font-weight: 900;">${worldRecordsOnNMstring}</span> ${slidingPuzzleString}</span>`);
             if (NxMSelected !== totalWRsAmount) {
                 formattedParts.push(`${byString}<span class="pinktext">${NxMSelected}</span>`);
             }
