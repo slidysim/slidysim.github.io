@@ -116,7 +116,7 @@ const userCountryMap = {
   
     daanbe: 'Germany',
     XLII: 'Germany',
-    Dyslexus: 'Germany',
+    dyslexus: 'Germany',
     RedstoneTim: 'Germany',
     Corpllwacquirerrichmf: 'Germany',
     Zip: 'Germany',
