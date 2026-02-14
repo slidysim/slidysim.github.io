@@ -2176,10 +2176,18 @@ function populateTableHistory(records, recordsListWR, scoreType, table, reverse)
             const tierCap = tier.charAt(0)
                 .toUpperCase() + tier.slice(1);
             if (percentage === 100) {
-                tierCell.textContent = `WR`;
+                if (currentCountry === 'worldwide'){
+                    tierCell.textContent = `WR`;
+                } else {
+                    tierCell.textContent = `NR (${currentCountry})`;
+                }
                 tierCell.classList.add("WRPB");
             } else {
-                tierCell.innerHTML = `${tierCap}<br>(${percentage.toFixed(1)}%)`;
+                 if (currentCountry === 'worldwide'){
+                    tierCell.innerHTML = `${tierCap}<br>(${percentage.toFixed(1)}%)`;
+                } else {
+                    tierCell.innerHTML = `${tierCap}<br>(${percentage.toFixed(1)}% ${currentCountry})`;
+                }
             }
             dataRow.classList.add(tier);
             dataRow.appendChild(tierCell);
