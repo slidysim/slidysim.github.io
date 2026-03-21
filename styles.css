@@ -1033,7 +1033,7 @@ img {
     height: max(3.5vw, 32px);
     border: 0.1vh solid #000;
     color: black;
-    background-color: #222222;
+    background-color: #333333;
     border-radius: 0.4vh;
     font-size: max(1.75vw, 16px);
     font-family: "Calibri", "Verdana", "sans-serif";
