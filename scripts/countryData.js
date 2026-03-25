@@ -76,6 +76,8 @@ const userCountryMap = {
   
     luybo: 'Bulgaria',
     'v_perm': 'Bulgaria',
+    qwerty6450: 'Bulgaria',
+    omgplayer: 'Bulgaria',
   
     ap: 'Canada',
     vcuber13: 'Canada',
