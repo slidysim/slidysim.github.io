@@ -6,6 +6,71 @@
     </head>
 
     <body>
+
+<!-- 🔥 DRAGGABLE + UNMUTED EGG VIDEO OVERLAY -->
+<div id="egg-video-overlay" 
+     style="position: fixed; top: 30px; right: 30px; z-index: 2147483647; 
+            box-shadow: 0 0 35px rgba(255, 234, 0, 0.9); 
+            border-radius: 18px; overflow: hidden; border: 5px solid #ffeb3b; 
+            cursor: grab; user-select: none; background: #000;">
+    
+    <!-- Drag handle -->
+    <div id="drag-handle" 
+         style="background: linear-gradient(#ffeb3b, #ffaa00); color: #1a0a00; 
+                padding: 4px 12px; font-size: 13px; font-weight: bold; 
+                text-align: center; cursor: grab; border-bottom: 3px solid #fff;">
+        🥚 I LOVE EGG 🥚
+    </div>
+
+    <iframe 
+        id="egg-iframe"
+        width="440" 
+        height="248" 
+        src="https://www.youtube.com/embed/0ToC0cknRBw?autoplay=1&amp;loop=1&amp;playlist=0ToC0cknRBw&amp;controls=0&amp;modestbranding=1&amp;rel=0" 
+        title="Egg Chaos Video" 
+        frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        referrerpolicy="strict-origin-when-cross-origin" 
+        allowfullscreen>
+    </iframe>
+</div>
+
+<script>
+    // Make the video draggable
+    const overlay = document.getElementById('egg-video-overlay');
+    const handle = document.getElementById('drag-handle');
+    let isDragging = false;
+    let offsetX, offsetY;
+
+    handle.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        offsetX = e.clientX - overlay.getBoundingClientRect().left;
+        offsetY = e.clientY - overlay.getBoundingClientRect().top;
+        overlay.style.cursor = 'grabbing';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        overlay.style.left = `${e.clientX - offsetX}px`;
+        overlay.style.top = `${e.clientY - offsetY}px`;
+        overlay.style.right = 'auto';   // remove right positioning when dragging
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (isDragging) {
+            isDragging = false;
+            overlay.style.cursor = 'grab';
+        }
+    });
+
+    // Optional: Double-click handle to reset position
+    handle.addEventListener('dblclick', () => {
+        overlay.style.top = '30px';
+        overlay.style.right = '30px';
+        overlay.style.left = 'auto';
+    });
+</script>
+
         <div class="page-header">
             <button class="menu-btn"><i class="menu-icon"></i></button>
             <button class="date-button" id="date-button">Power Rankings</button>
@@ -57,7 +122,7 @@
             <a href="https://www.youtube.com/channel/UCKzRppIfkDedp3Ktkf24xcA/videos" target="_blank" title="New Tab">Osipov Alexander</a>
         </div>
         <script src="power/js/dynamicPower.js?v=1.0.149"></script>
-        <script src="power/js/populatetable.js?v=1.0.181" type="module"></script>
+        <script src="power/js/populatetable.js?v=1.0.205" type="module"></script>
         <script src="power/js/menu.js"></script>
         <script defer="" src="power/js/switch.js?v=1.0.146"></script>
 </body></html>
