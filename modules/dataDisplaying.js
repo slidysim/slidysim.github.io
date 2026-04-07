@@ -1663,19 +1663,25 @@ function generateFormattedString(request) {
         function initArchiveSelector(containerSelector, loadingPower) {
             if (!availableArchives || availableArchives.length === 0) return;
 
-            // Format YYYYMMDD -> "MMM D, YYYY"
-            function formatDisplayDate(dateStr) {
+            function formatDisplayDate(archiveWithPrefix) {
+                const match = archiveWithPrefix.match(/(leaderboard_|exe_|web_)(\d{8})/);
+                if (!match) return archiveWithPrefix;
+                
+                const prefix = match[1].replace('_', '');
+                const dateStr = match[2];
+                const day = dateStr.slice(6, 8);
+                const month = dateStr.slice(4, 6);
                 const year = dateStr.slice(0, 4);
-                const month = parseInt(dateStr.slice(4, 6), 10) - 1;
-                const day = parseInt(dateStr.slice(6, 8), 10);
-                const date = new Date(year, month, day);
-                return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+                const formattedDate = `${day}.${month}.${year}`;
+                
+                const typeLabel = (prefix === 'leaderboard' || prefix === 'exe') ? '[exe]' : '[web]';
+                
+                return `${typeLabel} ${formattedDate}`;
             }
 
             const container = document.querySelector(containerSelector);
             if (!container) return;
 
-            // Remove any existing select (for re-render)
             const existingSelect = container.querySelector("select");
             if (existingSelect) existingSelect.remove();
 
@@ -1685,13 +1691,14 @@ function generateFormattedString(request) {
             select.style.background = "#333";
             select.style.border = "1px solid #aaa";
 
-            availableArchives.forEach(archive => {
+            availableArchives.forEach(archiveWithPrefix => {
                 const option = document.createElement("option");
-                option.value = archive; // YYYYMMDD format
-                option.textContent = formatDisplayDate(archive); // user-friendly
-                if (archive === archiveDate) option.selected = true;
+                option.value = archiveWithPrefix;
+                option.textContent = formatDisplayDate(archiveWithPrefix);
+                if (archiveWithPrefix === archiveDate) option.selected = true;
                 select.appendChild(option);
             });
+            
             if (loadingPower) {
                 select.addEventListener("change", () => {
                     archiveDate = select.value;
@@ -1704,10 +1711,9 @@ function generateFormattedString(request) {
                 });
             }
 
-
             container.appendChild(select);
         }
-        const lp = loadingPower; // capture current value
+        const lp = loadingPower;
         setTimeout(() => initArchiveSelector(".leaderboardUpdateSpan", lp), 0);
     }
 

@@ -23,7 +23,9 @@ const displayTypeOptions = [
     "Minesweeper",
     "Minimal unsolved",
     "Maximal unsolved",
-    "Rows and columns"
+    "Rows and columns",
+    "Cyclic",
+    "Divisible"
 ];
 const tierLabels = [
     "Any",

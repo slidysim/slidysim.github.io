@@ -38,6 +38,9 @@ function updateServer(auth_token, displayType, controlType, pbType) {
             console.log("Error:", error);
         } else {
             leaderboardData = res.scoresParsed;
+            if (leaderboardData === undefined){
+                leaderboardData = [];
+            }
             const allowedUsers = ["dphdmn", "vovker", "OCEshadow"];
             if (!allowedUsers.includes(logged_in_as)) {
                 removePlayerScores("mouse");

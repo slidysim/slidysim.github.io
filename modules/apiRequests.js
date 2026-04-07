@@ -32,7 +32,9 @@ const display_type_map = {
     "Rows and columns": 17,
     "Standard": 18,
     "Vanish on solved": 19,
-    "Vectors": 20
+    "Vectors": 20,
+    "Cyclic": 21,
+    "Divisible": 22
 };
 
 const pb_type_map = {
