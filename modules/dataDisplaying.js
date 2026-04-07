@@ -62,7 +62,7 @@ function createSheet(sortedLists, sheetType) {
     NxNWRsContainer.innerHTML = "";
     let tiersData;
     let tiersMap;
-    let headersCount = 5;
+    let headersCount = normalTableHeaders.length;
     generateFormattedString(request);
     const mainHeaders = normalTableHeaders;
     if (Object.values(sortedLists)

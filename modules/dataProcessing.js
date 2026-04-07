@@ -432,34 +432,16 @@ function getScoreID(time, moves, width, height, displayType, nameFilter, control
 
 function organizeData(data) {
     const lists = {
-        Single: [],
-        ao5: [],
-        ao12: [],
-        ao50: [],
-        ao100: []
+        Single: [], ao5: [], ao12: [], ao25: [], ao50: [], ao100: [],
+        ao250: [], ao500: [], ao1000: [], ao2500: [], ao5000: [], ao10000: [],
+        ao25000: [], ao50000: [], ao100000: [], ao250000: [], ao500000: [], ao1000000: []
     };
 
     data.forEach(item => {
-        switch (item.avglen) {
-            case 1:
-                lists.Single.push(item);
-                break;
-            case 5:
-                lists.ao5.push(item);
-                break;
-            case 12:
-                lists.ao12.push(item);
-                break;
-            case 50:
-                lists.ao50.push(item);
-                break;
-            case 100:
-                lists.ao100.push(item);
-                break;
-            default:
-                break;
-        }
+        const key = item.avglen === 1 ? 'Single' : `ao${item.avglen}`;
+        if (lists[key]) lists[key].push(item);
     });
+    
     return lists;
 }
 
@@ -565,43 +547,17 @@ function filterByUniqueSize(originalList) {
 //_________________"Private" functions for processSquareRecordsData_________________
 
 function getSquareWRs(lists, controlType) {
-    const filteredLists = {
-        Single: [],
-        ao5: [],
-        ao12: [],
-        ao50: [],
-        ao100: []
-    };
-    for (const key in lists) {
-        if (lists.hasOwnProperty(key)) {
-            const originalList = lists[key];
-            let filteredList;
-            if (controlType === "mouse") {
-                filteredList = filterByMouse(originalList);
-                filteredLists[key] = filteredList;
-            } else if (controlType === "keyboard") {
-                filteredList = filterByKeyboard(originalList);
-                filteredLists[key] = filteredList;
-            } else {
-                filteredLists[key] = originalList;
-            }
-        }
-    }
-    const WRLists = {
-        Single: [],
-        ao5: [],
-        ao12: [],
-        ao50: [],
-        ao100: []
-    };
-    for (const key in filteredLists) {
-        if (filteredLists.hasOwnProperty(key)) {
-            const originalList = filteredLists[key];
-            let WRList = filterBySquares(originalList);
-            WRLists[key] = WRList;
-        }
-    }
-    return WRLists;
+    const filterFn = controlType === "mouse" ? filterByMouse : 
+                     controlType === "keyboard" ? filterByKeyboard : 
+                     list => list;
+    
+    const filteredLists = Object.fromEntries(
+        Object.entries(lists).map(([key, list]) => [key, filterFn(list)])
+    );
+    
+    return Object.fromEntries(
+        Object.entries(filteredLists).map(([key, list]) => [key, filterBySquares(list)])
+    );
 }
 
 function filterBySquares(originalList) {
