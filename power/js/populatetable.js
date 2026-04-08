@@ -216,7 +216,7 @@ function populate_table(table){
             if (oldTiers) {
                 const dynamicSum = getDynamicSum(user.slice(3));
                 if (dynamicSum > 303030){
-                    if (dynamicSum > 500000){
+                    if (user[2] > 303030){
                         //power_div.innerHTML += `<br><span style="fontSize=10px;color:cyan">${dynamicSum}</span>`;
                     } else {
                         power_div.innerHTML += `<br><span style="fontSize=10px;">${dynamicSum}</span>`;
