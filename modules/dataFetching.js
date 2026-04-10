@@ -206,6 +206,7 @@ function filterDataByRequest(data, request) {
             return data.filter(entry => {
                 return (
                     (entry.width > 2) && (entry.height > 2) &&
+                    (entry.width === entry.height) &&
                     (entry.gameMode.includes("Marathon")) &&
                     (request.nameFilter === "" || entry.nameFilter.toLowerCase() === request.nameFilter.toLowerCase()) &&
                     (entry.avglen === 1)
