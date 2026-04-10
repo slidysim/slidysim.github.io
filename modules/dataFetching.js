@@ -71,6 +71,7 @@ function directUpdate(){
     //if(loadingPower) {
     //    controlType = 'unique';
     //}
+    isAllMarathons = (request.gameMode === allMarathons);
     last_displayType = request.displayType;
     last_controlType = controlType;
     last_pbType = request.leaderboardType;
@@ -112,7 +113,7 @@ function directUpdate(){
     } else if (sheetType === "History") {
         processHistoryData(cleanedData);
     } else {
-        processNormalLeaderboard(cleanedData);
+        processNormalLeaderboard(cleanedData, isAllMarathons);
 
     }
     updateSelectSizes();
@@ -152,6 +153,14 @@ function filterDataByRequest(data, request) {
         });
     }
     if (request.width === "History") {
+        if (request.gameMode === allMarathons) {
+            return data.filter(entry => {
+                return (
+                    (entry.gameMode.includes("Marathon")) &&
+                    (entry.avglen === 1)
+                );
+            });
+        }
         return data.filter(entry => {
             return (
                 ((entry.width > 2) || (entry.height > 2)) && (
@@ -193,12 +202,32 @@ function filterDataByRequest(data, request) {
         });
     }
     if (request.width === squaresSheetType) {
+        if (request.gameMode === allMarathons) {
+            return data.filter(entry => {
+                return (
+                    (entry.width > 2) && (entry.height > 2) &&
+                    (entry.gameMode.includes("Marathon")) &&
+                    (request.nameFilter === "" || entry.nameFilter.toLowerCase() === request.nameFilter.toLowerCase()) &&
+                    (entry.avglen === 1)
+                );
+            });
+        }
         return data.filter(entry => {
             return (
                 (entry.width > 2) && (entry.height > 2) &&
                 (entry.width === entry.height) &&
                 (request.gameMode === entry.gameMode) &&
                 (request.nameFilter === "" || entry.nameFilter.toLowerCase() === request.nameFilter.toLowerCase())
+            );
+        });
+    }
+    if (request.gameMode === allMarathons) {
+        return data.filter(entry => {
+            return (
+                (entry.gameMode.includes("Marathon")) &&
+                (request.width === entry.width) &&
+                (request.height === entry.height) &&
+                (entry.avglen === 1)
             );
         });
     }

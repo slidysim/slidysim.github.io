@@ -1187,3 +1187,6 @@ iframe {
     height: 100vh;
     border: none; /* Remove iframe border */
 }
+#customInputMarathon {
+    max-width: 50px;
+}

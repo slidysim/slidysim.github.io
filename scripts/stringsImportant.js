@@ -54,11 +54,6 @@ const tierstable = [
 const controlTypeSelectValues = ["unique", "both", "mouse", "keyboard"];
 const controlTypeSelectValuesUnique = ["unique", "mouse", "keyboard"];
 const PBTypeValues = ["time", "move", "tps"];
-const normalTableHeaders = [
-    'Single', 'ao5', 'ao12', 'ao25', 'ao50', 'ao100',
-    'ao250', 'ao500', 'ao1000', 'ao2500', 'ao5000', 'ao10000',
-    'ao25000', 'ao50000', 'ao100000', 'ao250000', 'ao500000', 'ao1000000'
-];
 const squaresSheetType = "Squares";
 const scoreTypes = {
     "time": 0,
@@ -76,3 +71,4 @@ const cTMap = {
     'grids1': 2,
     'grids2': 3,
 };
+const allMarathons = "All Marathons of";

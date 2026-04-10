@@ -21,13 +21,13 @@ function renamePlayerScores(oldNameFilter, newNameFilter) {
 function createCountrySelect() {
     const container = document.createElement('div');
     container.style.cssText = 'position:relative;display:inline-block;width:150px; padding-left: 5px;';
-    
+
     const selected = document.createElement('div');
     selected.style.cssText = 'padding:2px 5px;border:1px solid #444;cursor:pointer;background:#222;color:white;border-radius:3px;display:flex;align-items:center;gap:3px;font-size:12px;height:22px;';
-    
+
     const options = document.createElement('div');
     options.style.cssText = 'display:none;position:absolute;top:100%;left:0;right:0;background:#222;z-index:1000;max-height:150px;overflow-y:auto;border:1px solid #444;margin-top:1px;font-size:12px;scrollbar-width:thin;scrollbar-color:#888 #333;';
-    
+
     // Webkit scrollbar styles
     const style = document.createElement('style');
     style.textContent = `
@@ -47,24 +47,24 @@ function createCountrySelect() {
     `;
     document.head.appendChild(style);
     options.className = 'country-select-options';
-    
+
     let currentValue = 'worldwide';
     let countryCounts = getCountryPlayerCounts();
-    
+
     // Worldwide option
     const worldOpt = document.createElement('div');
     worldOpt.style.cssText = 'padding:2px 5px;cursor:pointer;display:flex;align-items:center;gap:3px;color:white;height:20px;';
     worldOpt.innerHTML = `<img src="images/flags/default.png" style="width:16px;height:12px;margin:2px;"> Worldwide (${fullUniqueNames.length})`;
     worldOpt.onmouseover = () => worldOpt.style.background = '#333';
     worldOpt.onmouseout = () => worldOpt.style.background = 'none';
-    worldOpt.onclick = () => { 
-        currentValue = 'worldwide'; 
-        selected.innerHTML = worldOpt.innerHTML; 
+    worldOpt.onclick = () => {
+        currentValue = 'worldwide';
+        selected.innerHTML = worldOpt.innerHTML;
         options.style.display = 'none';
         container.dispatchEvent(new Event('change'));
     };
     options.appendChild(worldOpt);
-    
+
     // Country options
     countryCounts.forEach(([country, count]) => {
         const opt = document.createElement('div');
@@ -72,22 +72,22 @@ function createCountrySelect() {
         opt.innerHTML = `<img src="${countryEmojis?.[country] || 'images/flags/default.png'}" style="width:16px;height:12px;margin:2px;"> ${country} (${count})`;
         opt.onmouseover = () => opt.style.background = '#333';
         opt.onmouseout = () => opt.style.background = 'none';
-        opt.onclick = () => { 
-            currentValue = country; 
-            selected.innerHTML = opt.innerHTML; 
+        opt.onclick = () => {
+            currentValue = country;
+            selected.innerHTML = opt.innerHTML;
             options.style.display = 'none';
             container.dispatchEvent(new Event('change'));
         };
         options.appendChild(opt);
     });
-    
+
     selected.innerHTML = worldOpt.innerHTML;
     selected.onclick = (e) => { e.stopPropagation(); options.style.display = options.style.display === 'none' ? 'block' : 'none'; };
     options.onclick = (e) => e.stopPropagation();
     document.addEventListener('click', () => options.style.display = 'none');
-    
+
     Object.defineProperty(container, 'value', { get: () => currentValue });
-    
+
     container.appendChild(selected);
     container.appendChild(options);
     return container;
@@ -102,10 +102,10 @@ function filterScoresByCountry(countryParam) {
 
     // Step 2: Iterate through each score in leaderboardData.
     for (let score of scores) {
-        let playerCountry = countries[Object.keys(countries).find(key => 
+        let playerCountry = countries[Object.keys(countries).find(key =>
             key.toLowerCase() === score.nameFilter.toLowerCase()
         )];
-        
+
         // Step 4: Skip scores for players that don't have an associated country.
         if (!playerCountry) continue;
 
@@ -123,12 +123,12 @@ function filterScoresByCountry(countryParam) {
 function getCountryPlayerCounts() {
     // Step 1: Create an object to store country counts.
     let countryCounts = {};
-    
+
     // Step 2: Iterate through each entry in userCountryMap.
     for (let [key, country] of Object.entries(userCountryMap)) {
         // Step 3: Skip entries where the key equals the value (like "Norway": "Norway").
         if (key === country) continue;
-        
+
         // Step 4: Increment the count for this country.
         if (countryCounts[country]) {
             countryCounts[country]++;
@@ -136,13 +136,13 @@ function getCountryPlayerCounts() {
             countryCounts[country] = 1;
         }
     }
-    
+
     // Step 5: Convert the object to an array of [country, count] pairs.
     let countryArray = Object.entries(countryCounts);
-    
+
     // Step 6: Sort the array by count in descending order (highest to lowest).
     countryArray.sort((a, b) => b[1] - a[1]);
-    
+
     // Step 8: Return the sorted array.
     return countryArray;
 }
@@ -158,7 +158,7 @@ function getCountryScores() {
     for (let score of scores) {
         // Step 3: Get the country of the player using nameFilter.
         let country = countries[score.nameFilter];
-        
+
         // Step 4: Ignore scores for players that don't have an associated country.
         if (!country) continue;
 
@@ -217,7 +217,11 @@ function processSquareRecordsData(cleanedData) {
     let controlsFilteredLists;
     rankingTabs.style.display = "none";
     usernameInput.style.display = "block";
-    organizedLists = organizeData(cleanedData);
+    if (isAllMarathons) {
+        organizedLists = organizeDataMarathons(cleanedData);
+    } else {
+        organizedLists = organizeData(cleanedData);
+    }
     sortedLists = sortData(organizedLists, request.leaderboardType);
     sortedLists = sortData(sortedLists, "size");
     controlsFilteredLists = getSquareWRs(sortedLists, controlType);
@@ -237,7 +241,11 @@ function processSquareRecordsData(cleanedData) {
             nameFilter: ""
         };
         cleanedData = filterDataByRequest(leaderboardData, modifiedRequest);
-        organizedLists = organizeData(cleanedData);
+        if (isAllMarathons) {
+            organizedLists = organizeDataMarathons(cleanedData);
+        } else {
+            organizedLists = organizeData(cleanedData);
+        }
         sortedLists = sortData(organizedLists, request.leaderboardType);
         WRsDataForPBs = getSquareWRs(sortedLists, controlType);
     }
@@ -259,7 +267,7 @@ function processNxMRecordsData(cleanedData) {
     controlsFilteredLists = getAllWRs(sortedLists, controlType);
     NxMRecords.length = 0;
     NxMRecords = controlsFilteredLists;
-    if (n_m_size_limit > 0){
+    if (n_m_size_limit > 0) {
         NxMRecords = NxMRecords.filter(record => record.width * record.height <= n_m_size_limit);
     }
     if (request.nameFilter !== "") {
@@ -278,7 +286,7 @@ function processNxMRecordsData(cleanedData) {
 
 //"Public" function to process Kinch Rankings data
 function processRankingsData(cleanedData, rankingsType) {
-   // console.log("processing rankings data");
+    // console.log("processing rankings data");
     let organizedLists;
     let sortedLists;
     let controlsFilteredLists;
@@ -369,12 +377,16 @@ function processHistoryData(cleanedData) {
 }
 
 //"Public" function to process data for regular leaderboard
-function processNormalLeaderboard(cleanedData) {
+function processNormalLeaderboard(cleanedData, isAllMarathons) {
     let organizedLists;
     let sortedLists;
     let controlsFilteredLists;
     rankingTabs.style.display = "none";
-    organizedLists = organizeData(cleanedData);
+    if (isAllMarathons) {
+        organizedLists = organizeDataMarathons(cleanedData);
+    } else {
+        organizedLists = organizeData(cleanedData);
+    }
     sortedLists = sortData(organizedLists, request.leaderboardType);
     controlsFilteredLists = filterListsByControlType(sortedLists, controlType);
     createSheet(controlsFilteredLists, -1);
@@ -430,19 +442,35 @@ function getScoreID(time, moves, width, height, displayType, nameFilter, control
 
 //_________________"Private" functions (multiple usage)_________________
 
-function organizeData(data) {
-    const lists = {
-        Single: [], ao5: [], ao12: [], ao25: [], ao50: [], ao100: [],
-        ao250: [], ao500: [], ao1000: [], ao2500: [], ao5000: [], ao10000: [],
-        ao25000: [], ao50000: [], ao100000: [], ao250000: [], ao500000: [], ao1000000: []
-    };
+function organizeDataMarathons(data) {
+    const lists = {};
 
-    data.forEach(item => {
-        const key = item.avglen === 1 ? 'Single' : `ao${item.avglen}`;
-        if (lists[key]) lists[key].push(item);
-    });
-    
-    return lists;
+    for (const item of data) {
+        const num = item.gameMode.split(' ')[1];
+        const key = 'x' + num;
+        (lists[key] ||= []).push(item);
+    }
+
+    const sortedKeys = Object.keys(lists).sort((a, b) =>
+        a.slice(1) - b.slice(1)
+    );
+
+    return Object.fromEntries(sortedKeys.map(k => [k, lists[k]]));
+}
+
+function organizeData(data) {
+    const lists = {};
+
+    for (const item of data) {
+        const key = item.avglen === 1 ? 'Single' : 'ao' + item.avglen;
+        (lists[key] ||= []).push(item);
+    }
+
+    const sortedKeys = Object.keys(lists).sort((a, b) =>
+        a === 'Single' ? -1 : b === 'Single' ? 1 : a.slice(2) - b.slice(2)
+    );
+
+    return Object.fromEntries(sortedKeys.map(k => [k, lists[k]]));
 }
 
 function sortData(lists, sortfactor) {
@@ -547,14 +575,14 @@ function filterByUniqueSize(originalList) {
 //_________________"Private" functions for processSquareRecordsData_________________
 
 function getSquareWRs(lists, controlType) {
-    const filterFn = controlType === "mouse" ? filterByMouse : 
-                     controlType === "keyboard" ? filterByKeyboard : 
-                     list => list;
-    
+    const filterFn = controlType === "mouse" ? filterByMouse :
+        controlType === "keyboard" ? filterByKeyboard :
+            list => list;
+
     const filteredLists = Object.fromEntries(
         Object.entries(lists).map(([key, list]) => [key, filterFn(list)])
     );
-    
+
     return Object.fromEntries(
         Object.entries(filteredLists).map(([key, list]) => [key, filterBySquares(list)])
     );
@@ -682,7 +710,7 @@ function getKinchRankings(uniqueNames, scoresLists, scoreType, percentageTable, 
             if (bestValue !== defaultScore && !isInvalid(bestValue, scoreTypeNew)) {
                 sum += Math.pow(score.scorePercentage, weight);
                 count++;
-            } else{
+            } else {
                 score.scoreTier = "kappa";
             }
         });
@@ -777,7 +805,7 @@ function getPopularList(scores, controlType, categoriesAmount = 1, onlySquares =
             if (categoryCountMap.has(category)) {
                 if (categoryCountMap.get(category) !== 0) {
                     isReserved = reserveCategory(item.nameFilter, category);
-                    if (!isReserved){
+                    if (!isReserved) {
                         categoryCountMap.set(category, categoryCountMap.get(category) + 1);
                     }
                 } else {
@@ -812,7 +840,7 @@ function getPopularList(scores, controlType, categoriesAmount = 1, onlySquares =
         }
         return out;
     }
-    
+
     allowedCategoryCounts = getAllowedAmounts(categoriesCounters);
     newMaxCategories = validCategories.length;
     validCategories = validCategories.slice(0, categoriesAmount);

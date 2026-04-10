@@ -62,9 +62,9 @@ function createSheet(sortedLists, sheetType) {
     NxNWRsContainer.innerHTML = "";
     let tiersData;
     let tiersMap;
-    let headersCount = normalTableHeaders.length;
+    let headersCount = Object.keys(sortedLists).length;;
     generateFormattedString(request);
-    const mainHeaders = normalTableHeaders;
+    const mainHeaders = Object.keys(sortedLists);
     if (Object.values(sortedLists)
         .every(list => list.length === 0)) {
         contentDiv.innerHTML = notFoundError;
@@ -101,7 +101,7 @@ function createSheet(sortedLists, sheetType) {
             let bestValue;
             sortedLists[header].forEach(item => {
                 let percentageCurrent = 100;
-                const isAverage = (header !== normalTableHeaders[0]);
+                const isAverage = (header !== "Single");
                 mytableid++;
                 const tableRow = document.createElement('tr');
                 let scoreType = request.leaderboardType;
@@ -1582,9 +1582,12 @@ function generateFormattedString(request) {
     const formattedParts = [];
     const sortedByPart = `<span style="font-weight: 900;">${selectPBTypeString}</span> ${leaderboardForString} `;
     formattedParts.push(sortedByPart);
-    if (request.gameMode !== "Standard" && !String(request.width)
-        .includes("Rankings")) {
-        formattedParts.push(`<span class="gamma" style="font-weight: 700;">${request.gameMode}</span> `);
+    if (request.gameMode !== "Standard" && !String(request.width).includes("Rankings")) {
+        if (request.width === squaresSheetType) {
+            formattedParts.push(`<span class="gamma" style="font-weight: 700;">${(request.gameMode).replace(" of", "")}</span> `);
+        } else {
+            formattedParts.push(`<span class="gamma" style="font-weight: 700;">${request.gameMode}</span> `);
+        }
     }
     if (request.width === squaresSheetType) {
         if (request.nameFilter.length === 0) {
@@ -1717,8 +1720,13 @@ function generateFormattedString(request) {
         setTimeout(() => initArchiveSelector(".leaderboardUpdateSpan", lp), 0);
     }
 
+    if (request.gameMode === allMarathons && request.width === "All") {
+        formattedParts.length = 0;
+        formattedParts.push("All Marathons option is not supported for NxM sheet, please select other settings");
+    }
 
     const finalString = `${formattedParts.join(' ')}`;
+    
     leaderboardName.innerHTML = finalString;
     function displayTypeChanged() {
         let currentValue = displayTypeSelect.value;
