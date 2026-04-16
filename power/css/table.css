@@ -154,8 +154,8 @@
 
 /* tiers OLD */
 [tier="eggOLD"]          { background-color: rgb(30, 30, 30); color: yellow; text-shadow: 0px 0px 10px yellow;} 
-[tier="g++OLD"]          { background-color: rgb(30, 30, 30); color: #ff00ff; text-shadow: 0px 0px 10px #ff00ff;} 
-[tier="gamma+OLD"]       { background-color: rgb(30, 30, 30); color: white; } 
+[tier="g++OLD"]          { background-color: rgb(42, 42, 52); color: #ff00ff; text-shadow: 0px 0px 10px #ff00ff;} 
+[tier="gamma+OLD"]       { background-color: rgb(42, 42, 52); color: cyan; } 
 [tier="gammaOLD"]        { background-color: #00ffff; color: #002626; } /* Deep teal for better contrast */
 [tier="alephOLD"]        { background-color: #00ff2a; color: #002b0b; } /* Dark forest green */
 [tier="ascendedOLD"]     { background-color: #ff2262; color: #330010; } /* Deep burgundy */
