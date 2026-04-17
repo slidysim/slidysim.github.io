@@ -288,7 +288,8 @@ const userCountryMap = {
 
     zynua: 'South Africa',
 
-    xenia: 'Sweden'
+    xenia: 'Sweden',
+    Andersh2345: 'Sweden'
 
   };
   
