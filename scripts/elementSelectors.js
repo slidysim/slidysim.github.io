@@ -41,3 +41,4 @@ const enableDebugMode = document.getElementById("enableDebugMode");
 const ytOnlyButton = document.getElementById("ytOnlyButton");
 const createCustomReplayButtonLink = document.getElementById("createCustomReplayButtonLink");
 const countriesCB = document.getElementById("countriesLeaderboard");
+const includeWebCB = document.getElementById("includeWeb");

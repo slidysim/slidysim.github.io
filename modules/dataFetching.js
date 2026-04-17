@@ -24,48 +24,82 @@ function unloadAnimation(loadingAnimation, contentDiv) {
     }, 250);
 }
 
+function handleScoresResponse(error, res, customScores, customUserList) {
+    unloadAnimation(loadingAnimation, contentDiv);
+    document.body.style.pointerEvents = 'auto';
+    if (error) {
+        console.log("Error:", error);
+    } else {
+        leaderboardData = customScores || res.scoresParsed || [];
+        fullUniqueNames = customUserList || res.userList.sort();
+        if (initial) {
+            addListenersToElements();
+        }
+        updateSuggestions();
+        directUpdate();
+        if (initial) {
+            document.getElementById("controlsDiv").style.opacity = "1";
+            customRanksCheck();
+            initial = false;
+        }
+    }
+}
+
+function getCategoryKey(s) {
+    return `${s.width}-${s.height}-${s.leaderboardType}-${s.controls}-${s.gameMode}-${s.displayType}-${s.nameFilter}-${s.avglen}`;
+}
+
+function isBetter(web, live, type) {
+    const webVal = type === "tps" ? web.tps : (type === "move" ? web.moves : web.time);
+    const liveVal = type === "tps" ? live.tps : (type === "move" ? live.moves : live.time);
+    if (webVal === -1) return false;
+    if (liveVal === -1) return true;
+    return type === "tps" ? webVal > liveVal : webVal < liveVal;
+}
+
+function mergeWebPBs(liveData, webData) {
+    const map = new Map(liveData.map(s => [getCategoryKey(s), s]));
+    webData.forEach(w => {
+        const key = getCategoryKey(w);
+        const l = map.get(key);
+        if (!l || isBetter(w, l, w.leaderboardType)) map.set(key, w);
+    });
+    return Array.from(map.values());
+}
+
 function updateServer(auth_token, displayType, controlType, pbType) {
     const loadingAnimation = document.getElementById("loadingAnimation");
     const contentDiv = document.getElementById("contentDiv");
     latestRecordTime = new Date();
     loadAnimation(loadingAnimation, contentDiv);
     document.body.style.pointerEvents = 'none';
-    getScoresWrapper(auth_token, displayType, controlType, pbType, (error, res) => {
-        //console.log("getting scores from server");
-        unloadAnimation(loadingAnimation, contentDiv);
-        document.body.style.pointerEvents = 'auto';
-        if (error) {
-            console.log("Error:", error);
-        } else {
-            leaderboardData = res.scoresParsed;
-            if (leaderboardData === undefined){
-                leaderboardData = [];
-            }
-            const allowedUsers = ["dphdmn", "vovker", "OCEshadow"];
-            if (!allowedUsers.includes(logged_in_as)) {
-                removePlayerScores("mouse");
-            } else {
-                //removePlayerScores("dphdmn");
-                //renamePlayerScores("mouse", "dphdmn");
-            }
-            if (initial) {
-                fullUniqueNames = res.userList.sort();
-                addListenersToElements();
-            }
-            directUpdate();
 
-            if (initial) {
-                //radio4.checked = true;
-                document.getElementById("controlsDiv").style.opacity = "1";
-                customRanksCheck();
-                initial = false;
-                
+    if (webLeaderboardEnabled && archiveDate === "LIVE") {
+        archiveDate = "LIVE";
+        getScoresWrapper(auth_token, displayType, controlType, pbType, (err, liveRes) => {
+            if (err) {
+                console.log("Error when fetching live scores:", err);
+                return;
             }
-        }
-    });
+            archiveDate = latestWebArchive;
+            getScoresWrapper(auth_token, displayType, controlType, pbType, (webErr, webRes) => {
+                if (!webErr && webRes.scoresParsed && liveRes.scoresParsed) {
+                    const merged = mergeWebPBs(liveRes.scoresParsed, webRes.scoresParsed);
+                    const mergedUserList = [...new Set([...liveRes.userList, ...webRes.userList])].sort();
+                    archiveDate = "LIVE";
+                    handleScoresResponse(err, liveRes, merged, mergedUserList);
+                } else {
+                    console.log("Error when fetching or merging web scores:", err);
+                    return;
+                }
+            });
+        });
+    } else {
+        getScoresWrapper(auth_token, displayType, controlType, pbType, handleScoresResponse);
+    }
 }
 
-function directUpdate(){
+function directUpdate() {
     //console.log("direct update called");
     document.getElementById('power-iframe')?.remove();
     //if(loadingPower) {
@@ -93,8 +127,8 @@ function directUpdate(){
     let cleanedData;
     if (countryRanksEnabled) {
         cleanedData = filterDataByRequest(getCountryScores(leaderboardData), request);
-    } else{
-        if (currentCountry === "worldwide"){
+    } else {
+        if (currentCountry === "worldwide") {
             cleanedData = filterDataByRequest(leaderboardData, request);
         } else {
             cleanedData = filterDataByRequest(filterScoresByCountry(currentCountry), request);
@@ -126,19 +160,16 @@ function sendMyRequest() {
     let new_displayType = request.displayType;
     let new_controlType = controlType;
     let new_pbType = request.leaderboardType;
-    if (loadingPower) {
-        //console.log("updating server for power update");
+    if (loadingPower || forceServerUpdate) {
+        forceServerUpdate = false;
         updateServer(user_token, new_displayType, controlType, new_pbType);
     } else {
-        if (new_displayType === last_displayType && new_controlType === last_controlType && new_pbType === last_pbType){
+        if (new_displayType === last_displayType && new_controlType === last_controlType && new_pbType === last_pbType) {
             directUpdate();
-            //console.log("Normal update");
-        } else{
-            if (last_displayType !== -1){
-                //console.log("Updating server");
+        } else {
+            if (last_displayType !== -1) {
                 updateServer(user_token, new_displayType, controlType, new_pbType);
             } else {
-                //console.log("Not doing repeated update");
             }
         }
     }
@@ -245,7 +276,7 @@ function getSolutionForScore(item, callback) {
     const loadingAnimation = document.getElementById("loadingAnimation");
     const contentDiv = document.getElementById("contentDiv");
     document.body.style.pointerEvents = 'none';
- 
+
     loadAnimation(loadingAnimation, contentDiv);
     getSolveData(user_token, item.time, item.moves, item.timestamp)
         .then(solveData => {
@@ -302,7 +333,7 @@ function getHighestTimestampValue(arr) {
     if (arr.length === 0) {
         return undefined;
     }
-    
+
     let highestTimestamp = arr[0].timestamp;
     const currentTime = Date.now();
 

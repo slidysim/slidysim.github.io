@@ -65,6 +65,7 @@ let last_controlType = -1;
 let last_pbType = -1;
 let replayStatus = "DEAD"; //replayStatus = "PLAYING"; "DEAD"; "PENDING"; "FINISHED"
 let countryRanksEnabled = false;
+let webLeaderboardEnabled = true;
 let updatedInitial = false;
 let n_m_size_limit = 0;
 let savedPlayerScores;
@@ -78,3 +79,6 @@ let availableArchives = [];
 let currentCountry = "worldwide";
 let countrySelect;
 let lastLoadWasPower = true;
+let latestWebArchive;
+let filteredSuggestions = [];
+let forceServerUpdate = false;

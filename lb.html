@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="images/egg.png" type="image/png">
-  <title>Open Slidysim Leaderboard v4.4.2</title>
+  <title>Open Slidysim Leaderboard v4.5.0</title>
   
 </head>
 
@@ -110,6 +110,10 @@
           <label class="custom-checkbox-countries">
             <input type="checkbox" id="countriesLeaderboard" />
             <span class="checkbox-text">Country</span>
+        </label>
+          <label class="custom-checkbox-countries">
+            <input type="checkbox" id="includeWeb" checked/>
+            <span class="checkbox-text">Web</span>
         </label>
           <button id="createCustomReplayButton">Replay</button>
           <button id="enableDebugMode">Video</button>
@@ -216,6 +220,7 @@
 </div>
   <script src="libs/pako.min.js"></script>
   <script src="libs/sha256.min.js"></script>
+  <script src="libs/xzwasm.min.js"></script>
 
   <script src="scripts/jsonfix.js"></script>
   <script src="scripts/countryData.js"></script>
@@ -226,7 +231,7 @@
   <script src="scripts/mainRankings.js"></script>
   <script src="scripts/globalVars.js"></script>
   <script src="scripts/dropreplay.js"></script>
-  
+  <script src="scripts/archiveloader.js?v=1.0.190"></script>
   <script src="modules/apiRequests.js"></script>
 
   <script src="modules/gridsAnalysis.js"></script>

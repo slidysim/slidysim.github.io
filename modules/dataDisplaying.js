@@ -1648,14 +1648,23 @@ function generateFormattedString(request) {
     if (archiveDate === "LIVE") {
         // Live leaderboard: dynamic time ago
         let timeAgo = getTimeAgo(latestRecordTime);
-        formattedParts.push(`<span class="leaderboardUpdateSpan">${lastLeaderboardUpdateString} <span style="color: #ffffff">${timeAgo}</span></span>`);
+        let updateText = `${lastLeaderboardUpdateString} <span style="color: #ffffff">${timeAgo}</span>`;
+        let webArchiveSuffix = '';
 
+        // Add web archive date in brackets if enabled
+        if (webLeaderboardEnabled && latestWebArchive) {
+            const d = latestWebArchive.replace('web_', '');
+            webArchiveSuffix = ` (including web data backup: ${d.substring(6, 8)}.${d.substring(4, 6)}.${d.substring(0, 4)})`;
+            updateText += webArchiveSuffix;
+        }
+
+        formattedParts.push(`<span class="leaderboardUpdateSpan">${updateText}</span>`);
         clearInterval(window.leaderboardInterval);
         window.leaderboardInterval = setInterval(() => {
             try {
                 const updateSpan = document.querySelector(".leaderboardUpdateSpan");
                 if (updateSpan) {
-                    updateSpan.innerHTML = `${lastLeaderboardUpdateString} <span style="color: #ffffff">${getTimeAgo(latestRecordTime)}</span>`;
+                    updateSpan.innerHTML = `${lastLeaderboardUpdateString} <span style="color: #ffffff">${getTimeAgo(latestRecordTime)}</span>${webArchiveSuffix}`;
                 }
             } catch (error) { }
         }, 10000);
@@ -1669,16 +1678,16 @@ function generateFormattedString(request) {
             function formatDisplayDate(archiveWithPrefix) {
                 const match = archiveWithPrefix.match(/(leaderboard_|exe_|web_)(\d{8})/);
                 if (!match) return archiveWithPrefix;
-                
+
                 const prefix = match[1].replace('_', '');
                 const dateStr = match[2];
                 const day = dateStr.slice(6, 8);
                 const month = dateStr.slice(4, 6);
                 const year = dateStr.slice(0, 4);
                 const formattedDate = `${day}.${month}.${year}`;
-                
+
                 const typeLabel = (prefix === 'leaderboard' || prefix === 'exe') ? '[exe]' : '[web]';
-                
+
                 return `${typeLabel} ${formattedDate}`;
             }
 
@@ -1701,7 +1710,7 @@ function generateFormattedString(request) {
                 if (archiveWithPrefix === archiveDate) option.selected = true;
                 select.appendChild(option);
             });
-            
+
             if (loadingPower) {
                 select.addEventListener("change", () => {
                     archiveDate = select.value;
@@ -1726,7 +1735,7 @@ function generateFormattedString(request) {
     }
 
     const finalString = `${formattedParts.join(' ')}`;
-    
+
     leaderboardName.innerHTML = finalString;
     function displayTypeChanged() {
         let currentValue = displayTypeSelect.value;
@@ -2190,14 +2199,14 @@ function populateTableHistory(records, recordsListWR, scoreType, table, reverse)
             const tierCap = tier.charAt(0)
                 .toUpperCase() + tier.slice(1);
             if (percentage === 100) {
-                if (currentCountry === 'worldwide'){
+                if (currentCountry === 'worldwide') {
                     tierCell.textContent = `WR`;
                 } else {
                     tierCell.textContent = `NR (${currentCountry})`;
                 }
                 tierCell.classList.add("WRPB");
             } else {
-                 if (currentCountry === 'worldwide'){
+                if (currentCountry === 'worldwide') {
                     tierCell.innerHTML = `${tierCap}<br>(${percentage.toFixed(1)}%)`;
                 } else {
                     tierCell.innerHTML = `${tierCap}<br>(${percentage.toFixed(1)}% ${currentCountry})`;

@@ -25,6 +25,13 @@ function toggleCountryRanks(){
     reload();
 }
 
+function toggleWebLeaderboard(){
+    webLeaderboardEnabled = includeWebCB.checked;
+    forceServerUpdate = true;
+    enableDebugMode.style.display = webLeaderboardEnabled ? "none" : "inline-block";
+    reload();
+}
+
 //"Public" function to change control type
 function changeControls(newtype) {
     controlType = newtype;
@@ -80,63 +87,89 @@ function changePuzzleSize(puzzleSize) {
         }
     }
 }
+//for username input
+function updateSuggestions() {
+    const userInput = usernameInput.value.trim().toLowerCase();
+    
+    // Only show suggestions if there's actual input
+    if (!userInput) {
+        suggestionsContainer.innerHTML = "";
+        suggestionsContainer.style.display = "none";
+        return;
+    }
+    
+    suggestionsContainer.innerHTML = "";
+    filteredSuggestions = fullUniqueNames.filter((name) =>
+        name.toLowerCase().includes(userInput)
+    );
+    
+    // Only show container if there are filtered suggestions
+    if (filteredSuggestions.length > 0) {
+        filteredSuggestions.forEach((suggestion) => {
+            const suggestionElement = document.createElement("div");
+            suggestionElement.textContent = suggestion;
+            suggestionElement.classList.add("suggestion");
+            suggestionElement.addEventListener("click", function (event) {
+                event.stopPropagation();
+                usernameInput.value = suggestion;
+                suggestionsContainer.innerHTML = "";
+                suggestionsContainer.style.display = "none";
+                changeNameFilter(usernameInput.value);
+            });
+            suggestionsContainer.appendChild(suggestionElement);
+        });
+        suggestionsContainer.style.display = "block";
+    } else {
+        suggestionsContainer.style.display = "none";
+    }
+}
+
+function addSuggestions() {
+    usernameInput.addEventListener("input", updateSuggestions);
+    
+    usernameInput.addEventListener("keydown", function (event) {
+        const suggestions = document.querySelectorAll(".suggestion");
+        if ((event.key === "Tab" || event.key === "Enter") && filteredSuggestions.length > 0) {
+            event.preventDefault();
+            suggestions[0].click();
+            changeNameFilter(usernameInput.value);
+        }
+    });
+    
+    usernameInput.addEventListener("focus", function () {
+        updateSuggestions(); // Will only show if there's input text
+    });
+    
+    usernameInput.addEventListener("blur", function () {
+        setTimeout(() => {
+            suggestionsContainer.style.display = "none";
+        }, 200);
+    });
+}
 
 //"Public" function to add major event listeners for html elements
 function addListenersToElements() {
+    enableDebugMode.style.display = webLeaderboardEnabled ? "none" : "inline-block";
     countriesCB.addEventListener("change", toggleCountryRanks);
-    function addSuggestions() {
-        let filteredSuggestions = [];
-        usernameInput.addEventListener("input", function () {
-            suggestionsContainer.innerHTML = "";
-            const userInput = usernameInput.value.trim().toLowerCase();
-            filteredSuggestions = fullUniqueNames.filter((name) =>
-                name.toLowerCase()
-                    .includes(userInput)
-            );
-            filteredSuggestions.forEach((suggestion, index) => {
-                const suggestionElement = document.createElement("div");
-                suggestionElement.textContent = suggestion;
-                suggestionElement.classList.add("suggestion");
-                suggestionElement.addEventListener("click", function (event) {
-                    event.stopPropagation();
-                    usernameInput.value = suggestion;
-                    suggestionsContainer.innerHTML = "";
-                    changeNameFilter(usernameInput.value);
-                });
-                suggestionsContainer.appendChild(suggestionElement);
-            });
-        });
-        usernameInput.addEventListener("keydown", function (event) {
-            const suggestions = document.querySelectorAll(".suggestion");
-            if ((event.key === "Tab" || event.key === "Enter") && filteredSuggestions.length > 0) {
-                event.preventDefault();
-                suggestions[0].click();
-                changeNameFilter(usernameInput.value);
-            }
-        });
-        usernameInput.addEventListener("focus", function () {
-            suggestionsContainer.style.display = "block";
-        });
-        usernameInput.addEventListener("blur", function () {
-            setTimeout(() => {
-                suggestionsContainer.style.display = "none";
-            }, 200);
-        });
-    }
+    includeWebCB?.addEventListener("change", toggleWebLeaderboard);
     addSuggestions();
     createCustomReplayButton.addEventListener("click", function () {
         makeReplay("", -1, 15000, 4, 4, "Custom");
     });
     enableDebugMode.addEventListener("click", function(){
-        if (!debugMode){
-            if (logged_in_as !== "vovker" && logged_in_as !== "dphdmn"){
-                alert("Please find your score on the leaderboard, click on it, and add video link to submit." +
-                    "\nNote: Only YouTube links are accepted.\nYou can only submit your own videos for your own scores.\n" +
-                    "Abuse of the system may result in a ban from the leaderboard.");
-                }
+        if (webLeaderboardEnabled) {
+            alert("Video upload not supported for Web scores, sorry for inconvenience. Please disable web before uploading.");
+        } else {
+            if (!debugMode){
+                if (logged_in_as !== "vovker" && logged_in_as !== "dphdmn"){
+                    alert("Please find your score on the leaderboard, click on it, and add video link to submit." +
+                        "\nNote: Only YouTube links are accepted.\nYou can only submit your own videos for your own scores.\n" +
+                        "Abuse of the system may result in a ban from the leaderboard.");
+                    }
+            }
+            debugMode = !debugMode;
+            sendMyRequest();
         }
-        debugMode = !debugMode;
-        sendMyRequest();
     });
    // ytOnlyButton.addEventListener("click", function(){
   //      ytOnlyEnabled = !ytOnlyEnabled;

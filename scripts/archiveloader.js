@@ -91,7 +91,7 @@ class LeaderboardArchiveLoader {
     }
 }
 
-async function initArchive() {
+async function initArchive(isArchPage = true) {
     try {
         archiveLoader = new LeaderboardArchiveLoader();
         archiveLoader.githubRepo = 'dphdmn/slidyarch';
@@ -111,8 +111,15 @@ async function initArchive() {
             .reverse();
         
         console.log(`Found ${availableArchives.length} archives:`, availableArchives);
-        archiveDate = availableArchives[0];
-        console.log('Latest archiveDate:', archiveDate);
+        
+        if (!isArchPage) {
+            latestWebArchive = availableArchives.find(archive => archive.includes('web'));
+            console.log('Latest web archive:', latestWebArchive);
+        } else {
+            archiveDate = availableArchives[0];
+            console.log('Latest archiveDate:', archiveDate);
+        }
+        
         return {
             success: true,
             archives: availableArchives
@@ -136,4 +143,3 @@ async function preloadArchives(datesWithPrefix = null) {
     const datesToPreload = datesWithPrefix || availableArchives.slice(0, 3);
     await archiveLoader.preloadArchives(datesToPreload);
 }
-archivePage = true;
