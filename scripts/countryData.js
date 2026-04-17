@@ -143,6 +143,7 @@ const userCountryMap = {
   
     Rafael: 'Netherlands',
     JihadCubing: 'Netherlands',
+    winteriscool: 'Netherlands',
   
     eff: 'Philippines',
     Enzo1098: 'Philippines',
