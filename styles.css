@@ -143,16 +143,15 @@ select:focus {
 }
 
 .content {
-    display: grid;
-    justify-items: center;
-    gap: 2px;
+    display: block;
     text-align: center;
     color: #fff;
-    overflow-x: scroll;
+    overflow-x: auto;
     margin: 2px;
     padding: 15px;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
 }
 
 #scrambleContainer::-webkit-scrollbar,
@@ -177,11 +176,14 @@ select:focus {
     font-family: Arial;
     font-size: 14px;
     border: 1px solid #444;
-    padding: 10px;
+    padding: 10px 5px;
     background-color: rgba(0, 0, 0, 0.4);
     opacity: 0.95;
-    border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    display: inline-block;
+    white-space: normal;
+    vertical-align: top;
+    min-width: 280px;
 }
 
 .bigContainer {
@@ -251,6 +253,7 @@ table.rankingCells td {
     border-radius: 6px;
     font-size: 13px;
     box-shadow: 0 0 3px currentColor;
+    box-sizing: content-box;
 }
 
 .WRstable {
@@ -286,8 +289,8 @@ table.rankingCells td {
 }
 
 .shadowFun {
-    box-shadow: 0 0 3px currentColor;
-    height: 47px;
+    box-shadow: 0 0 2px currentColor;
+    height: 50px;
 }
 
 .blackBG {
@@ -528,6 +531,11 @@ table td {
     padding: 5px;
     text-align: center;
     min-width: 60px;
+    height: 50px;
+    display: table-cell;
+    vertical-align: middle;
+    line-height: 1;
+    box-sizing: border-box;
 }
 
 h2 {
@@ -832,6 +840,13 @@ img {
 .NxMTable td {
     border-radius: 0px;
     box-shadow: 0.5px 0.5px 0.5px 0.5px hsla(180, 100%, 50%, .3);
+    background-color: transparent;
+    font-size: 14px;
+    padding: 5px;
+    text-align: center;
+    min-width: 60px;
+    height: auto;
+    box-sizing: content-box;
 }
 
 .NxMTable td span {
@@ -845,8 +860,7 @@ img {
 }
 
 .cardContainer {
-    width: 70%;
-    min-width: 345px;
+    width: auto;
     text-align: -webkit-center;
     text-align: -moz-center;
 }
@@ -859,13 +873,29 @@ img {
 .normalCardTable {
     border-collapse: separate;
     border-spacing: 0 7px;
-    max-width: 500px;
+    max-width: 320px;
 }
 
 .historyRecordsTable {
     border-collapse: separate;
-    border-spacing: 0 7px;
+    border-spacing: 0 9px;
     max-width: 900px;
+}
+
+.table-container .normalCardTable {
+    min-width: 285px;
+}
+
+.table-container .historyRecordsTable {
+    min-width: 285px;
+}
+
+.left-column-container .normalCardTable {
+    min-width: auto;
+}
+
+.left-column-table {
+    min-width: auto;
 }
 
 .historyRecordsTable td {
@@ -873,6 +903,66 @@ img {
     min-width: 100px;
     white-space: pre-wrap;
     word-wrap: break-word;
+}
+
+.left-column-container {
+    position: sticky;
+    left: 0;
+    display: inline-block;
+    min-width: 85px;
+    max-width: 85px;
+    vertical-align: top;
+    background-color: #121212;
+    z-index: 10;
+}
+
+.left-column-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 7px;
+    vertical-align: top;
+}
+
+.left-column-table tr {
+    height: auto;
+}
+
+.left-column-table td {
+    text-align: center;
+    vertical-align: middle;
+    padding: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    border-spacing: 0;
+    height: 50px;
+    display: table-cell;
+    width: 55px;
+    word-wrap: break-word;
+    border: 1px solid #333;
+    line-height: 1;
+    box-sizing: border-box;
+}
+
+.left-header-row {
+    display: none;
+}
+
+.gap-row {
+    height: auto;
+}
+
+.gap-cell {
+    text-align: center;
+    vertical-align: middle;
+    color: #555;
+    font-size: 14px;
+    padding: 8px;
+    height: 50px;
+    display: table-cell;
+    border: 1px solid #333;
+    line-height: 1;
+    font-weight: normal;
+    box-sizing: border-box;
 }
 
 #tierSlider {
@@ -956,7 +1046,9 @@ img {
 #rewindSliderMovesTable td {
     max-width: 100px;
     min-width: 100px;
-    height: 35px;
+    height: 50px;
+    padding: 8px;
+    box-sizing: border-box;
 }
 
 #popupContainerSettings {

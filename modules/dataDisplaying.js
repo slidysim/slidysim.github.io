@@ -78,7 +78,48 @@ function createSheet(sortedLists, sheetType) {
         tiersMap = tiersData.tiersMap;
     }
     contentDiv.classList = "content";
-    mainHeaders.forEach(header => {
+
+    // Collect all unique puzzle sizes for square sheet
+    let uniqueSizes = [];
+    if (sheetType === squaresSheetType) {
+        const sizeSet = new Set();
+        mainHeaders.forEach(header => {
+            sortedLists[header].forEach(item => {
+                sizeSet.add(item.width + "x" + item.height);
+            });
+        });
+        uniqueSizes = Array.from(sizeSet).sort((a, b) => {
+            const [aW, aH] = a.split('x').map(Number);
+            const [bW, bH] = b.split('x').map(Number);
+            const aTotal = aW * aH;
+            const bTotal = bW * bH;
+            return aTotal - bTotal || aW - bW;
+        });
+    }
+
+    // Create left helper column container
+    const leftColumnContainer = document.createElement('div');
+    leftColumnContainer.classList.add('table-container');
+    leftColumnContainer.classList.add('left-column-container');
+    contentDiv.appendChild(leftColumnContainer);
+
+    // Add h1 header to match data tables height
+    const leftHeaderSpacer = document.createElement('h1');
+    leftHeaderSpacer.classList.add('left-header-spacer');
+    leftHeaderSpacer.textContent = sheetType === squaresSheetType ? 'Size' : '#';
+    leftColumnContainer.appendChild(leftHeaderSpacer);
+
+    const leftTable = document.createElement('table');
+    leftTable.classList.add("normalCardTable");
+    leftTable.classList.add('left-column-table');
+    leftColumnContainer.appendChild(leftTable);
+
+    // Add header to left table
+    const leftHeaderRow = document.createElement('tr');
+    leftHeaderRow.classList.add('left-header-row');
+    leftTable.appendChild(leftHeaderRow);
+
+    mainHeaders.forEach((header, headerIndex) => {
         if (sortedLists[header].length > 0) {
             const tableContainer = document.createElement('div');
             tableContainer.classList.add('table-container');
@@ -96,10 +137,54 @@ function createSheet(sortedLists, sheetType) {
             } else {
                 tableHeaderRow.innerHTML = cardHeadersTier;
             }
-            //table.appendChild(tableHeaderRow);
+
             let mytableid = 0;
             let bestValue;
-            sortedLists[header].forEach(item => {
+
+            // Determine items to process
+            let itemsToProcess;
+            if (sheetType === squaresSheetType) {
+                itemsToProcess = uniqueSizes.map(size => {
+                    return sortedLists[header].find(it => (it.width + "x" + it.height) === size) || null;
+                });
+            } else {
+                itemsToProcess = sortedLists[header];
+            }
+
+            itemsToProcess.forEach((item, itemIndex) => {
+                if (item === null) {
+                    const emptyRow = document.createElement('tr');
+                    emptyRow.classList.add('gap-row');
+
+                    const nameCell = document.createElement('td');
+                    nameCell.classList.add('gap-cell');
+                    nameCell.textContent = uniqueSizes[itemIndex];
+                    emptyRow.appendChild(nameCell);
+
+                    const scoreCell = document.createElement('td');
+                    scoreCell.classList.add('gap-cell');
+                    scoreCell.textContent = header;
+                    emptyRow.appendChild(scoreCell);
+
+                    table.appendChild(emptyRow);
+
+                    if (headerIndex === 0) {
+                        const leftRow = document.createElement('tr');
+                        const sizeCell = createTableCell(uniqueSizes[itemIndex]);
+                        sizeCell.classList.add("clickable");
+                        sizeCell.addEventListener("click", function () {
+                            let newSize = uniqueSizes[itemIndex];
+                            customSizeInput.value = newSize;
+                            radioCustomSize.value = newSize;
+                            radioCustomSize.checked = true;
+                            changePuzzleSize(newSize);
+                        });
+                        leftRow.appendChild(sizeCell);
+                        leftTable.appendChild(leftRow);
+                    }
+                    return;
+                }
+
                 let percentageCurrent = 100;
                 const isAverage = (header !== "Single");
                 mytableid++;
@@ -130,7 +215,6 @@ function createSheet(sortedLists, sheetType) {
                 let limitsString = '';
                 let percentageInfoForNormal = "";
                 if (sheetType !== squaresSheetType) {
-                    //normal sheet
                     const percentage = calculatePercentage(mainValue, bestValue, reverse);
                     percentageInfoForNormal = percentage.toFixed(1) + "% ";
                     const tierName = getClassBasedOnPercentage(percentage, percentageTable);
@@ -141,9 +225,13 @@ function createSheet(sortedLists, sheetType) {
                         percentageInfoForNormal = "WR "
                         tableRow.classList.add("WRPB");
                     }
-                    tableRow.appendChild(createTableCell(mytableid, 'tableid'));
+                    if (headerIndex === 0) {
+                        const leftRow = document.createElement('tr');
+                        const idCell = createTableCell(mytableid);
+                        leftRow.appendChild(idCell);
+                        leftTable.appendChild(leftRow);
+                    }
                 } else {
-                    //WRs or PBs sheet
                     if (!noNameFilter) {
                         bestValue = getBestValue(WRsDataForPBs[header], scoreType, item.width, item.height);
                         limitsString = `<p>${item.width}x${item.height} ${header} ${requirementsString} (${request.gameMode}):</p>`
@@ -178,24 +266,41 @@ function createSheet(sortedLists, sheetType) {
                             isWRforReplay = true;
                             tableRow.classList.add("WRPB");
                         } else {
-                            // displayedName = `${tierName.charAt(0).toUpperCase()}${tierName.slice(1)} ${percentage.toFixed(1)}%`;
                             displayedName = `${percentage.toFixed(3)}%`;
+                        }
+                        if (headerIndex === 0) {
+                            const leftRow = document.createElement('tr');
+                            const sizeCell = createTableCell(item.width + "x" + item.height);
+                            sizeCell.classList.add("clickable");
+                            sizeCell.addEventListener("click", function () {
+                                let newSize = item.width + "x" + item.height;
+                                customSizeInput.value = newSize;
+                                radioCustomSize.value = newSize;
+                                radioCustomSize.checked = true;
+                                changePuzzleSize(newSize);
+                            });
+                            leftRow.appendChild(sizeCell);
+                            leftTable.appendChild(leftRow);
                         }
                     } else {
                         isWRforReplay = true;
                         tierNameForReplay = "alpha";
                         tableRow.classList.add(tiersMap[item.nameFilter]);
+                        if (headerIndex === 0) {
+                            const leftRow = document.createElement('tr');
+                            const sizeCell = createTableCell(item.width + "x" + item.height);
+                            sizeCell.classList.add("clickable");
+                            sizeCell.addEventListener("click", function () {
+                                let newSize = item.width + "x" + item.height;
+                                customSizeInput.value = newSize;
+                                radioCustomSize.value = newSize;
+                                radioCustomSize.checked = true;
+                                changePuzzleSize(newSize);
+                            });
+                            leftRow.appendChild(sizeCell);
+                            leftTable.appendChild(leftRow);
+                        }
                     }
-                    const puzzleSizeCell = createTableCell(item.width + "x" + item.height, 'tableid');
-                    tableRow.appendChild(puzzleSizeCell);
-                    puzzleSizeCell.classList.add("clickable");
-                    puzzleSizeCell.addEventListener("click", function () {
-                        let newSize = item.width + "x" + item.height;
-                        customSizeInput.value = newSize;
-                        radioCustomSize.value = newSize;
-                        radioCustomSize.checked = true;
-                        changePuzzleSize(newSize);
-                    });
                     if (isInvalid(mainValue, scoreType)) {
                         thisScoreInvalid = true;
                         tableRow.style.color = 'gray';
@@ -249,7 +354,6 @@ function createSheet(sortedLists, sheetType) {
                     }
                     if (true//request.gameMode === "Standard"// && !isAverage//
                     ) {
-                        // const solution = getSolutionForScore(item);
                         if (item.solve_data_available) {
                             makeyoutubelink = false;
                             scoreCellElement.classList.add("clickable");
@@ -267,7 +371,6 @@ function createSheet(sortedLists, sheetType) {
                                     if (error) {
                                         alert("Error while loading solvedata! Maybe server died for a second...", error);
                                     } else {
-                                        //makeReplay(solution, event, item.tps, item.width, item.height, scoreTitle);
                                         handleSavedReplay(item, solveData, event, item.tps, item.width, item.height, scoreTitle, videoLinkForReplay, tierNameForReplay, isWRforReplay);
                                     }
                                 });
@@ -324,7 +427,6 @@ function createSheet(sortedLists, sheetType) {
         } else {
             headersCount--;
         }
-        contentDiv.style.gridTemplateColumns = `repeat(${headersCount}, 1fr)`;
     });
 }
 
