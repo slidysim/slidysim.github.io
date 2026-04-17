@@ -175,15 +175,13 @@ select:focus {
 .table-container {
     font-family: Arial;
     font-size: 14px;
-    border: 1px solid #444;
-    padding: 10px 5px;
+    border: 1px solid #303030;
+    padding: 0 4px;
     background-color: rgba(0, 0, 0, 0.4);
     opacity: 0.95;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
     display: inline-block;
     white-space: normal;
     vertical-align: top;
-    min-width: 280px;
 }
 
 .bigContainer {
@@ -880,10 +878,6 @@ img {
     border-collapse: separate;
     border-spacing: 0 9px;
     max-width: 900px;
-}
-
-.table-container .normalCardTable {
-    min-width: 285px;
 }
 
 .table-container .historyRecordsTable {
