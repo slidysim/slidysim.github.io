@@ -69,6 +69,7 @@ const userCountryMap = {
     wiserboblouis: 'Australia',
     macandcheese: 'Australia',
     Ton618: 'Australia',
+    retsni: 'Australia',
   
     Utochka: 'Belarus',
   
@@ -136,6 +137,7 @@ const userCountryMap = {
     Nabbissimux: 'Italy',
     DedolCubing: 'Italy',
     chettocri: 'Italy',
+    ebrancati: 'Italy',
   
     thelegendary08: 'Malaysia',
   
@@ -177,6 +179,7 @@ const userCountryMap = {
     '1210': 'Russia',
     VanillaGawr: 'Russia',
     moceke: 'Russia',
+    vmejion: 'Russia',
   
     jug: 'Serbia',
     andrewtheslider: 'Serbia',
@@ -206,6 +209,7 @@ const userCountryMap = {
     luca: 'UK',
     iota: 'UK',
     Waldi: 'UK',
+    '2017HARR08': 'UK',
   
     HoHo: 'Japan',
     Ncuber: 'Japan',
@@ -264,6 +268,8 @@ const userCountryMap = {
     WillTRM: 'USA',
     clementinebedsheets: 'USA',
     lopsidedhampter: 'USA',
+    '2023RAMA09': 'USA',
+    Chanoh17: 'USA',
   
     Sakinuto: 'Brazil',
     PedroAM: 'Brazil',
