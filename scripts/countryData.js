@@ -57,6 +57,7 @@ const userCountryMap = {
     Scotland: 'Scotland',
     Slovenia: 'Slovenia',
     'South Africa': 'South Africa',
+    Sweden: 'Sweden',
 
     kaxymonoxy: 'Iceland',
 
@@ -284,7 +285,9 @@ const userCountryMap = {
     Duysen: 'Vietnam',
     nguywn: 'Vietnam',
 
-    zynua: 'South Africa'
+    zynua: 'South Africa',
+
+    xenia: 'Sweden'
 
   };
   
