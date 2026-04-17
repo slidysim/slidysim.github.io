@@ -1059,7 +1059,7 @@ function createSheetHistory(recordsList, recordsListWR, showAll = false) {
                 const tableContainer = document.createElement('div');
                 tableContainer.classList.add('table-container');
                 tableContainer.style.maxWidth = "50%";
-                tableContainer.style.minWidth = "900px";
+                tableContainer.style.minWidth = "1000px";
                 tableContainer.style.margin = "20px";
                 const table = document.createElement('table');
                 table.classList.add("historyRecordsTable");
