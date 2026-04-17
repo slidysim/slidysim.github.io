@@ -151,6 +151,7 @@ const userCountryMap = {
     eff: 'Philippines',
     Enzo1098: 'Philippines',
     usernameh1h2: 'Philippines',
+    Nyajumi: 'Philippines',
   
     Dawidluna: 'Poland',
     kiraa96: 'Poland',
