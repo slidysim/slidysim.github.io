@@ -71,6 +71,7 @@ const userCountryMap = {
     macandcheese: 'Australia',
     Ton618: 'Australia',
     retsni: 'Australia',
+    TeamMathcraft: 'Australia',
   
     Utochka: 'Belarus',
   
@@ -287,6 +288,7 @@ const userCountryMap = {
     nguywn: 'Vietnam',
 
     zynua: 'South Africa',
+    Yokow: 'South Africa',
 
     xenia: 'Sweden',
     Andersh2345: 'Sweden'
