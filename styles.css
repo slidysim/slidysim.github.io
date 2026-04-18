@@ -899,7 +899,6 @@ img {
     position: sticky;
     left: 0;
     display: inline-block;
-    min-width: 85px;
     max-width: 85px;
     vertical-align: top;
     background-color: #121212;

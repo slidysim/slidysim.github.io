@@ -118,7 +118,7 @@ function createSheet(sortedLists, sheetType) {
     // Add h1 header to match data tables height
     const leftHeaderSpacer = document.createElement('h1');
     leftHeaderSpacer.classList.add('left-header-spacer');
-    leftHeaderSpacer.textContent = sheetType === squaresSheetType ? 'Size' : '#';
+    leftHeaderSpacer.textContent = sheetType === squaresSheetType ? 'N' : '#';
     leftColumnContainer.appendChild(leftHeaderSpacer);
 
     const leftTable = document.createElement('table');
