@@ -101,11 +101,11 @@ function updateServer(auth_token, displayType, controlType, pbType) {
 
 function removeBannedScores(scores) {
     const bannedScores = [
-        {nameFilter: "MOKA", tps: 181512},
-        {nameFilter: "robotmania", tps: 9999000, leaderboardType: "tps", gameMode: "Marathon 42"}
+        { nameFilter: "MOKA", tps: 181512 },
+        { nameFilter: "robotmania", tps: 9999000, leaderboardType: "tps", gameMode: "Marathon 42" }
     ];
-    
-    return scores.filter(score => 
+
+    return scores.filter(score =>
         !bannedScores.some(banned => {
             // Check every property in the banned score object
             return Object.keys(banned).every(key => banned[key] === score[key]);
@@ -208,33 +208,32 @@ function filterDataByRequest(data, request) {
             });
         }
         return data.filter(entry => {
-            return (
-                ((entry.width > 2) || (entry.height > 2)) && (
-                    (request.gameMode === "All Solve Types") ||
-                    (request.gameMode === entry.gameMode) ||
-                    (request.gameMode === "Interesting" &&
-                        ( //intesrting are only squares
-                            (entry.width === entry.height)
-                        ) &&
-                        ( //limitations on avglen based on gamemode
-                            (entry.gameMode === "Standard") || //no limitations on standard
-                            (entry.gameMode === "BLD") || //no limitations on BLD
-                            (entry.avglen === 1) //for all other check that it is not average
-                        ) &&
-                        ( //limitations for bad marathons
-                            (!entry.gameMode.includes("Marathon")) || //not a marathon
-                            (entry.gameMode === "Marathon 10") || //allow marathon 10
-                            (entry.gameMode === "Marathon 42") || //alow marathon 42
-                            (entry.gameMode.length > 11) //11 means any marathon 100 or longer ("Marathon 100" string length)
-                        )
-                    ) ||
-                    (request.gameMode === "Standard Singles") &&
-                    (
-                        (entry.avglen === 1) &&
-                        (entry.gameMode === "Standard")
-                    )
-                )
-            );
+            if (entry.width <= 2 && entry.height <= 2) return false; //no 2x2 solves
+
+            if (request.gameMode === "All Solve Types") return true; //ALL without filters
+            if (request.gameMode === entry.gameMode) return true; //ALL if specific gamemode is selected
+
+            if (request.gameMode === "Standard Singles") {
+                return entry.avglen === 1 && entry.gameMode === "Standard"; //NxM records
+            }
+
+            if (request.gameMode === "Interesting") {
+                if (entry.gameMode === "BLD") return true; //BLD is always interesting
+                const interestingAvgLens = [1, 5, 12, 25, 50, 100]; //Only important averages
+                const interestingMarathons = [10, 25, 42, 50, 100]; //Only important marathons
+                if (entry.width !== entry.height) return false; //No NxM solves are interesting
+                if (entry.gameMode === "Width relay" || entry.gameMode === "Height relay") return false; //No weird relays (EUT is interesting tho)
+                if (entry.gameMode.startsWith("Marathon ")) {
+                    const marathonNumber = parseInt(entry.gameMode.split(" ")[1]);
+                    if (!interestingMarathons.includes(marathonNumber)) return false;
+                }
+                if (entry.gameMode === "Standard") {
+                    return interestingAvgLens.includes(entry.avglen);
+                }
+                return entry.avglen === 1; //If gamemode is not standard, only singles are interesting
+            }
+            console.log("(You should never see this message) Unknown gamemode filter: ", request.gameMode);
+            return false;
         });
     }
     if (request.width === "All") {
