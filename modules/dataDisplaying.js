@@ -97,6 +97,18 @@ function createSheet(sortedLists, sheetType) {
         });
     }
 
+    // Determine max number of rows across all tables
+    let maxRowCount = 0;
+
+    if (sheetType === squaresSheetType) {
+        maxRowCount = uniqueSizes.length;
+    } else {
+        mainHeaders.forEach(header => {
+            if (sortedLists[header].length > maxRowCount) {
+                maxRowCount = sortedLists[header].length;
+            }
+        });
+    }
     // Create left helper column container
     const leftColumnContainer = document.createElement('div');
     leftColumnContainer.classList.add('table-container');
@@ -118,6 +130,34 @@ function createSheet(sortedLists, sheetType) {
     const leftHeaderRow = document.createElement('tr');
     leftHeaderRow.classList.add('left-header-row');
     leftTable.appendChild(leftHeaderRow);
+
+    // Pre-generate ALL left column rows
+    for (let i = 0; i < maxRowCount; i++) {
+        const leftRow = document.createElement('tr');
+
+        let cellValue;
+        if (sheetType === squaresSheetType) {
+            cellValue = uniqueSizes[i] || "";
+        } else {
+            cellValue = i + 1;
+        }
+
+        const cell = createTableCell(cellValue);
+
+        if (sheetType === squaresSheetType && uniqueSizes[i]) {
+            cell.classList.add("clickable");
+            cell.addEventListener("click", function () {
+                let newSize = uniqueSizes[i];
+                customSizeInput.value = newSize;
+                radioCustomSize.value = newSize;
+                radioCustomSize.checked = true;
+                changePuzzleSize(newSize);
+            });
+        }
+
+        leftRow.appendChild(cell);
+        leftTable.appendChild(leftRow);
+    }
 
     mainHeaders.forEach((header, headerIndex) => {
         if (sortedLists[header].length > 0) {
@@ -167,21 +207,6 @@ function createSheet(sortedLists, sheetType) {
                     emptyRow.appendChild(scoreCell);
 
                     table.appendChild(emptyRow);
-
-                    if (headerIndex === 0) {
-                        const leftRow = document.createElement('tr');
-                        const sizeCell = createTableCell(uniqueSizes[itemIndex]);
-                        sizeCell.classList.add("clickable");
-                        sizeCell.addEventListener("click", function () {
-                            let newSize = uniqueSizes[itemIndex];
-                            customSizeInput.value = newSize;
-                            radioCustomSize.value = newSize;
-                            radioCustomSize.checked = true;
-                            changePuzzleSize(newSize);
-                        });
-                        leftRow.appendChild(sizeCell);
-                        leftTable.appendChild(leftRow);
-                    }
                     return;
                 }
 
@@ -225,12 +250,6 @@ function createSheet(sortedLists, sheetType) {
                         percentageInfoForNormal = "WR "
                         tableRow.classList.add("WRPB");
                     }
-                    if (headerIndex === 0) {
-                        const leftRow = document.createElement('tr');
-                        const idCell = createTableCell(mytableid);
-                        leftRow.appendChild(idCell);
-                        leftTable.appendChild(leftRow);
-                    }
                 } else {
                     if (!noNameFilter) {
                         bestValue = getBestValue(WRsDataForPBs[header], scoreType, item.width, item.height);
@@ -268,38 +287,10 @@ function createSheet(sortedLists, sheetType) {
                         } else {
                             displayedName = `${percentage.toFixed(3)}%`;
                         }
-                        if (headerIndex === 0) {
-                            const leftRow = document.createElement('tr');
-                            const sizeCell = createTableCell(item.width + "x" + item.height);
-                            sizeCell.classList.add("clickable");
-                            sizeCell.addEventListener("click", function () {
-                                let newSize = item.width + "x" + item.height;
-                                customSizeInput.value = newSize;
-                                radioCustomSize.value = newSize;
-                                radioCustomSize.checked = true;
-                                changePuzzleSize(newSize);
-                            });
-                            leftRow.appendChild(sizeCell);
-                            leftTable.appendChild(leftRow);
-                        }
                     } else {
                         isWRforReplay = true;
                         tierNameForReplay = "alpha";
                         tableRow.classList.add(tiersMap[item.nameFilter]);
-                        if (headerIndex === 0) {
-                            const leftRow = document.createElement('tr');
-                            const sizeCell = createTableCell(item.width + "x" + item.height);
-                            sizeCell.classList.add("clickable");
-                            sizeCell.addEventListener("click", function () {
-                                let newSize = item.width + "x" + item.height;
-                                customSizeInput.value = newSize;
-                                radioCustomSize.value = newSize;
-                                radioCustomSize.checked = true;
-                                changePuzzleSize(newSize);
-                            });
-                            leftRow.appendChild(sizeCell);
-                            leftTable.appendChild(leftRow);
-                        }
                     }
                     if (isInvalid(mainValue, scoreType)) {
                         thisScoreInvalid = true;
@@ -1044,7 +1035,7 @@ function createSheetHistory(recordsList, recordsListWR, showAll = false) {
         mainList = mainList.slice(0, 2000);
     }
     const contentDiv = document.getElementById("contentDiv");
-    contentDiv.classList = "NxMContent";
+    contentDiv.className = "NxMContent centeredHistory";
     contentDiv.innerHTML = "";
     generateFormattedString(request);
     if (mainList.length === 0) {
@@ -1058,9 +1049,7 @@ function createSheetHistory(recordsList, recordsListWR, showAll = false) {
             if (records.length > 0 && !tableIsEmpty(records, recordsListWR, scoreType)) {
                 const tableContainer = document.createElement('div');
                 tableContainer.classList.add('table-container');
-                tableContainer.style.maxWidth = "50%";
-                tableContainer.style.minWidth = "1000px";
-                tableContainer.style.margin = "20px";
+                tableContainer.classList.add("history-container");
                 const table = document.createElement('table');
                 table.classList.add("historyRecordsTable");
                 const headers = historyTableHeaders;
@@ -2201,33 +2190,66 @@ function populateTableHistory(records, recordsListWR, scoreType, table, reverse)
             scoresCounter++;
             const dataRow = document.createElement('tr');
             table.appendChild(dataRow);
-            const puzzleCell = document.createElement('td');
-            dataRow.appendChild(puzzleCell);
+            const categoryCell = document.createElement('td');
+            dataRow.appendChild(categoryCell);
+
             const isAverage = (item.avglen !== 1);
-            let avgpart = "single";
-            if (isAverage) {
-                avgpart = `ao${item.avglen}`;
+            let avgpart = isAverage ? `ao${item.avglen}` : "";
+
+            let sizePart = `${item.width}x${item.height}`;
+            let mode = item.gameMode;
+            let modePart = "";
+
+            // Transform game modes
+            if (mode === "Standard") {
+                modePart = "";
             }
-            puzzleCell.innerHTML = `${item.width}x${item.height}<br>${avgpart}`;
-            puzzleCell.classList.add("clickable");
+            else if (mode.startsWith("Marathon")) {
+                const num = mode.split(" ")[1];
+                modePart = `x${num}`;
+            }
+            else if (mode === "2-N relay") {
+                modePart = "relay";
+            }
+            else if (mode === "Width relay") {
+                modePart = "Wrel";
+            }
+            else if (mode === "Height relay") {
+                modePart = "Hrel";
+            }
+            else if (mode === "Everything-up-to relay") {
+                modePart = "EUT";
+            }
+            else {
+                modePart = mode;
+            }
+
+            // Build final string
+            let categoryString = sizePart;
+            if (modePart) categoryString += ` ${modePart}`;
+            if (avgpart) categoryString += ` ${avgpart}`;
+
+            categoryCell.innerHTML = categoryString;
+            categoryCell.classList.add("clickable");
+
             let newSize = item.width + "x" + item.height;
             let newGameMode = item.gameMode;
-            puzzleCell.addEventListener("click", function () {
+
+            categoryCell.addEventListener("click", function () {
                 customSizeInput.value = newSize;
                 radioCustomSize.value = newSize;
                 radioCustomSize.checked = true;
+
                 for (const radio of gamemodeRadios) {
                     if (radio.value === newGameMode) {
                         radio.checked = true;
                         break;
                     }
                 }
+
                 changeGameMode(newGameMode);
                 changePuzzleSize(newSize);
             });
-            const gamemodeCell = document.createElement('td');
-            gamemodeCell.innerHTML = item.gameMode.replace(" ", "<br>").replace("Everything-up-to", "EUT");
-            dataRow.appendChild(gamemodeCell);
             const displayedName = item.nameFilter;
             const playerNameCell = document.createElement("td");
             playerNameCell.innerHTML = appendFlagIconToNickname(displayedName);
