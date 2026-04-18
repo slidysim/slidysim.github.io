@@ -1397,13 +1397,15 @@ function getScoreString(time, moves, tps, scoreType, isAverage) {
 function createTableCellScore(scoreString, className, secondaryClass) {
     const cell = document.createElement('td');
     cell.className = className;
+    
     const mainValue = document.createElement('span');
-    mainValue.style.fontWeight = 'bold';
+    mainValue.className = 'score-main';
     mainValue.innerHTML = scoreString[0];
+    
     const secondaryValue = document.createElement('span');
-    secondaryValue.classList = secondaryClass;
-    secondaryValue.style.fontSize = '12px';
+    secondaryValue.className = `score-secondary ${secondaryClass}`;
     secondaryValue.textContent = scoreString[1];
+    
     cell.appendChild(mainValue);
     cell.appendChild(document.createElement('br'));
     cell.appendChild(secondaryValue);

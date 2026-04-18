@@ -1304,3 +1304,11 @@ iframe {
     left: 50%;
     transform: translateX(-50%);
 }
+
+.score-main {
+    font-weight: bold;
+}
+
+.score-secondary {
+    font-size: 11px;
+}
