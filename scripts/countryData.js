@@ -131,6 +131,7 @@ const userCountryMap = {
     '0jacky0': 'China',
     '13975': 'China',
     lzy: 'China',
+    lulu: 'China',
   
     Luisa15: 'Colombia',
     chaeerin: 'Colombia',
