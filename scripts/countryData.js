@@ -18,6 +18,36 @@ const adminsList = [
     "daanbe"
 ];
 
+function appendFlagIconToNickname(nickname, minimal = false) {
+    const lowerCaseNickname = nickname.toLowerCase();
+    let country = null;
+
+    for (const user in userCountryMap) {
+        if (user.toLowerCase() === lowerCaseNickname) {
+            country = userCountryMap[user];
+            break;
+        }
+    }
+
+    const flagIconLink = country && countryEmojis[country]
+        ? countryEmojis[country]
+        : "images/flags/default.png";
+
+    const isDonator = donatorsList.some(donator => donator.toLowerCase() === lowerCaseNickname);
+
+    const donatorIcon = isDonator
+        ? `<span class="gold-icon-link"><img class="emoji" draggable="false" alt="gold" src="images/gold.png" style="border-radius:50%"></span>`
+        : '';
+
+    const isAdminOrDeveloper = adminsList.some(user => user.toLowerCase() === lowerCaseNickname);
+
+    const roleIcon = isAdminOrDeveloper
+        ? `<span class="admin-icon-link">🛠️</span>`
+        : '';
+
+    return `<img class="emoji" draggable="false" alt="${country || 'unknown'}" src="${flagIconLink}">${nickname}${roleIcon}${donatorIcon}`;
+}
+
 //countries list and emoji for users to add flags
 
 const userCountryMap = {

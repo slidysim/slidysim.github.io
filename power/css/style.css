@@ -4,7 +4,7 @@
 @import url("header.css");
 @import url("menu.css");
 @import url("scrollbar.css?v=1.0.101");
-@import url("table.css?v=1.0.105");
+@import url("table.css?v=1.0.112");
 
 * {
   font-family: monospace;
@@ -31,4 +31,15 @@ body {
 
 .overflow-hidden {
   overflow: hidden;
+}
+
+.emoji {
+    margin: 0 2px -2px;
+    max-height: 15px;
+    max-width: 13px;
+    border-radius: 2px;
+}
+
+.emoji, .admin-icon-link {
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.8));
 }

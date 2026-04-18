@@ -18,8 +18,9 @@
     padding: 0 4px;
     font-weight: 500;
     font-size: 12px;
-    max-width: 48px;
-    min-width: 48px;
+    max-width: 47px;
+    min-width: 47px;
+    overflow: hidden;
 }
 
 /* table header */
@@ -42,8 +43,8 @@
 .req-row td {
     width: max-content;
     font-size: 1.2rem;
-    min-width: 48px;
-    max-width: 48px;
+    min-width: 47px;
+    max-width: 47px;
     height: 40px;
     font-weight: bold;
     letter-spacing: .5px;
@@ -94,8 +95,8 @@
 
 .player {
     font-size: 1.05em;
-    min-width: 100px !important;
-    max-width: 100px !important;
+    min-width: 132px !important;
+    max-width: 132px !important;
 }
 
 /* tiers with better matching text colors */

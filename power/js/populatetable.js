@@ -80,7 +80,7 @@ function populate_table(table){
             tier_events_row.appendChild(document.createElement("td"));
         }
         tier_events_row.children[0].textContent = "Name";
-        tier_events_row.children[0].style.minWidth = "100px";
+        tier_events_row.children[0].style.minWidth = "132px";
         tier_events_row.children[1].textContent = "Place";
         tier_events_row.children[2].textContent = "Power";
         for(var j=0; j<num_categories; j++){
@@ -133,7 +133,7 @@ function populate_table(table){
         }
 
         tier_req_row.children[0].innerHTML = tier["name"].replace(/ /g, '<br>');
-        tier_req_row.children[0].style.minWidth = "100px";
+        tier_req_row.children[0].style.minWidth = "132px";
         tier_req_row.children[1].textContent = tier["power"];
         tier_req_row.children[2].textContent = tier["limit"];
         if (tier["limit"] == 9999999) {
@@ -152,7 +152,7 @@ function populate_table(table){
             tier_events_row.appendChild(document.createElement("td"));
         }
         tier_events_row.children[0].textContent = "Name";
-        tier_events_row.children[0].style.minWidth = "100px";
+        tier_events_row.children[0].style.minWidth = "132px";
         tier_events_row.children[1].textContent = "Place";
         tier_events_row.children[2].textContent = "Power";
 
@@ -187,7 +187,7 @@ function populate_table(table){
             var place_div = document.createElement("td");
             var power_div = document.createElement("td");
 
-            name_div.textContent = user[0];
+            name_div.innerHTML = appendFlagIconToNickname(user[0], true);
             place_div.textContent = user[1];
             power_div.textContent = user[2];
 
