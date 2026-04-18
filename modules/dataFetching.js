@@ -99,7 +99,22 @@ function updateServer(auth_token, displayType, controlType, pbType) {
     }
 }
 
+function removeBannedScores(scores) {
+    const bannedScores = [
+        {nameFilter: "MOKA", tps: 181512},
+        {nameFilter: "robotmania", tps: 9999000, leaderboardType: "tps", gameMode: "Marathon 42"}
+    ];
+    
+    return scores.filter(score => 
+        !bannedScores.some(banned => {
+            // Check every property in the banned score object
+            return Object.keys(banned).every(key => banned[key] === score[key]);
+        })
+    );
+}
+
 function directUpdate() {
+    leaderboardData = removeBannedScores(leaderboardData);
     //console.log("direct update called");
     document.getElementById('power-iframe')?.remove();
     //if(loadingPower) {
