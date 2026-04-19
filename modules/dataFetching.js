@@ -31,7 +31,9 @@ function handleScoresResponse(error, res, customScores, customUserList) {
         console.log("Error:", error);
     } else {
         leaderboardData = customScores || res.scoresParsed || [];
-        fullUniqueNames = customUserList || res.userList.sort();
+        const userList = customUserList || res.userList || [];
+        fullUniqueNames = userList.length ? userList.sort() : [];
+
         if (initial) {
             addListenersToElements();
         }
@@ -58,6 +60,10 @@ function isBetter(web, live, type) {
 }
 
 function mergeWebPBs(liveData, webData) {
+    if (!liveData || !webData) return liveData || webData || [];
+    if (!liveData.length) return webData;
+    if (!webData.length) return liveData;
+    
     const map = new Map(liveData.map(s => [getCategoryKey(s), s]));
     webData.forEach(w => {
         const key = getCategoryKey(w);
@@ -83,13 +89,22 @@ function updateServer(auth_token, displayType, controlType, pbType) {
             }
             archiveDate = latestWebArchive;
             getScoresWrapper(auth_token, displayType, controlType, pbType, (webErr, webRes) => {
-                if (!webErr && webRes.scoresParsed && liveRes.scoresParsed) {
+                if (!webErr && webRes?.scoresParsed && liveRes?.scoresParsed) {
                     const merged = mergeWebPBs(liveRes.scoresParsed, webRes.scoresParsed);
-                    const mergedUserList = [...new Set([...liveRes.userList, ...webRes.userList])].sort();
+                    const liveUsers = liveRes.userList || [];
+                    const webUsers = webRes.userList || [];
+                    const mergedUserList = [...new Set([...liveUsers, ...webUsers])].sort();
                     archiveDate = "LIVE";
-                    handleScoresResponse(err, liveRes, merged, mergedUserList);
+                    handleScoresResponse(null, liveRes, merged, mergedUserList);
                 } else {
-                    console.log("Error when fetching or merging web scores:", err);
+                    console.log("Error when fetching or merging web scores:", {
+                        webErr: webErr,
+                        hasWebScores: !!webRes?.scoresParsed,
+                        hasLiveScores: !!liveRes?.scoresParsed
+                    });
+                    // Fall back to live only
+                    archiveDate = "LIVE";
+                    handleScoresResponse(null, liveRes);
                     return;
                 }
             });

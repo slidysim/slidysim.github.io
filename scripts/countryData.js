@@ -18,6 +18,20 @@ const adminsList = [
     "daanbe"
 ];
 
+const rename_map = {
+    'ivy': 'daanbe',
+    'skye': 'iota',
+    'eggben': 'ben1996123',
+    'eskiu': 'sq',
+    'HashPanda': 'Rafael',
+    'wiser': 'wiserboblouis',
+    'garyx': 'gr21xx',
+    'ekimmy': 'ekim',
+    'ap_web': 'ap',
+    'juunas': 'asdfghqwerty',
+    'minsie': 'MegaminX'
+};
+
 function appendFlagIconToNickname(nickname, minimal = false) {
     const lowerCaseNickname = nickname.toLowerCase();
     let country = null;

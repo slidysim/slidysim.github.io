@@ -34,7 +34,12 @@ const display_type_map = {
     "Vanish on solved": 19,
     "Vectors": 20,
     "Cyclic": 21,
-    "Divisible": 22
+    "Divisible": 22,
+    "Vertical multi-tile": 23,
+    "Rows": 24,
+    "Square fringe": 25,
+    "Split square fringe": 26,
+    "Checkerboard": 27
 };
 
 const pb_type_map = {
@@ -47,7 +52,9 @@ const control_type_map = {
     "keyboard": 0,
     "mouse": 1,
     "both": 2,
-    "unique": 3
+    "unique": 3,
+    "click": 4,
+    "touch": 5
 };
 
 function videoLinkCheck(link) {
@@ -194,14 +201,15 @@ async function callGetScores(auth_token, display_type_text, control_type_text, p
         if (!status) {
             return -1;
         }
+        const controlMap = {null: "Keyboard", 0: "Keyboard", 1: "Mouse", 4: "Click", 5: "Touch"};
         const scoresParsed = scores.map(entry => ({
             width: entry["size_n"],
             height: entry["size_m"],
             leaderboardType: pb_type_text,
-            controls: entry["control_type"] === 1 ? "Mouse" : "Keyboard",
+            controls: controlMap[entry["control_type"]],
             gameMode: entry["solve_type"] < 7 ? { 1: "Standard", 2: "2-N relay", 3: "BLD", 4: "Everything-up-to relay", 5: "Height relay", 6: "Width relay" }[entry["solve_type"]] : `Marathon ${entry["marathon_length"]}`,
             displayType: display_type_text,
-            nameFilter: usermap[entry["userid"]] || 'Unknown',
+            nameFilter: rename_map[usermap[entry["userid"]]] || usermap[entry["userid"]] || 'Unknown',
             avglen: entry["average_type"],
             time: entry["time"],
             moves: entry["moves"],
@@ -210,6 +218,9 @@ async function callGetScores(auth_token, display_type_text, control_type_text, p
             solve_data_available: entry["solution_available"] === 1,
             videolink: entry["videolink"]
         }));
+        //scores.forEach(entry => {
+        //    console.log(entry["control_type"]);
+        //});
         return { scoresParsed, userList };
     } catch (error) {
         console.error('Error calling getScores:', error);

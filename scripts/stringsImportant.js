@@ -25,7 +25,12 @@ const displayTypeOptions = [
     "Maximal unsolved",
     "Rows and columns",
     "Cyclic",
-    "Divisible"
+    "Divisible",
+    "Vertical multi-tile",
+    "Rows",
+    "Square fringe",
+    "Split square fringe",
+    "Checkerboard"
 ];
 const tierLabels = [
     "Any",
@@ -51,8 +56,8 @@ const tierstable = [
     'theta',
     'iota',
 ];
-const controlTypeSelectValues = ["unique", "both", "mouse", "keyboard"];
-const controlTypeSelectValuesUnique = ["unique", "mouse", "keyboard"];
+const controlTypeSelectValues = ["unique", "both", "mouse", "keyboard", "click", "touch"];
+const controlTypeSelectValuesUnique = ["unique", "mouse", "keyboard", "click", "touch"];
 const PBTypeValues = ["time", "move", "tps"];
 const squaresSheetType = "Squares";
 const scoreTypes = {

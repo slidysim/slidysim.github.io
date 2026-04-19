@@ -520,33 +520,24 @@ function filterListsByControlType(lists, controlType) {
     if (controlType === "both") {
         return lists;
     }
+    
     const filteredLists = {};
     for (const key in lists) {
         if (lists.hasOwnProperty(key)) {
             const originalList = lists[key];
-            let filteredList;
-            if (controlType === "mouse") {
-                filteredList = filterByMouse(originalList);
-            } else if (controlType === "keyboard") {
-                filteredList = filterByKeyboard(originalList);
-            } else if (controlType === "unique") {
-                filteredList = filterByUnique(originalList);
+            
+            if (controlType === "unique") {
+                filteredLists[key] = filterByUnique(originalList);
+            } else {
+                filteredLists[key] = filterBySingleControl(originalList, controlType);
             }
-            filteredLists[key] = filteredList;
         }
     }
     return filteredLists;
 }
 
-function filterByMouse(originalList) {
-    return originalList.filter(item => item.controls === "Mouse");
-}
-
-function filterByKeyboard(originalList) {
-    return originalList.filter(item => item.controls === "Keyboard");
-}
-
-//Only for single category scores list, do not try at mixed categories lists!
+//Preserving old warning comment in case its improtant in the future:
+// "Only for single category scores list, do not try at mixed categories lists!"
 function filterByUnique(originalList) {
     const nameFilterSet = new Set();
     return originalList.filter(item => {
@@ -556,6 +547,17 @@ function filterByUnique(originalList) {
         }
         return false;
     });
+}
+
+function filterBySingleControl(originalList, controlType) {
+    const controlMap = {
+        "mouse": "Mouse",
+        "keyboard": "Keyboard",
+        "click": "Click",
+        "touch": "Touch"
+    };
+    const targetControl = controlMap[controlType];
+    return originalList.filter(item => item.controls === targetControl);
 }
 
 function filterByUniqueSize(originalList) {
@@ -575,9 +577,9 @@ function filterByUniqueSize(originalList) {
 //_________________"Private" functions for processSquareRecordsData_________________
 
 function getSquareWRs(lists, controlType) {
-    const filterFn = controlType === "mouse" ? filterByMouse :
-        controlType === "keyboard" ? filterByKeyboard :
-            list => list;
+    const filterFn = (controlType !== "both" && controlType !== "unique") 
+        ? list => filterBySingleControl(list, controlType)
+        : list => list;
 
     const filteredLists = Object.fromEntries(
         Object.entries(lists).map(([key, list]) => [key, filterFn(list)])
@@ -605,12 +607,10 @@ function filterBySquares(originalList) {
 
 function getAllWRs(originalList, controlType) {
     let filteredList;
-    if (controlType === "mouse") {
-        filteredList = filterByMouse(originalList);
-    } else if (controlType === "keyboard") {
-        filteredList = filterByKeyboard(originalList);
-    } else {
+    if (controlType === "both" || controlType === "unique") {
         filteredList = originalList;
+    } else {
+        filteredList = filterBySingleControl(originalList, controlType);
     }
     return filterByUniqueSize(filteredList);
 }
@@ -762,10 +762,8 @@ function getKinchRankings(uniqueNames, scoresLists, scoreType, percentageTable, 
 }
 
 function getPopularList(scores, controlType, categoriesAmount = 1, onlySquares = false) {
-    if (controlType === "mouse") {
-        scores = filterByMouse(scores);
-    } else if (controlType === "keyboard") {
-        scores = filterByKeyboard(scores);
+    if (controlType !== "both" && controlType !== "unique") {
+        scores = filterBySingleControl(scores, controlType);
     }
     const categoryCountMap = new Map();
     function initializeCategory(item, category) {
@@ -941,18 +939,13 @@ function defineCategoryString(item) {
 //_________________"Private" functions for processHistoryData_________________
 
 function filterControlMany(lists, controlType) {
-    if (controlType !== "mouse" && controlType !== "keyboard") {
+    if (controlType === "both" || controlType === "unique") {
         return lists;
     }
     const filteredLists = {};
     for (const key in lists) {
         if (lists.hasOwnProperty(key)) {
-            const originalList = lists[key];
-            if (controlType === "mouse") {
-                filteredLists[key] = filterByMouse(originalList);
-            } else if (controlType === "keyboard") {
-                filteredLists[key] = filterByKeyboard(originalList);
-            }
+            filteredLists[key] = filterBySingleControl(lists[key], controlType);
         }
     }
     return filteredLists;
