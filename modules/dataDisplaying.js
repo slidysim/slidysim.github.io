@@ -628,7 +628,6 @@ function createSheetNxM(WRList) {
                     // Both FMC types use time for comparison
                     mainValue = result.time;
                 }
-
                 let recordisInvalid = isInvalid(mainValue, scoreType);
                 if (recordisInvalid) {
                     result.nameFilter = invalidPlaceHolderString;
@@ -1617,7 +1616,7 @@ function calculateNxMTiers(WRList) {
 
 function isInvalidScore(result) {
     const scoreType = request.leaderboardType;
-
+    
     const valueMap = {
         "move": result.moves,
         "time": result.time,
@@ -1625,9 +1624,14 @@ function isInvalidScore(result) {
         "FMC": result.time,
         "FMC MTM": result.time
     };
-
-    const mainValue = valueMap[scoreType];
-    return isInvalid(mainValue, scoreType);
+    
+    const formattedType = {
+        "move": "Moves",
+        "time": "Time",
+        "tps": "TPS"
+    }[scoreType] || scoreType;
+    
+    return isInvalid(valueMap[scoreType], formattedType);
 }
 
 function getScoreLimitExact(precentage, bestscore, reverse) {

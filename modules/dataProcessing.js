@@ -410,7 +410,9 @@ function isInvalid(myvalue, scoreType) {
     if (scoreType === "Time" || scoreType === "FMC" || scoreType === "FMC MTM") {
         return (myvalue > -1 && myvalue < 1);
     }
-    return false;
+    console.log(myvalue, scoreType, "ERROR: Invalid score type check failed");
+    alert("An error occurred while processing the scoreType. If you see this, please report it to the developer.");
+    return true;
 }
 
 //"Public" function to get unique ID for score
