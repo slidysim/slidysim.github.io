@@ -73,15 +73,28 @@ function isBetter(web, live, type) {
 
 function mergeWebPBs(liveData, webData) {
     if (!liveData || !webData) return liveData || webData || [];
-    if (!liveData.length) return webData;
-    if (!webData.length) return liveData;
+    if (!liveData.length) return webData.map(s => ({ ...s, isWeb: true }));
+    if (!webData.length) return liveData.map(s => ({ ...s, isWeb: false }));
     
-    const map = new Map(liveData.map(s => [getCategoryKey(s), s]));
+    const map = new Map();
+    
+    // Add live data first, mark as not web
+    liveData.forEach(s => {
+        map.set(getCategoryKey(s), { ...s, isWeb: false });
+    });
+    
+    // Process web data
     webData.forEach(w => {
         const key = getCategoryKey(w);
         const l = map.get(key);
-        if (!l || isBetter(w, l, w.leaderboardType)) map.set(key, w);
+        
+        if (!l || isBetter(w, l, w.leaderboardType)) {
+            // If web score is better or no live score exists, use web score
+            map.set(key, { ...w, isWeb: true });
+        }
+        // If live score is better, it stays in the map with isWeb: false
     });
+    
     return Array.from(map.values());
 }
 
