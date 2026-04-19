@@ -12,7 +12,7 @@ Please note that before v3.12, Kinch used a special formula, AVG(X^10)^(1/10), w
 `;
 
 const tooltipText = "Interesting records exclude the following:<br>• N≠M solves<br>• Width/Height relays<br>• Averages for non-Standard modes (except BLD)<br>• Marathons other than 10, 25, 42, 50, or 100<br>• Standard averages other than 5, 12, 25, 50, or 100";
-const PBTypeStrings = ["Time", "Moves", "TPS"];
+const PBTypeStrings = ["Time", "Moves", "TPS", "FMC", "FMC MTM"];
 const controlTypeSelectStrings = ["Unique", "All", "Mouse only", "Keyboard only", "Click only", "Touch only"];
 const controlTypeSelectStringsUnique = ["Unique", "Mouse only", "Keyboard only", "Click only", "Touch only"];
 const notFoundError = `<h1 style="color:red">There are no results based on your current filters.<br><img alt="Sad Egg Image" src="images/sadegg.png"></img></h1>`

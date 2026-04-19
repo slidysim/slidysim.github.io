@@ -29,7 +29,8 @@ const rename_map = {
     'ekimmy': 'ekim',
     'ap_web': 'ap',
     'juunas': 'asdfghqwerty',
-    'minsie': 'MegaminX'
+    'minsie': 'MegaminX',
+    '554': 'yzx'
 };
 
 function appendFlagIconToNickname(nickname, minimal = false) {

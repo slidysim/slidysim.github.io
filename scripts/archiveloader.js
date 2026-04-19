@@ -12,9 +12,9 @@ class LeaderboardArchiveLoader {
 
     async loadArchive(dateWithPrefix) {
         try {
-            if (this.archiveCache.has(dateWithPrefix)) {
-                return this.archiveCache.get(dateWithPrefix);
-            }
+            //if (this.archiveCache.has(dateWithPrefix)) {
+            //    return this.archiveCache.get(dateWithPrefix);
+            //}
 
             const archiveUrl = this.getGitHubArchiveUrl(dateWithPrefix);
             const response = await fetch(archiveUrl);

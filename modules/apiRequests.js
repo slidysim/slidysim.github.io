@@ -45,7 +45,9 @@ const display_type_map = {
 const pb_type_map = {
     "time": 1,
     "move": 2,
-    "tps": 3
+    "tps": 3,
+    "FMC": 4,
+    "FMC MTM": 5
 };
 
 const control_type_map = {
@@ -186,6 +188,7 @@ async function callGetScores(auth_token, display_type_text, control_type_text, p
     const display_type = display_type_map[display_type_text];
     const control_type = control_type_map[control_type_text];
     const pb_type = pb_type_map[pb_type_text];
+    console.log("Mapped display_type:", display_type, "control_type:", control_type, "pb_type:", pb_type);
 
     if (
         display_type === undefined ||
@@ -201,6 +204,7 @@ async function callGetScores(auth_token, display_type_text, control_type_text, p
         if (!status) {
             return -1;
         }
+        //console.log("Scores fetched successfully:", scores);
         const controlMap = {null: "Keyboard", 0: "Keyboard", 1: "Mouse", 4: "Click", 5: "Touch"};
         const scoresParsed = scores.map(entry => ({
             width: entry["size_n"],
@@ -219,7 +223,7 @@ async function callGetScores(auth_token, display_type_text, control_type_text, p
             videolink: entry["videolink"]
         }));
         //scores.forEach(entry => {
-        //    console.log(entry["control_type"]);
+        //    console.log(entry["pb_type"]);
         //});
         return { scoresParsed, userList };
     } catch (error) {
@@ -261,7 +265,7 @@ async function getScores(auth_token, display_type, control_type, pb_type) {
             // Fetch archive data
             textData = await getScoresArch(archiveDate, display_type, control_type, pb_type);
         }
-
+        //console.log("Raw text data received:", textData);
         // Process textData (common logic)
         const [userMapLine, ...scoreLines] = textData.split(';').filter(line => line.trim() !== '');
         const usermap = userMapLine.split(',').reduce((map, pair) => {

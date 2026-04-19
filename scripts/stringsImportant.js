@@ -58,12 +58,14 @@ const tierstable = [
 ];
 const controlTypeSelectValues = ["unique", "both", "mouse", "keyboard", "click", "touch"];
 const controlTypeSelectValuesUnique = ["unique", "mouse", "keyboard", "click", "touch"];
-const PBTypeValues = ["time", "move", "tps"];
+const PBTypeValues = ["time", "move", "tps", "FMC", "FMC MTM"];
 const squaresSheetType = "Squares";
 const scoreTypes = {
     "time": 0,
     "move": 1,
-    "tps": 2
+    "tps": 2,
+    "FMC": 3,
+    "FMC MTM": 4
 }
 const mapReverseMove = {
     R: 'L',

@@ -52,11 +52,23 @@ function getCategoryKey(s) {
 }
 
 function isBetter(web, live, type) {
-    const webVal = type === "tps" ? web.tps : (type === "move" ? web.moves : web.time);
-    const liveVal = type === "tps" ? live.tps : (type === "move" ? live.moves : live.time);
+    // Map type to the value and comparison direction
+    const config = {
+        "tps": { get: (x) => x.tps, higherIsBetter: true },
+        "move": { get: (x) => x.moves, higherIsBetter: false },
+        "time": { get: (x) => x.time, higherIsBetter: false },
+        "FMC": { get: (x) => x.time, higherIsBetter: false },
+        "FMC MTM": { get: (x) => x.time, higherIsBetter: false }
+    };
+    
+    const cfg = config[type] || config["time"];
+    const webVal = cfg.get(web);
+    const liveVal = cfg.get(live);
+    
     if (webVal === -1) return false;
     if (liveVal === -1) return true;
-    return type === "tps" ? webVal > liveVal : webVal < liveVal;
+    
+    return cfg.higherIsBetter ? webVal > liveVal : webVal < liveVal;
 }
 
 function mergeWebPBs(liveData, webData) {
@@ -247,7 +259,6 @@ function filterDataByRequest(data, request) {
                 }
                 return entry.avglen === 1; //If gamemode is not standard, only singles are interesting
             }
-            console.log("(You should never see this message) Unknown gamemode filter: ", request.gameMode);
             return false;
         });
     }

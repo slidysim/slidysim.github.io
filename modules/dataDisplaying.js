@@ -232,6 +232,10 @@ function createSheet(sortedLists, sheetType) {
                     mainValue = item.tps;
                     reverse = true;
                 }
+                if (scoreType === "FMC" || scoreType === "FMC MTM") {
+                    // Both FMC types use time for comparison
+                    mainValue = item.time;
+                }
                 if (mytableid === 1) {
                     bestValue = mainValue;
                 }
@@ -382,7 +386,7 @@ function createSheet(sortedLists, sheetType) {
                         });
                     }
                 }
-                if (scoreType === "Time" && item.time > 59999) {
+                if (["Time", "FMC", "FMC MTM"].includes(scoreType) && item.time > 59999) {
                     scoreCellElement.addEventListener('mouseover', () => {
                         tooltip.textContent = formatTime(item.time);
                         tooltip.style.display = 'block';
@@ -617,6 +621,11 @@ function createSheetNxM(WRList) {
                     mainValue = result.tps;
                     reverse = true;
                 }
+                if (scoreType === "FMC" || scoreType === "FMC MTM") {
+                    // Both FMC types use time for comparison
+                    mainValue = result.time;
+                }
+
                 let recordisInvalid = isInvalid(mainValue, scoreType);
                 if (recordisInvalid) {
                     result.nameFilter = invalidPlaceHolderString;
@@ -714,7 +723,7 @@ function createSheetNxM(WRList) {
                         }
                     }
                     let extraInfo = "";
-                    if (scoreType === "Time" && result.time > 59999) {
+                    if (["Time", "FMC", "FMC MTM"].includes(scoreType) && result.time > 59999) {
                         extraInfo = " " + formatTime(result.time);
                     }
                     if (request.nameFilter !== "") {
@@ -757,20 +766,17 @@ function createSheetNxM(WRList) {
 //"Public" function to create Rankings sheet
 function createSheetRankings(playerScores) {
     savedPlayerScores = playerScores;
-    let reverse = false;
-    if (request.leaderboardType === "tps") {
-        reverse = true;
-    }
-    let scoreType = request.leaderboardType;
-    if (scoreType === "move") {
-        scoreType = "Moves"
-    }
-    if (scoreType === "time") {
-        scoreType = "Time"
-    }
-    if (scoreType === "tps") {
-        scoreType = "TPS"
-    }
+    let reverse = request.leaderboardType === "tps";
+
+    const scoreTypeDisplayMap = {
+        "move": "Moves",
+        "time": "Time",
+        "tps": "TPS",
+        "FMC": "FMC",
+        "FMC MTM": "FMC MTM"
+    };
+
+    let scoreType = scoreTypeDisplayMap[request.leaderboardType] || request.leaderboardType;
     const contentDiv = document.getElementById("contentDiv");
     contentDiv.classList = "NxMContent";
     contentDiv.innerHTML = "";
@@ -889,7 +895,7 @@ function createSheetRankings(playerScores) {
                             const scoreCell = createTableCellScore([scoreString[0], ""], 'score', "kappa");
                             scoreCell.classList.add(scoreData.scoreTier);
                             let extraInfo = "";
-                            if (scoreType === "Time") {
+                            if (["Time", "FMC", "FMC MTM"].includes(scoreType)) { 
                                 extraInfo = formatTime(item.time);
                                 extraInfo += ` (${(item.moves / 1000).toFixed(3).replace(/\.?0+$/, '')} / ${normalizeTPS(item.tps)})`
                                 extraInfo += "<br>";
@@ -1013,20 +1019,17 @@ function createSheetRankings(playerScores) {
 
 //"Public" function to create Latest records sheet
 function createSheetHistory(recordsList, recordsListWR, showAll = false) {
-    let reverse = false;
-    if (request.leaderboardType === "tps") {
-        reverse = true;
-    }
-    let scoreType = request.leaderboardType;
-    if (scoreType === "move") {
-        scoreType = "Moves";
-    }
-    if (scoreType === "time") {
-        scoreType = "Time";
-    }
-    if (scoreType === "tps") {
-        scoreType = "TPS";
-    }
+    let reverse = request.leaderboardType === "tps";
+
+    const scoreTypeMap = {
+        "move": "Moves",
+        "time": "Time",
+        "tps": "TPS",
+        "FMC": "FMC",
+        "FMC MTM": "FMC MTM"
+    };
+
+    let scoreType = scoreTypeMap[request.leaderboardType] || request.leaderboardType;
     let mainList = recordsList;
     if (mainList.length <= 2000) {
         showAll = true;
@@ -1338,16 +1341,21 @@ function getClassBasedOnPercentage(percentage, percentageTable) {
 
 function getBestValue(data, scoreType, width, height) {
     let bestValue = null;
+    
+    const valueMap = {
+        "Moves": (item) => item.moves,
+        "Time": (item) => item.time,
+        "TPS": (item) => item.tps,
+        "FMC": (item) => item.time,
+        "FMC MTM": (item) => item.time
+    };
+    
+    const getValue = valueMap[scoreType];
+    
     for (let i = 0; i < data.length; i++) {
         const item = data[i];
-        if (item.width === width && item.height === height) {
-            if (scoreType === "Moves") {
-                bestValue = item.moves;
-            } else if (scoreType === "Time") {
-                bestValue = item.time;
-            } else if (scoreType === "TPS") {
-                bestValue = item.tps;
-            }
+        if (item.width === width && item.height === height && getValue) {
+            bestValue = getValue(item);
             break;
         }
     }
@@ -1383,29 +1391,33 @@ function getScoreString(time, moves, tps, scoreType, isAverage) {
     time = result["time"];
     moves = result["moves"];
     tps = result["tps"];
-    if (scoreType === "Moves") {
-        return [moves, "" + time + " / " + tps + ""];
-    }
-    if (scoreType === "Time") {
-        return [time, "" + moves + " / " + tps + ""];
-    }
-    if (scoreType === "TPS") {
-        return [tps, "" + time + " / " + moves + ""];
+    
+    const scoreConfig = {
+        "Moves": { primary: moves, secondary: `${time} / ${tps}` },
+        "Time": { primary: time, secondary: `${moves} / ${tps}` },
+        "TPS": { primary: tps, secondary: `${time} / ${moves}` },
+        "FMC": { primary: time, secondary: `${moves} / ${tps}` },
+        "FMC MTM": { primary: time, secondary: `${moves} / ${tps}` }
+    };
+    
+    const config = scoreConfig[scoreType];
+    if (config) {
+        return [config.primary, config.secondary];
     }
 }
 
 function createTableCellScore(scoreString, className, secondaryClass) {
     const cell = document.createElement('td');
     cell.className = className;
-    
+
     const mainValue = document.createElement('span');
     mainValue.className = 'score-main';
     mainValue.innerHTML = scoreString[0];
-    
+
     const secondaryValue = document.createElement('span');
     secondaryValue.className = `score-secondary ${secondaryClass}`;
     secondaryValue.textContent = scoreString[1];
-    
+
     cell.appendChild(mainValue);
     cell.appendChild(document.createElement('br'));
     cell.appendChild(secondaryValue);
@@ -1542,7 +1554,7 @@ function normalizeTPS(tps) {
         return tps = unknownStatsShortString;
     } else {
         tps = (tps / 1000).toFixed(3);
-        if (tps > 1000000) {
+        if (tps > 1000) {
             tps = "∞";
         }
         return tps;
@@ -1594,20 +1606,17 @@ function calculateNxMTiers(WRList) {
 }
 
 function isInvalidScore(result) {
-    let scoreType = request.leaderboardType;
-    let mainValue;
-    if (scoreType === "move") {
-        scoreType = "Moves"
-        mainValue = result.moves;
-    }
-    if (scoreType === "time") {
-        scoreType = "Time"
-        mainValue = result.time;
-    }
-    if (scoreType === "tps") {
-        scoreType = "TPS"
-        mainValue = result.tps;
-    }
+    const scoreType = request.leaderboardType;
+    
+    const valueMap = {
+        "move": result.moves,
+        "time": result.time,
+        "tps": result.tps,
+        "FMC": result.time,
+        "FMC MTM": result.time
+    };
+    
+    const mainValue = valueMap[scoreType];
     return isInvalid(mainValue, scoreType);
 }
 
@@ -1636,200 +1645,316 @@ function getScoreLimit(precentage, bestscore, reverse, scoreType, isAverage) {
     } else {
         value = Math.floor(bestscore / precentage);
     }
+    
+    // Time-based score types (Time, FMC, FMC MTM) use normalizeTime
+    if (scoreType === "Time" || scoreType === "FMC" || scoreType === "FMC MTM") {
+        return normalizeTime(value);
+    }
     if (scoreType === "Moves") {
         return normalizeMoves(value, isAverage);
-    }
-    if (scoreType === "Time") {
-        return normalizeTime(value);
     }
     if (scoreType === "TPS") {
         return normalizeTPS(value);
     }
 }
-
 function generateFormattedString(request) {
-    let worldRecordsOnNMstring = worldRecordsOnNM;
-    let worldRecordsOnNNstring = worldRecordsOnNN;
-    if (currentCountry !== 'worldwide') {
-        worldRecordsOnNMstring = worldRecordsOnNM.replace("World", currentCountry);
-        worldRecordsOnNNstring = worldRecordsOnNN.replace("World", currentCountry);
-    }
-    function generateSelect(id, values, texts) {
-        if (values.length !== texts.length) {
-            console.error("Values and texts arrays must have the same length.");
-            return '';
-        }
-        const optionsHTML = values.map((value, index) => `<option value="${value}">${texts[index]}</option>`).join('');
-        const selectHTML = `<select id="${id}">${optionsHTML}</select>`;
-        return selectHTML;
-    }
-    const selectString = generateSelect("displayType", displayTypeOptions, displayTypeOptions);
-    const selectPBTypeString = generateSelect("pbTypeSelect", PBTypeValues, PBTypeStrings);
-    var selectControlTypeString;
-    if (request.width === squaresSheetType || request.width === "All" || String(request.width)
-        .includes("Rankings")) {
-        selectControlTypeString = generateSelect("controlTypeSelect", controlTypeSelectValuesUnique, controlTypeSelectStringsUnique);
-    } else {
-        selectControlTypeString = generateSelect("controlTypeSelect", controlTypeSelectValues, controlTypeSelectStrings);
-    }
-    const formattedParts = [];
-    const sortedByPart = `<span style="font-weight: 900;">${selectPBTypeString}</span> ${leaderboardForString} `;
-    formattedParts.push(sortedByPart);
-    if (request.gameMode !== "Standard" && !String(request.width).includes("Rankings")) {
-        if (request.width === squaresSheetType) {
-            formattedParts.push(`<span class="gamma" style="font-weight: 700;">${(request.gameMode).replace(" of", "")}</span> `);
-        } else {
-            formattedParts.push(`<span class="gamma" style="font-weight: 700;">${request.gameMode}</span> `);
+    const worldRecordsTexts = getLocalizedWorldRecordsText();
+    const selects = generateAllSelects(request.width);
+    
+    const pageConfig = getPageConfig(request.width);
+    
+    let headerHTML = buildHeader(selects.pbType, request);
+    
+    // Add game mode to header for squaresSheet and All pages
+    if (!pageConfig.isCustomSize && 
+        request.width !== "History" && 
+        !String(request.width).includes("Rankings") && 
+        request.gameMode !== "Standard") {
+        
+        let mode = formatGameModeForDisplay(request.gameMode, request.width);
+        if (mode) {
+            headerHTML += ` <span class="gamma" style="font-weight: 700;">${mode}</span>`;
         }
     }
-    if (request.width === squaresSheetType) {
-        if (request.nameFilter.length === 0) {
-            formattedParts.push(`<span class="epsilon" style="font-weight: 900;">${worldRecordsOnNNstring}</span> ${slidingPuzzleString}`);
-            if (NxMSelected !== totalWRsAmount) {
-                formattedParts.push(`${byString}<span class="pinktext">${NxMSelected}</span>`);
-            }
-        } else {
-            formattedParts.push(`${PBsPlaceHolderString} ${slidingPuzzleString}`);
+    
+    const contentHTML = buildPageContent(pageConfig, request, worldRecordsTexts);
+    const controlsHTML = buildControlsRow(selects.displayType, selects.controlType);
+    const refreshButton = buildRefreshButton();
+    const timestampHTML = buildTimestampSection();
+    
+    const finalHTML = `${headerHTML} ${contentHTML} ${refreshButton} ${controlsHTML} ${timestampHTML}`;
+    
+    renderAndSetup(finalHTML, request);
+}
+
+function getPageConfig(width) {
+    const configs = {
+        [squaresSheetType]: {
+            className: 'epsilon',
+            textWithName: () => `PBs by <span id="nameSpanHeader" class="pinktext" style="font-weight: 900;"></span> on NxN`,
+            textNoName: (wr) => `${wr.worldRecordsOnNNtext}`,
+            puzzleWord: 'sliding puzzles',
+            showCount: true
+        },
+        'All': {
+            className: 'alpha',
+            textWithName: () => `PBs by <span id="nameSpanHeader" class="pinktext" style="font-weight: 900;"></span> on NxM`,
+            textNoName: (wr) => `${wr.worldRecordsOnNMtext}`,
+            puzzleWord: 'sliding puzzles',
+            showCount: true
+        },
+        'Rankings': {
+            className: 'beta',
+            text: 'Main™ Rankings of 3x3 - 10x10',
+            puzzleWord: 'sliding puzzles'
+        },
+        'Rankings2': {
+            className: 'beta',
+            text: 'Most Popular Categories of',
+            puzzleWord: 'sliding puzzles',
+            onBefore: createCustomSlider
+        },
+        'Rankings3': {
+            className: 'beta',
+            text: 'Kinch Rankings of',
+            puzzleWord: 'sliding puzzles'
+        },
+        'History': {
+            className: 'delta',
+            text: 'Latest Records of',
+            puzzleWord: 'sliding puzzles',
+            showNameSpan: true
         }
-    } else if (request.width === "All") {
-        if (request.nameFilter.length === 0) {
-            formattedParts.push(`<span class="alpha" style="font-weight: 900;">${worldRecordsOnNMstring}</span> ${slidingPuzzleString}</span>`);
-            if (NxMSelected !== totalWRsAmount) {
-                formattedParts.push(`${byString}<span class="pinktext">${NxMSelected}</span>`);
-            }
-        } else {
-            formattedParts.push(`${PBsPlaceHolderStringNxM} ${slidingPuzzleString}`);
+    };
+    
+    return configs[width] || {
+        className: 'pinktext',
+        puzzleWord: 'sliding puzzle',
+        isCustomSize: true
+    };
+}
+
+function formatGameModeForDisplay(gameMode, width) {
+    if (gameMode === "Standard") return null;
+    
+    if (gameMode === allMarathons) {
+        return "all marathons";
+    }
+    
+    const cleanMode = width === squaresSheetType ? gameMode.replace(" of", "") : gameMode;
+    
+    const modeMap = {
+        '2-N relay': 'relay',
+        'Width relay': 'width relay',
+        'Height relay': 'height relay',
+        'Everything-up-to relay': 'EUT relay',
+        'BLD': 'blindfolded'
+    };
+    
+    if (modeMap[cleanMode]) {
+        return modeMap[cleanMode];
+    }
+    
+    if (cleanMode.startsWith('Marathon')) {
+        const number = cleanMode.replace('Marathon', '').trim();
+        return `x${number} marathon`;
+    }
+    
+    return cleanMode;
+}
+
+
+function formatGameModeText(gameMode, forHistoryPage = false) {
+    if (gameMode === "Standard") return "";
+    
+    let text = gameMode;
+    
+    // Map to display text
+    if (text === "2-N relay") text = "relay";
+    else if (text === "Width relay") text = "width relay";
+    else if (text === "Height relay") text = "height relay";
+    else if (text === "Everything-up-to relay") text = "EUT relay";
+    else if (text === "BLD") text = forHistoryPage ? "blindfolded" : "(blindfolded)";
+    else if (text === allMarathons) text = "all marathons";
+    else if (text.startsWith("Marathon")) {
+        const num = text.replace("Marathon", "").trim();
+        text = `x${num} marathon${forHistoryPage ? "s" : ""}`;
+    }
+    
+    return text;
+}
+
+function buildHeader(pbSelect, request) {
+    const parts = [`<span style="font-weight: 900;">${pbSelect}</span> Leaderboard for`];
+    return parts.join(' ');
+}
+
+function buildPageContent(config, request, wrTexts) {
+    const width = request.width;
+    const hasNameFilter = request.nameFilter.length > 0;
+    const gameMode = request.gameMode;
+    
+    // History page
+    if (width === "History") {
+        let prefix = "latest Standard Records";
+        if (gameMode !== "Standard") {
+            const modeText = formatGameModeText(gameMode, true);
+            prefix = `Latest ${modeText} Records`;
         }
-    } else if (request.width === "Rankings") {
-        formattedParts.push(`<span class="beta" style="font-weight: 900;">${MainRankingsString}</span> ${slidingPuzzleString}`);
-    } else if (request.width === "Rankings2") {
+        let text = prefix;
+        if (hasNameFilter) {
+            text += ` by <span id="nameSpanHeader" class="pinktext" style="font-weight: 900;"></span>`;
+        }
+        return `<span class="delta" style="font-weight: 900;">${text}</span>`;
+    }
+    
+    // Rankings pages
+    if (width === "Rankings") {
+        return `<span class="beta" style="font-weight: 900;">Main™ Rankings of 3x3 - 10x10</span> sliding puzzles`;
+    }
+    if (width === "Rankings2") {
         createCustomSlider();
-        formattedParts.push(`<span class="beta" style="font-weight: 900;">${PopularRankingsString}</span> ${slidingPuzzleString}`);
-    } else if (request.width === "Rankings3") {
-        formattedParts.push(`<span class="beta" style="font-weight: 900;">${customRankingsString}</span> ${slidingPuzzleString}`);
-    } else if (request.width === "History") {
-        formattedParts.push(`<span class="delta" style="font-weight: 900;">${hisroryPageString}</span> ${slidingPuzzleString}`);
-        if (request.nameFilter !== "") {
-            formattedParts.push(`${byString}<span id="nameSpanHeader" class="pinktext" style="font-weight: 900;"></span>`);
-        }
-    } else {
-        formattedParts.push(`<span class="pinktext" style="font-weight: 900;">${request.width}x${request.height}</span> ${slidingPuzzleStringOne}`);
+        return `<span class="beta" style="font-weight: 900;">Most Popular Categories of</span> sliding puzzles`;
     }
-    formattedParts.push(`
-        <style>
-            .glow-button {
-                background: black;
-                border: none;
-                cursor: pointer;
-                border-radius: 5px;
-                padding: 5px;
-                transition: box-shadow 0.3s;
-                outline: none;
-            }
-
-            .glow-button:hover {
-                background-color: white;
-                box-shadow: 0 0 50px cyan;
-            }
-        </style>
-        <button class="glow-button" onclick="${loadingPower ? 'loadingPower  = true; ' : ''}updateServer(user_token, last_displayType, last_controlType, last_pbType)">
-            <span style="font-size: 24px; color: white;">&#x267B;</span> <!-- Unicode for refresh icon -->
-        </button>
-    `);
-    formattedParts.push(`<br><h2>${doneWithString} ` + selectString + displayTypeHeaderString);
-    formattedParts.push(`<span class="pinktext" style="font-weight: 700;">${selectControlTypeString}</span> ${controlsTypeHeaderString}</h2>`);
-    if (archiveDate === "LIVE") {
-        // Live leaderboard: dynamic time ago
-        let timeAgo = getTimeAgo(latestRecordTime);
-        let updateText = `${lastLeaderboardUpdateString} <span style="color: #ffffff">${timeAgo}</span>`;
-        let webArchiveSuffix = '';
-
-        // Add web archive date in brackets if enabled
-        if (webLeaderboardEnabled && latestWebArchive) {
-            const d = latestWebArchive.replace('web_', '');
-            webArchiveSuffix = ` (including web data backup: ${d.substring(6, 8)}.${d.substring(4, 6)}.${d.substring(0, 4)})`;
-            updateText += webArchiveSuffix;
-        }
-
-        formattedParts.push(`<span class="leaderboardUpdateSpan">${updateText}</span>`);
-        clearInterval(window.leaderboardInterval);
-        window.leaderboardInterval = setInterval(() => {
-            try {
-                const updateSpan = document.querySelector(".leaderboardUpdateSpan");
-                if (updateSpan) {
-                    updateSpan.innerHTML = `${lastLeaderboardUpdateString} <span style="color: #ffffff">${getTimeAgo(latestRecordTime)}</span>${webArchiveSuffix}`;
-                }
-            } catch (error) { }
-        }, 10000);
-    } else {
-        // Archive mode: show dropdown selector for available archives
-        formattedParts.push(`<span class="leaderboardUpdateSpan">Archive from </span>`);
-        // Initialize archive selector
-        function initArchiveSelector(containerSelector, loadingPower) {
-            if (!availableArchives || availableArchives.length === 0) return;
-
-            function formatDisplayDate(archiveWithPrefix) {
-                const match = archiveWithPrefix.match(/(leaderboard_|exe_|web_)(\d{8})/);
-                if (!match) return archiveWithPrefix;
-
-                const prefix = match[1].replace('_', '');
-                const dateStr = match[2];
-                const day = dateStr.slice(6, 8);
-                const month = dateStr.slice(4, 6);
-                const year = dateStr.slice(0, 4);
-                const formattedDate = `${day}.${month}.${year}`;
-
-                const typeLabel = (prefix === 'leaderboard' || prefix === 'exe') ? '[exe]' : '[web]';
-
-                return `${typeLabel} ${formattedDate}`;
-            }
-
-            const container = document.querySelector(containerSelector);
-            if (!container) return;
-
-            const existingSelect = container.querySelector("select");
-            if (existingSelect) existingSelect.remove();
-
-            const select = document.createElement("select");
-            select.style.marginLeft = "5px";
-            select.style.color = "#ffffff";
-            select.style.background = "#333";
-            select.style.border = "1px solid #aaa";
-
-            availableArchives.forEach(archiveWithPrefix => {
-                const option = document.createElement("option");
-                option.value = archiveWithPrefix;
-                option.textContent = formatDisplayDate(archiveWithPrefix);
-                if (archiveWithPrefix === archiveDate) option.selected = true;
-                select.appendChild(option);
-            });
-
-            if (loadingPower) {
-                select.addEventListener("change", () => {
-                    archiveDate = select.value;
-                    getPowerData();
-                });
-            } else {
-                select.addEventListener("change", () => {
-                    archiveDate = select.value;
-                    updateServer(user_token, last_displayType, last_controlType, last_pbType)
-                });
-            }
-
-            container.appendChild(select);
-        }
-        const lp = loadingPower;
-        setTimeout(() => initArchiveSelector(".leaderboardUpdateSpan", lp), 0);
+    if (width === "Rankings3") {
+        return `<span class="beta" style="font-weight: 900;">Kinch Rankings of</span> sliding puzzles`;
     }
+    
+    // NxN sheet
+    if (width === squaresSheetType) {
+        if (hasNameFilter) {
+            return `PBs by <span id="nameSpanHeader" class="pinktext" style="font-weight: 900;"></span> on NxN sliding puzzles`;
+        }
+        const parts = [`<span class="epsilon" style="font-weight: 900;">${wrTexts.worldRecordsOnNNtext}</span> sliding puzzles`];
+        if (NxMSelected !== totalWRsAmount) {
+            parts.push(`by <span class="pinktext">${NxMSelected}</span>`);
+        }
+        return parts.join(' ');
+    }
+    
+    // NxM sheet
+    if (width === "All") {
+        if (hasNameFilter) {
+            return `PBs by <span id="nameSpanHeader" class="pinktext" style="font-weight: 900;"></span> on NxM sliding puzzles`;
+        }
+        const parts = [`<span class="alpha" style="font-weight: 900;">${wrTexts.worldRecordsOnNMtext}</span> sliding puzzles`];
+        if (NxMSelected !== totalWRsAmount) {
+            parts.push(`by <span class="pinktext">${NxMSelected}</span>`);
+        }
+        return parts.join(' ');
+    }
+    
+    // Normal page with NxM
+    if (gameMode !== "Standard") {
+        const modeText = formatGameModeText(gameMode, false);
+        if (gameMode === allMarathons) {
+            return `<span class="gamma" style="font-weight: 700;">All </span> <span class="pinktext" style="font-weight: 900;">${width}x${request.height}</span><span class="gamma" style="font-weight: 700;"> marathons</span>`;
+        }
+        return `<span class="pinktext" style="font-weight: 900;">${width}x${request.height}</span> <span class="gamma" style="font-weight: 700;">${modeText}</span>`;
+    }
+    
+    return `<span class="pinktext" style="font-weight: 900;">${width}x${request.height}</span> sliding puzzle`;
+}
 
+function buildControlsRow(displaySelect, controlSelect) {
+    return `<br><h2>Done with ${displaySelect} display type, using <span class="pinktext" style="font-weight: 700;">${controlSelect}</span> controls</h2>`;
+}
+
+function buildTimestampSection() {
+    if (archiveDate !== "LIVE") {
+        setTimeout(() => initArchiveDropdown(".leaderboardUpdateSpan", loadingPower), 0);
+        return '<span class="leaderboardUpdateSpan">Archive from </span>';
+    }
+    
+    const timeAgo = getTimeAgo(latestRecordTime);
+    const archiveSuffix = webLeaderboardEnabled && latestWebArchive 
+        ? formatWebArchiveSuffix(latestWebArchive) 
+        : '';
+    
+    setupLiveUpdateTimer(archiveSuffix);
+    
+    return `<span class="leaderboardUpdateSpan">Last leaderboard update: <span style="color: #ffffff">${timeAgo}</span>${archiveSuffix}</span>`;
+}
+
+function generateAllSelects(width) {
+    const isSpecial = width === squaresSheetType || width === "All" || String(width).includes("Rankings");
+    const controlValues = isSpecial ? controlTypeSelectValuesUnique : controlTypeSelectValues;
+    const controlTexts = isSpecial ? controlTypeSelectStringsUnique : controlTypeSelectStrings;
+    
+    return {
+        pbType: createSelectHTML("pbTypeSelect", PBTypeValues, PBTypeStrings),
+        displayType: createSelectHTML("displayType", displayTypeOptions, displayTypeOptions),
+        controlType: createSelectHTML("controlTypeSelect", controlValues, controlTexts)
+    };
+}
+
+function getLocalizedWorldRecordsText() {
+    if (currentCountry === 'worldwide') {
+        return { worldRecordsOnNNtext: worldRecordsOnNN, worldRecordsOnNMtext: worldRecordsOnNM };
+    }
+    return {
+        worldRecordsOnNNtext: worldRecordsOnNN.replace("World", currentCountry),
+        worldRecordsOnNMtext: worldRecordsOnNM.replace("World", currentCountry)
+    };
+}
+
+function renderAndSetup(html, request) {
     if (request.gameMode === allMarathons && request.width === "All") {
-        formattedParts.length = 0;
-        formattedParts.push("All Marathons option is not supported for NxM sheet, please select other settings");
+        leaderboardName.innerHTML = "All Marathons option is not supported for NxM sheet, please select other settings";
+        return;
     }
+    
+    leaderboardName.innerHTML = html;
+    
+    attachSelectEvents(request);
+    
+    const nameSpan = document.getElementById('nameSpanHeader');
+    if (nameSpan && request.nameFilter) {
+        addNameFilterButton(nameSpan, request.nameFilter);
+    }
+    
+    if (loadingPower) {
+        modifyHeaderForPowerMode();
+    }
+}
 
-    const finalString = `${formattedParts.join(' ')}`;
+// Helper functions kept same
+function createSelectHTML(id, values, texts) {
+    if (values.length !== texts.length) return '';
+    const options = values.map((v, i) => `<option value="${v}">${texts[i]}</option>`).join('');
+    return `<select id="${id}">${options}</select>`;
+}
 
-    leaderboardName.innerHTML = finalString;
+function buildRefreshButton() {
+    const handler = loadingPower 
+        ? 'loadingPower=true;updateServer(user_token,last_displayType,last_controlType,last_pbType)' 
+        : 'updateServer(user_token,last_displayType,last_controlType,last_pbType)';
+    
+    return `<style>.glow-button{background:black;border:none;cursor:pointer;border-radius:5px;padding:5px;transition:box-shadow 0.3s;outline:none}.glow-button:hover{background-color:white;box-shadow:0 0 50px cyan}</style><button class="glow-button" onclick="${handler}"><span style="font-size:24px;color:white;">&#x267B;</span></button>`;
+}
+
+function formatWebArchiveSuffix(archive) {
+    const d = archive.replace('web_', '');
+    return ` (including web data backup: ${d.substring(6,8)}.${d.substring(4,6)}.${d.substring(0,4)})`;
+}
+
+function setupLiveUpdateTimer(suffix) {
+    clearInterval(window.leaderboardInterval);
+    window.leaderboardInterval = setInterval(() => {
+        const span = document.querySelector(".leaderboardUpdateSpan");
+        if (span) {
+            span.innerHTML = `Last leaderboard update: <span style="color:#ffffff">${getTimeAgo(latestRecordTime)}</span>${suffix}`;
+        }
+    }, 10000);
+}
+
+function attachSelectEvents(request) {
+    // Get elements AFTER they exist in DOM
+    displayTypeSelect = document.getElementById("displayType");
+    leaderboardTypeSelect = document.getElementById("pbTypeSelect");
+    controlTypeSelect = document.getElementById("controlTypeSelect");
+    
+    // Define handlers exactly as in original
     function displayTypeChanged() {
         let currentValue = displayTypeSelect.value;
         changeDisplayType(currentValue);
@@ -1847,6 +1972,8 @@ function generateFormattedString(request) {
         changeControls(currentValue);
         controlTypeSelect.style.width = `${getTextOfSelectLength(controlTypeSelect) + 1}ch`;
     }
+    
+    // Apply loadingPower wrapper if needed (exactly as original)
     if (loadingPower) {
         const originalDisplayTypeChanged = displayTypeChanged;
         displayTypeChanged = function () {
@@ -1862,38 +1989,84 @@ function generateFormattedString(request) {
             getPowerData();
         };
     }
-    displayTypeSelect = document.getElementById("displayType");
+    
+    // Attach listeners and set values
     displayTypeSelect.addEventListener("change", displayTypeChanged);
     displayTypeSelect.value = request.displayType;
-    leaderboardTypeSelect = document.getElementById("pbTypeSelect");
+    
     leaderboardTypeSelect.addEventListener("change", leaderboardTypeChanged);
     leaderboardTypeSelect.value = request.leaderboardType;
-    controlTypeSelect = document.getElementById("controlTypeSelect");
+    
     controlTypeSelect.addEventListener("change", controlTypeChanged);
     controlTypeSelect.value = controlType;
-    const nameSpanHeader = document.getElementById('nameSpanHeader');
-    if (nameSpanHeader) {
-        const removeIcon = document.createElement('button');
-        removeIcon.textContent = request.nameFilter;
-        removeIcon.fontSize = "16px";
-        removeIcon.addEventListener('click', () => {
-            usernameInput.value = "";
-            changeNameFilter("");
-        });
-        nameSpanHeader.appendChild(removeIcon);
-    }
-    if (loadingPower) {
-        header = document.getElementById("leaderboardName");
-        header.removeChild(header.firstChild);
-        header.removeChild(header.firstChild);
-        header.removeChild(header.firstChild);
-        header.firstChild.textContent = header.firstChild.textContent.replace(
-            "sliding puzzles",
-            "Slidysim Power Rankings"
-        );
+}
 
-    }
+function wrapHandler(select, callback, usePower) {
+    return function() {
+        if (usePower) loadingPower = true;
+        callback(select.value);
+        select.style.width = `${getTextOfSelectLength(select) + 1}ch`;
+        if (usePower) getPowerData();
+    };
+}
 
+function addNameFilterButton(container, name) {
+    const btn = document.createElement('button');
+    btn.textContent = name;
+    btn.style.fontSize = "16px";
+    btn.addEventListener('click', () => {
+        usernameInput.value = "";
+        changeNameFilter("");
+    });
+    container.appendChild(btn);
+}
+
+function modifyHeaderForPowerMode() {
+    const header = document.getElementById("leaderboardName");
+    if (header) {
+        header.removeChild(header.firstChild);
+        header.removeChild(header.firstChild);
+        header.removeChild(header.firstChild);
+        header.firstChild.textContent = header.firstChild.textContent.replace("sliding puzzles", "Slidysim Power Rankings");
+    }
+}
+
+function initArchiveDropdown(selector, usePower) {
+    if (!availableArchives?.length) return;
+    
+    const container = document.querySelector(selector);
+    if (!container) return;
+    
+    container.querySelector("select")?.remove();
+    
+    const select = document.createElement("select");
+    select.style.cssText = "margin-left:5px;color:#fff;background:#333;border:1px solid #aaa";
+    
+    availableArchives.forEach(archive => {
+        const opt = document.createElement("option");
+        opt.value = archive;
+        opt.textContent = formatArchiveDisplay(archive);
+        if (archive === archiveDate) opt.selected = true;
+        select.appendChild(opt);
+    });
+    
+    select.addEventListener("change", () => {
+        archiveDate = select.value;
+        usePower ? getPowerData() : updateServer(user_token, last_displayType, last_controlType, last_pbType);
+    });
+    
+    container.appendChild(select);
+}
+
+function formatArchiveDisplay(archive) {
+    const match = archive.match(/(leaderboard_|exe_|web_)(\d{8})/);
+    if (!match) return archive;
+    
+    const type = match[1].replace('_', '');
+    const d = match[2];
+    const label = (type === 'leaderboard' || type === 'exe') ? '[exe]' : '[web]';
+    
+    return `${label} ${d.slice(6,8)}.${d.slice(4,6)}.${d.slice(0,4)}`;
 }
 
 function getTextOfSelectLength(mySelect) {
@@ -1945,11 +2118,13 @@ function getScoreStringNxM(time, moves, tps, scoreType, isAverage, username) {
     time = result["time"];
     moves = result["moves"];
     tps = result["tps"];
+    
+    // Time-based score types (Time, FMC, FMC MTM) return time
+    if (scoreType === "Time" || scoreType === "FMC" || scoreType === "FMC MTM") {
+        return [time, username];
+    }
     if (scoreType === "Moves") {
         return [moves, username];
-    }
-    if (scoreType === "Time") {
-        return [time, username];
     }
     if (scoreType === "TPS") {
         return [tps, username];
@@ -2055,34 +2230,40 @@ function tableIsEmpty(records, recordsListWR, scoreType) {
 
 function getTier(item, recordsListWR, scoreType) {
     let bestValue = getBestValueWithGameMode(recordsListWR, scoreType, item.width, item.height, item.gameMode, item.avglen);
-    let mainValue;
-    let reverse = false;
-    if (scoreType === "Moves") {
-        mainValue = item.moves;
-    }
-    if (scoreType === "Time") {
-        mainValue = item.time;
-    }
-    if (scoreType === "TPS") {
-        mainValue = item.tps;
-        reverse = true;
-    }
+    let reverse = scoreType === "TPS";
+    
+    // Map score types to the value they use for comparison
+    const valueMap = {
+        "Moves": () => item.moves,
+        "Time": () => item.time,
+        "TPS": () => item.tps,
+        "FMC": () => item.time,
+        "FMC MTM": () => item.time
+    };
+    
+    const mainValue = valueMap[scoreType] ? valueMap[scoreType]() : item.time;
+    
     const percentage = calculatePercentage(mainValue, bestValue, reverse);
     return [percentage, getClassBasedOnPercentage(percentage, percentageTable), bestValue];
 }
 
 function getBestValueWithGameMode(data, scoreType, width, height, gameMode, avglen) {
     let bestValue = null;
+    
+    const valueMap = {
+        "Moves": (item) => item.moves,
+        "Time": (item) => item.time,
+        "TPS": (item) => item.tps,
+        "FMC": (item) => item.time,
+        "FMC MTM": (item) => item.time
+    };
+    
+    const getValue = valueMap[scoreType];
+    
     for (let i = 0; i < data.length; i++) {
         const item = data[i];
-        if (item.width === width && item.height === height && item.gameMode === gameMode && item.avglen === avglen) {
-            if (scoreType === "Moves") {
-                bestValue = item.moves;
-            } else if (scoreType === "Time") {
-                bestValue = item.time;
-            } else if (scoreType === "TPS") {
-                bestValue = item.tps;
-            }
+        if (item.width === width && item.height === height && item.gameMode === gameMode && item.avglen === avglen && getValue) {
+            bestValue = getValue(item);
             break;
         }
     }
@@ -2326,7 +2507,7 @@ function populateTableHistory(records, recordsListWR, scoreType, table, reverse)
             dataRow.addEventListener('mouseover', () => {
                 dataRow.classList.add("highlightedCell");
             });
-            if (scoreType === "Time" && item.time > 59999) {
+            if (["Time", "FMC", "FMC MTM"].includes(scoreType) && item.time > 59999) {
                 scoreCell.addEventListener('mouseover', () => {
                     tooltip.textContent = formatTime(item.time);
                     tooltip.style.display = 'block';

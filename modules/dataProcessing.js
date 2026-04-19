@@ -176,10 +176,9 @@ function getCountryScores() {
             let newValue = getMainValue(score, score.leaderboardType);
             let currentValue = getMainValue(currentBest, score.leaderboardType);
 
-            // Step 9: For "time" and "move", lower is better; for "tps", higher is better.
-            let isBetterScore = (score.leaderboardType === "time" || score.leaderboardType === "move")
-                ? newValue < currentValue
-                : newValue > currentValue;
+            // Step 9: For time-based and move, lower is better; for tps, higher is better.
+            const lowerIsBetter = ["time", "move", "FMC", "FMC MTM"].includes(score.leaderboardType);
+            let isBetterScore = lowerIsBetter ? newValue < currentValue : newValue > currentValue;
 
             // Step 10: If the new score is better, update the best score for this country.
             if (isBetterScore) {
@@ -198,14 +197,16 @@ function getCountryScores() {
 
     // Helper function to get the main value of a score based on the leaderboard type.
     function getMainValue(score, scoreType) {
-        if (scoreType === "time") {
-            return score.time;
-        } else if (scoreType === "move") {
-            return score.moves;
-        } else if (scoreType === "tps") {
-            return score.tps;
-        }
-        return Infinity; // Default to a very high value if the type is unrecognized.
+        const valueMap = {
+            "time": () => score.time,
+            "move": () => score.moves,
+            "tps": () => score.tps,
+            "FMC": () => score.time,
+            "FMC MTM": () => score.time
+        };
+
+        const getter = valueMap[scoreType];
+        return getter ? getter() : Infinity;
     }
 }
 
@@ -402,12 +403,14 @@ function isInvalid(myvalue, scoreType) {
     if (scoreType === "Moves") {
         return (myvalue === 1000 || myvalue === 2000);
     }
-    if (scoreType === "Time") {
-        return (myvalue > -1 && myvalue < 1);
-    }
     if (scoreType === "TPS") {
         return myvalue > 10000000;
     }
+    // Time, FMC, and FMC MTM all use time-based validation
+    if (scoreType === "Time" || scoreType === "FMC" || scoreType === "FMC MTM") {
+        return (myvalue > -1 && myvalue < 1);
+    }
+    return false;
 }
 
 //"Public" function to get unique ID for score
@@ -474,25 +477,29 @@ function organizeData(data) {
 }
 
 function sortData(lists, sortfactor) {
-    let sortField;
-    if (sortfactor === 'time') {
-        sortField = 'time';
-        percentageTable = percentageTableTime;
-    } else if (sortfactor === 'move') {
-        sortField = 'moves';
-        percentageTable = percentageTableMoves;
-    } else if (sortfactor === 'tps') {
-        sortField = 'tps';
-        percentageTable = percentageTableTPS;
-    } else if (sortfactor === 'size') { //!ONLY FOR SQUARES! 
-        sortField = 'width';
-    } else if (sortfactor === 'timestamp') {
-        sortField = 'timestamp';
-    } else {
+    // Map sortfactor to field and percentage table
+    const sortConfig = {
+        'time': { field: 'time', table: percentageTableTime },
+        'move': { field: 'moves', table: percentageTableMoves },
+        'tps': { field: 'tps', table: percentageTableTPS },
+        'FMC': { field: 'time', table: percentageTableTime },
+        'FMC MTM': { field: 'time', table: percentageTableTime },
+        'size': { field: 'width' },
+        'timestamp': { field: 'timestamp' }
+    };
+
+    const config = sortConfig[sortfactor];
+    if (!config) {
         throw new Error(`Invalid sortfactor: ${sortfactor}`);
     }
+
+    if (config.table) {
+        percentageTable = config.table;
+    }
+
+    const sortField = config.field;
+
     if (isArrayOfObjects(lists)) {
-        //silly code to adapt for 1-list entry
         lists = sortList(lists, sortField);
     } else {
         for (const key in lists) {
@@ -520,12 +527,12 @@ function filterListsByControlType(lists, controlType) {
     if (controlType === "both") {
         return lists;
     }
-    
+
     const filteredLists = {};
     for (const key in lists) {
         if (lists.hasOwnProperty(key)) {
             const originalList = lists[key];
-            
+
             if (controlType === "unique") {
                 filteredLists[key] = filterByUnique(originalList);
             } else {
@@ -577,7 +584,7 @@ function filterByUniqueSize(originalList) {
 //_________________"Private" functions for processSquareRecordsData_________________
 
 function getSquareWRs(lists, controlType) {
-    const filterFn = (controlType !== "both" && controlType !== "unique") 
+    const filterFn = (controlType !== "both" && controlType !== "unique")
         ? list => filterBySingleControl(list, controlType)
         : list => list;
 
@@ -640,15 +647,17 @@ function organizeInRanks(cleanedData, rankList) {
 
 function getKinchRankings(uniqueNames, scoresLists, scoreType, percentageTable, weight) {
     function getMainValue(score, scoreType) {
-        if (scoreType === scoreTypes["time"]) {
-            return score.time
-        }
-        if (scoreType === scoreTypes["move"]) {
-            return score.moves
-        }
-        if (scoreType === scoreTypes["tps"]) {
-            return score.tps
-        }
+        // Map scoreType to the value to return
+        const valueMap = {
+            [scoreTypes["time"]]: () => score.time,
+            [scoreTypes["move"]]: () => score.moves,
+            [scoreTypes["tps"]]: () => score.tps,
+            [scoreTypes["FMC"]]: () => score.time,
+            [scoreTypes["FMC MTM"]]: () => score.time
+        };
+
+        const getter = valueMap[scoreType];
+        return getter ? getter() : score.time;
     }
     let reverse = false;
     scoreType = scoreTypes[scoreType];
@@ -696,15 +705,15 @@ function getKinchRankings(uniqueNames, scoresLists, scoreType, percentageTable, 
         let sum = 0;
         let count = 0;
         let scoreTypeNew = request.leaderboardType;
-        if (scoreTypeNew === "move") {
-            scoreTypeNew = "Moves"
-        }
-        if (scoreTypeNew === "time") {
-            scoreTypeNew = "Time"
-        }
-        if (scoreTypeNew === "tps") {
-            scoreTypeNew = "TPS"
-        }
+        const scoreTypeDisplayMap = {
+            "move": "Moves",
+            "time": "Time",
+            "tps": "TPS",
+            "FMC": "FMC",
+            "FMC MTM": "FMC MTM"
+        };
+
+        scoreTypeNew = scoreTypeDisplayMap[scoreTypeNew] || scoreTypeNew;
         scores.forEach(score => {
             const bestValue = bestValues[score.id];
             if (bestValue !== defaultScore && !isInvalid(bestValue, scoreTypeNew)) {
@@ -994,12 +1003,15 @@ function removeWorseItems(AllRecordsMerged, request) {
             for (let i = 1; i < items.length; i++) {
                 const currentItem = items[i];
 
-                if (request.leaderboardType === 'time' && currentItem.time < bestItem.time) {
-                    bestItem = currentItem;
-                } else if (request.leaderboardType === 'move' && currentItem.moves < bestItem.moves) {
-                    bestItem = currentItem;
-                } else if (request.leaderboardType === 'tps' && currentItem.tps > bestItem.tps) {
-                    bestItem = currentItem;
+                if (request.leaderboardType === 'tps') {
+                    // TPS: higher is better
+                    if (currentItem.tps > bestItem.tps) bestItem = currentItem;
+                } else if (request.leaderboardType === 'move') {
+                    // Moves: lower is better
+                    if (currentItem.moves < bestItem.moves) bestItem = currentItem;
+                } else if (['time', 'FMC', 'FMC MTM'].includes(request.leaderboardType)) {
+                    // Time, FMC, FMC MTM: all use time, lower is better
+                    if (currentItem.time < bestItem.time) bestItem = currentItem;
                 }
             }
             for (let i = items.length - 1; i >= 0; i--) {
