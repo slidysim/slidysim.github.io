@@ -19,7 +19,7 @@ const weight = 1; //default value for kinch weight
 var debugMode = false;
 const youtubeLogoLink="images/youtube.ico";
 const youtubeElement = `<img class="emoji" src="${youtubeLogoLink}" alt="YouTube video available"></img>`
-const webElement = `<img class="emoji" src="images/web.ico" alt="Score from play.slidysim.com"></img>`
+const webElement = `<img class="emoji" src="images/web2.png" alt="Score from play.slidysim.com"></img>`
 const eggIcon = "images/eggIcon.ico";
 const eggElement = `<img class="emoji" src="${eggIcon}" alt="Repaly available"></img>`
 const redEggIcon = "images/redEgg.ico";

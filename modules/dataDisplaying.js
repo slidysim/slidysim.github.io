@@ -679,7 +679,7 @@ function createSheetNxM(WRList) {
                     if (!debugMode) {
                         const videolink = videoLinkCheck(result.videolink);
                         if (result.isWeb) {
-                            scoreCellElement.firstChild.innerHTML = webElement + scoreCellElement.firstChild.textContent;
+                            cell.firstChild.innerHTML = webElement + cell.firstChild.textContent;
                         }
                         let makeyoutubelink = false;
                         if (videolink) {
@@ -930,7 +930,7 @@ function createSheetRankings(playerScores) {
                                     const videolink = videoLinkCheck(item.videolink);
                                     let makeyoutubelink = false;
                                     if (item.isWeb) {
-                                        scoreCellElement.firstChild.innerHTML = webElement + scoreCellElement.firstChild.textContent;
+                                        scoreCell.firstChild.innerHTML = webElement + scoreCell.firstChild.textContent;
                                     }
                                     if (videolink) {
                                         scoreCell.classList.add("clickable");
@@ -1385,7 +1385,7 @@ function getScoreTitle(videolink, width, height, displayType, username, controls
         display_type_string = `${displayType} display type `
     }
     tierTitleSpan.innerHTML += `${display_type_string}Solve by ${username}<br>${scoreType} PB | ${controls} | ${formatTimestamp(timestamp)}`;
-    
+
     if (videolink !== -1) {
         tierTitleSpan.classList.add("clickable");
         tierTitleSpan.addEventListener('click', function () {
@@ -2430,6 +2430,9 @@ function populateTableHistory(records, recordsListWR, scoreType, table, reverse)
             const bestValue = tierInfo[2];
             if (!debugMode) {
                 let makeyoutubelink = false;
+                if (item.isWeb) {
+                    scoreCell.firstChild.innerHTML = webElement + scoreCell.firstChild.textContent;
+                }
                 const videolink = videoLinkCheck(item.videolink);
                 if (videolink) {
                     scoreCell.classList.add("clickable");
