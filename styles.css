@@ -1010,7 +1010,7 @@ img {
     box-shadow: 0 0 10px 5px #000;
     text-align: center;
     display: none;
-    z-index: 2;
+    z-index: 11;
 }
 
 #recOveralyContainer {
