@@ -103,6 +103,7 @@ const userCountryMap = {
     Slovenia: 'Slovenia',
     'South Africa': 'South Africa',
     Sweden: 'Sweden',
+    Afghanistan: 'Afghanistan',
 
     kaxymonoxy: 'Iceland',
 
@@ -338,6 +339,8 @@ const userCountryMap = {
 
     xenia: 'Sweden',
     Andersh2345: 'Sweden'
+
+    TheGameChallenger: 'Afghanistan'
 
   };
   
