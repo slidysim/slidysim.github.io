@@ -338,7 +338,7 @@ const userCountryMap = {
     Yokow: 'South Africa',
 
     xenia: 'Sweden',
-    Andersh2345: 'Sweden'
+    Andersh2345: 'Sweden',
 
     TheGameChallenger: 'Afghanistan'
 
