@@ -361,8 +361,14 @@ async function verifyLogin() {
                 return;
             } else if (response.status === 401) {
                 console.log("Stored token is invalid.");
+                localStorage.removeItem('user_token');
+            } else if (response.status === 429) {
+                alert("Too many requests. Please wait 5 seconds before trying again.");
+                await new Promise(resolve => setTimeout(resolve, 5000));
+                window.location.reload();
+                return;
             } else {
-                console.log("Unexpected server response. You can try /archive page.");
+                console.log("Unexpected server response.");
                 if (confirm("Server might be temporarily unavailable. Open the archive page instead? If not, page will simply reload. Check our Discord for updates.")) {
                     window.location.href = '/archive';
                     return;
@@ -377,30 +383,64 @@ async function verifyLogin() {
                 window.location.href = '/archive';
                 return;
             } else {
-                    window.location.reload();
-                    return;
-                }
+                window.location.reload();
+                return;
+            }
         }
     }
 
-    // If no stored token or invalid token
-    while (true) {
-        const choice = confirm("No valid login found.\nPress OK to login with credentials, or Cancel to use archive page (no solve replays).");
-        if (!choice) {
-            window.location.href = '/archive';
+    // No valid stored token - ask user for login choice
+    const choice = confirm("Would you like to login as a registered user?\n\nPress OK to login with credentials\nPress Cancel to continue as Guest");
+    
+    if (choice) {
+        const loginSuccess = await promptForUserLogin();
+        if (!loginSuccess) {
+            window.location.reload();
             return;
         }
+    } else {
+        await loginAsGuest();
+    }
+}
 
-        const username = prompt("Enter your username (or cancel to exit):");
+async function loginAsGuest() {
+    const guestToken = generateToken("Guest", "4bohpp77zccxirzx9cvhbk");
+    
+    try {
+        const response = await fetch(`${dblink}/api/protected`, {
+            method: 'GET',
+            headers: {
+                'Authorization': guestToken
+            }
+        });
+
+        if (response.ok) {
+            user_token = guestToken;
+            logged_in_as = "Guest";
+            const userlinkel = document.getElementById("user_logged_in");
+            userlinkel.textContent = "Guest";
+            
+        } else if (response.status === 429) {
+            alert("Too many requests. Please wait 5 seconds before trying again.");
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            window.location.reload();
+        }
+    } catch (error) {
+        console.log("Guest login failed:", error);
+        window.location.reload();
+    }
+}
+
+async function promptForUserLogin() {
+    while (true) {
+        const username = prompt("Enter your username:");
         if (username === null) {
-            window.location.href = '/';
-            return;
+            return false; // User cancelled
         }
 
         const password = prompt("Enter your password:");
         if (password === null) {
-            window.location.href = '/';
-            return;
+            return false; // User cancelled
         }
 
         const token = generateToken(username, password);
@@ -418,14 +458,19 @@ async function verifyLogin() {
                 localStorage.setItem('user_token', user_token);
                 console.log("Login successful. Token saved to local storage.");
                 setTimeout(() => window.location.reload(), 2000);
-                break;
+                return true;
             } else if (response.status === 401) {
-                alert("Login failed. Please try again.");
+                alert("Login failed. Invalid username or password.");
+            } else if (response.status === 429) {
+                alert("Too many requests. Please wait 5 seconds before trying again.");
+                await new Promise(resolve => setTimeout(resolve, 5000));
+                window.location.reload();
+                return false;
             } else {
-                alert("An error occurred. You can try the archive page.");
+                alert("An error occurred. Please try again.");
             }
         } catch (error) {
-            alert("Server error. You might try the archive page. Error: " + error.message);
+            alert("Server error. Please try again.");
         }
     }
 }
