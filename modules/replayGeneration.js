@@ -1682,3 +1682,34 @@ function loadCustomReplay(replayData) {
         handleSavedReplayWrapperDec(customReplayData);
     }
 }
+
+// Listen for messages from the parent window
+window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'runReplay') {
+        const {
+            solution,
+            event: eventParam = -1,
+            tps = 15,
+            width = -1,
+            height = -1,
+            scoreTitle = "Custom",
+            customScramble = -1,
+            customMoveTimes = -1,
+            cummulitive_data = -1,
+            nodelay = false
+        } = event.data;
+        
+        makeReplay(
+            solution,
+            eventParam,
+            tps,
+            width,
+            height,
+            scoreTitle,
+            customScramble,
+            customMoveTimes,
+            cummulitive_data,
+            nodelay
+        );
+    }
+});
