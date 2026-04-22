@@ -1180,6 +1180,7 @@ img {
 #contentDiv {
     opacity: 1; /* Start fully visible */
     transition: opacity 0.25s ease; /* Smooth transition for content div */
+    padding-bottom: 50px;
 }
 
 .tabs {
