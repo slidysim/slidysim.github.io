@@ -9,17 +9,55 @@ optimalSolver.js
 slidingPuzzle.js
 */
 
+function copyToClipboard(text, successMessage = linkCopiedSuccsess) {
+    navigator.clipboard.writeText(text)
+        .then(() => {
+            const copiedMessage = document.createElement("div");
+            copiedMessage.textContent = successMessage;
+            copiedMessage.style.position = "fixed";
+            copiedMessage.style.background = "rgba(0, 0, 0, 0.7)";
+            copiedMessage.style.color = "white";
+            copiedMessage.style.padding = "10px 20px";
+            copiedMessage.style.borderRadius = "5px";
+            copiedMessage.style.textAlign = "center";
+            copiedMessage.style.bottom = "20px";
+            copiedMessage.style.right = "20px";
+            copiedMessage.style.zIndex = "999";
+            copiedMessage.style.transition = "opacity 0.5s";
+            document.body.appendChild(copiedMessage);
+            
+            setTimeout(() => {
+                copiedMessage.style.opacity = "0";
+                setTimeout(() => {
+                    if (copiedMessage.parentNode) {
+                        document.body.removeChild(copiedMessage);
+                    }
+                }, 500);
+            }, 2000);
+        })
+        .catch((error) => {
+            console.error("Copy failed: ", error);
+        });
+}
+
+function toggleCustomVisibility() {
+    if (popupContainerCustom.style.display === "none") {
+        popupContainerCustom.style.display = "block";
+    } else {
+        popupContainerCustom.style.display = "none";
+        editButton.textContent = "Edit";
+    }
+}
+
 function toggleSettingsVisibility() {
     settingsButton = document.getElementById("settingsButton");
     if (popupContainerSettings.style.display === "none") {
         popupContainerSettings.style.display = "block";
-        settingsButton.textContent = hideStatsText;
         if (window.innerWidth < 1300){
             changeOveralyStyle(mobile=true, showWarning=!warningWasShown);
         }
     } else {
         popupContainerSettings.style.display = "none";
-        settingsButton.textContent = showStatsText;
     }
 }
 
@@ -1160,6 +1198,7 @@ function animateMatrix(scoreTitle, matrix, solution, tps, allFringeSchemes, grid
         createCustomBasedOnThatButton.textContent = createCustomReplayButtonText;
         createCustomBasedOnThatButton.addEventListener("click", function (event) {
             makeReplay(solution, event, tps, matrix[0].length, matrix.length, "Custom", stringScramble, customMoveTimes);
+            toggleCustomVisibility();
         });
         popupContainerSettings.appendChild(createCustomBasedOnThatButton);
     } else {
@@ -1254,33 +1293,7 @@ function animateMatrix(scoreTitle, matrix, solution, tps, allFringeSchemes, grid
         shareReplayButton.textContent = copyReplayButtonText;
         shareReplayButton.addEventListener("click", function () {
             const shareReplayLink = shareReplay(solution, newTPS, stringScramble, customMoveTimes);
-            // const shareReplayLink = `[${matrix[0].length}x${matrix.length} solve - ${replayScoreStringSpan.textContent}](${shareReplay(solution, newTPS, stringScramble, customMoveTimes)})`;
-            navigator.clipboard.writeText(shareReplayLink)
-                .then(() => {
-                    const copiedMessage = document.createElement("div");
-                    copiedMessage.textContent = linkCopiedSuccsess;
-                    copiedMessage.style.position = "fixed";
-                    copiedMessage.style.background = "rgba(0, 0, 0, 0.7)";
-                    copiedMessage.style.color = "white";
-                    copiedMessage.style.padding = "10px";
-                    copiedMessage.style.borderRadius = "5px";
-                    copiedMessage.style.textAlign = "center";
-                    copiedMessage.style.top = "50%";
-                    copiedMessage.style.left = "50%";
-                    copiedMessage.style.transform = "translate(-50%, -50%)";
-                    copiedMessage.style.zIndex = "999";
-                    document.body.appendChild(copiedMessage);
-                    setTimeout(() => {
-                        copiedMessage.style.transition = "opacity 0.5s";
-                        copiedMessage.style.opacity = "0";
-                        setTimeout(() => {
-                            document.body.removeChild(copiedMessage);
-                        }, 500);
-                    }, 1000);
-                })
-                .catch((error) => {
-                    console.error("Copy failed: ", error);
-                });
+            copyToClipboard(shareReplayLink);
         });
         popupContainerCustom.appendChild(customScrambleArea);
         popupContainerCustom.appendChild(TPSInputSpan);
@@ -1521,16 +1534,18 @@ scoreHeader.appendChild(messageSpan);
     closeButton.style.border = "0.1vh solid #000";
     closeButton.style.boxShadow = "none";
     closeButton.addEventListener('click', closeReplay);
-    if (popupContainerSettings.style.display === "none") {
-        settingsButton.textContent = showStatsText;
-    } else {
-        settingsButton.textContent = hideStatsText;
-    }
 
     settingsButton.addEventListener('click', toggleSettingsVisibility)
+
+    // Add Edit button
+    const editButton = document.createElement('button');
+    editButton.id = "editButton";
+    editButton.textContent = "Edit";
+    editButton.style.border = "0.1vh solid #fff";
+    editButton.addEventListener('click', toggleCustomVisibility);
     makeStopButton();
     popupContainerSettings.style.display = "none";
-    settingsButton.textContent = showStatsText;
+    settingsButton.textContent = "Stats";
     function toggleAnimationButton() {
         if (index === solLen && animationID === null) {
             makeStartButton();
@@ -1584,6 +1599,14 @@ scoreHeader.appendChild(messageSpan);
     rewindContainer.appendChild(document.createElement('br'));
     rewindContainer.appendChild(animationButton);
     rewindContainer.appendChild(settingsButton);
+    if (isCustomReplay) {
+        if (solution !== "") {
+            rewindContainer.appendChild(editButton);
+            const shareReplayLink = shareReplay(solution, tps, stringScramble, customMoveTimes);
+            copyToClipboard(shareReplayLink);
+            toggleCustomVisibility();
+        }
+    }
     
 
     if (solution === "") {
