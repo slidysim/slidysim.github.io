@@ -1876,7 +1876,8 @@ function buildControlsRow(displaySelect, controlSelect) {
 
 function buildTimestampSection() {
     if (archiveDate !== "LIVE") {
-        setTimeout(() => initArchiveDropdown(".leaderboardUpdateSpan", loadingPower), 0);
+        const lp = loadingPower;
+        setTimeout(() => initArchiveDropdown(".leaderboardUpdateSpan", lp), 0);
         return '<span class="leaderboardUpdateSpan">Archive from </span>';
     }
 
@@ -2066,6 +2067,7 @@ function initArchiveDropdown(selector, usePower) {
 
     select.addEventListener("change", () => {
         archiveDate = select.value;
+        //console.log(usePower ? "Fetching power data for archive " + archiveDate : "Updating server for archive " + archiveDate);
         usePower ? getPowerData() : updateServer(user_token, last_displayType, last_controlType, last_pbType);
     });
 
