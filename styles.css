@@ -57,6 +57,7 @@ body {
 
 select {
     padding: 0;
+    font-family: monospace;
     font-weight: bold !important;
     border: none;
     background-color: #121212;
@@ -259,9 +260,11 @@ table.rankingCells td {
     background-color: #222;
     color: #fff;
 }
+/* Responsive table for mobile */
 @media (max-width: 1200px) {
     .WRstable {
-        display: none;
+        display: block;
+        overflow-x: auto;
     }
 }
 
@@ -1281,7 +1284,7 @@ iframe {
 }
 
 .historyRecordsTable {
-    width: 650px;
+    width: 550px;
     max-width: 100%;
     border-spacing: 0 4px; /* tighter rows */
     font-size: 13px;
@@ -1290,8 +1293,13 @@ iframe {
 .historyRecordsTable td {
     height: 32px !important;
     padding: 3px 3px !important;
-    min-width: unset !important;
-    max-width: unset !important;
+    min-width: 95px;
+    max-width: 95px;
+}
+
+.historyRecordsTable td:first-child {
+    min-width: 150px;
+    max-width: 150px;
 }
 
 .historyRecordsTable th {
@@ -1300,7 +1308,7 @@ iframe {
 }
 
 .centeredHistory {
-    max-width: 700px;
+    max-width: 600px;
     position: relative;
     left: 50%;
     transform: translateX(-50%);

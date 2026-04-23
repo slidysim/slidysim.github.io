@@ -1799,7 +1799,7 @@ function formatGameModeText(gameMode, forHistoryPage = false) {
 }
 
 function buildHeader(pbSelect, request) {
-    const parts = [`<span style="font-weight: 900;">${pbSelect}</span> Leaderboard for`];
+    const parts = [`<span style="font-weight: 900;">${pbSelect}</span>`];
     return parts.join(' ');
 }
 
@@ -2360,80 +2360,25 @@ function populateTableHistory(records, recordsListWR, scoreType, table, reverse)
             scoresCounter++;
             const dataRow = document.createElement('tr');
             table.appendChild(dataRow);
-            const categoryCell = document.createElement('td');
-            dataRow.appendChild(categoryCell);
 
-            const isAverage = (item.avglen !== 1);
-            let avgpart = isAverage ? `ao${item.avglen}` : "";
+            const tier = tierInfo[1];
+            dataRow.classList.add(tier);
 
-            let sizePart = `${item.width}x${item.height}`;
-            let mode = item.gameMode;
-            let modePart = "";
-
-            // Transform game modes
-            if (mode === "Standard") {
-                modePart = "";
-            }
-            else if (mode.startsWith("Marathon")) {
-                const num = mode.split(" ")[1];
-                modePart = `x${num}`;
-            }
-            else if (mode === "2-N relay") {
-                modePart = "relay";
-            }
-            else if (mode === "Width relay") {
-                modePart = "Wrel";
-            }
-            else if (mode === "Height relay") {
-                modePart = "Hrel";
-            }
-            else if (mode === "Everything-up-to relay") {
-                modePart = "EUT";
-            }
-            else {
-                modePart = mode;
-            }
-
-            // Build final string
-            let categoryString = sizePart;
-            if (modePart) categoryString += ` ${modePart}`;
-            if (avgpart) categoryString += ` ${avgpart}`;
-
-            categoryCell.innerHTML = categoryString;
-            categoryCell.classList.add("clickable");
-
-            let newSize = item.width + "x" + item.height;
-            let newGameMode = item.gameMode;
-
-            categoryCell.addEventListener("click", function () {
-                customSizeInput.value = newSize;
-                radioCustomSize.value = newSize;
-                radioCustomSize.checked = true;
-
-                for (const radio of gamemodeRadios) {
-                    if (radio.value === newGameMode) {
-                        radio.checked = true;
-                        break;
-                    }
-                }
-
-                changeGameMode(newGameMode);
-                changePuzzleSize(newSize);
-            });
+            // === PLAYER NAME CELL ===
             const displayedName = item.nameFilter;
             const playerNameCell = document.createElement("td");
             playerNameCell.innerHTML = appendFlagIconToNickname(displayedName);
             playerNameCell.classList.add("clickable");
-            playerNameCell.style.minWidth = "150px";
-            playerNameCell.style.maxWidth = "150px";
             playerNameCell.addEventListener("click", function () {
                 changeNameFilter(item.nameFilter);
             });
             dataRow.appendChild(playerNameCell);
+
+            // === SCORE CELL ===
+            const isAverage = (item.avglen !== 1);
             const scoreString = getScoreString(item.time, item.moves, item.tps, scoreType, isAverage);
             const scoreCell = createTableCellScore(scoreString, 'score', "grayColor");
-            const tier = tierInfo[1];
-            const bestValue = tierInfo[2];
+
             if (!debugMode) {
                 let makeyoutubelink = false;
                 if (item.isWeb) {
@@ -2445,33 +2390,27 @@ function populateTableHistory(records, recordsListWR, scoreType, table, reverse)
                     scoreCell.firstChild.innerHTML = youtubeElement + scoreCell.firstChild.textContent;
                     makeyoutubelink = true;
                 }
-                if (true//item.gameMode === "Standard"// && !isAverage
-                ) {
-                    //const solution = getSolutionForScore(item);
-                    if (item.solve_data_available) {
-                        makeyoutubelink = false;
-                        let videoLinkForReplay = -1;
-                        if (videolink) {
-                            videoLinkForReplay = videolink;
-                            scoreCell.firstChild.innerHTML = redEggElement + scoreCell.firstChild.textContent;
-                        } else {
-                            scoreCell.firstChild.innerHTML = eggElement + scoreCell.firstChild.textContent;
-                        }
-                        scoreCell.classList.add("clickable");
-
-                        const scoreTitle = getScoreTitle(videoLinkForReplay, item.width, item.height, item.displayType, item.nameFilter, item.controls, item.timestamp, tier, percentage === 100, scoreType);
-                        scoreCell.addEventListener('click', (event) => {
-                            getSolutionForScore(item, (error, solveData) => {
-                                if (error) {
-                                    alert(error);
-                                } else {
-                                    //makeReplay(solution, event, item.tps, item.width, item.height, scoreTitle);
-                                    handleSavedReplay(item, solveData, event, item.tps, item.width, item.height, scoreTitle, videoLinkForReplay, tier, percentage === 100);
-                                }
-                            });
-                            // makeReplay(solution, event, item.tps, item.width, item.height, scoreTitle);
-                        });
+                if (item.solve_data_available) {
+                    makeyoutubelink = false;
+                    let videoLinkForReplay = -1;
+                    if (videolink) {
+                        videoLinkForReplay = videolink;
+                        scoreCell.firstChild.innerHTML = redEggElement + scoreCell.firstChild.textContent;
+                    } else {
+                        scoreCell.firstChild.innerHTML = eggElement + scoreCell.firstChild.textContent;
                     }
+                    scoreCell.classList.add("clickable");
+
+                    const scoreTitle = getScoreTitle(videoLinkForReplay, item.width, item.height, item.displayType, item.nameFilter, item.controls, item.timestamp, tier, percentage === 100, scoreType);
+                    scoreCell.addEventListener('click', (event) => {
+                        getSolutionForScore(item, (error, solveData) => {
+                            if (error) {
+                                alert(error);
+                            } else {
+                                handleSavedReplay(item, solveData, event, item.tps, item.width, item.height, scoreTitle, videoLinkForReplay, tier, percentage === 100);
+                            }
+                        });
+                    });
                 }
                 if (makeyoutubelink) {
                     scoreCell.addEventListener('click', function () {
@@ -2488,44 +2427,89 @@ function populateTableHistory(records, recordsListWR, scoreType, table, reverse)
                 }
             }
             dataRow.appendChild(scoreCell);
+
+            // === CATEGORY CELL ===
+            const categoryCell = document.createElement('td');
+            let avgpart = isAverage ? `ao${item.avglen}` : "";
+            let sizePart = `${item.width}x${item.height}`;
+            let mode = item.gameMode;
+            let modePart = "";
+
+            if (mode === "Standard") {
+                modePart = "";
+            } else if (mode.startsWith("Marathon")) {
+                const num = mode.split(" ")[1];
+                modePart = `x${num}`;
+            } else if (mode === "2-N relay") {
+                modePart = "relay";
+            } else if (mode === "Width relay") {
+                modePart = "Wrel";
+            } else if (mode === "Height relay") {
+                modePart = "Hrel";
+            } else if (mode === "Everything-up-to relay") {
+                modePart = "EUT";
+            } else {
+                modePart = mode;
+            }
+
+            let categoryString = sizePart;
+            if (modePart) categoryString += ` ${modePart}`;
+            if (avgpart) categoryString += ` ${avgpart}`;
+
+            categoryCell.innerHTML = categoryString;
+            categoryCell.classList.add("clickable");
+
+            categoryCell.addEventListener("click", function () {
+                customSizeInput.value = sizePart;
+                radioCustomSize.value = sizePart;
+                radioCustomSize.checked = true;
+
+                for (const radio of gamemodeRadios) {
+                    if (radio.value === mode) {
+                        radio.checked = true;
+                        break;
+                    }
+                }
+
+                changeGameMode(mode);
+                changePuzzleSize(sizePart);
+            });
+            dataRow.appendChild(categoryCell);
+
+            // === CONTROLS CELL (with percentage) ===
             const controlsCell = document.createElement('td');
-            controlsCell.textContent = item.controls;
-            dataRow.appendChild(controlsCell);
-            const tierCell = document.createElement('td');
-            const limitsString = getLimitString(bestValue, item, avgpart, item.gameMode, reverse, isAverage, scoreType);
-            const tierCap = tier.charAt(0)
-                .toUpperCase() + tier.slice(1);
             if (percentage === 100) {
                 if (currentCountry === 'worldwide') {
-                    tierCell.textContent = `WR`;
+                    controlsCell.innerHTML = `${item.controls}<br>(WR)`;
                 } else {
-                    tierCell.textContent = `NR (${currentCountry})`;
+                    controlsCell.innerHTML = `${item.controls}<br>(NR)`;
                 }
-                tierCell.classList.add("WRPB");
+                dataRow.classList.add("WRPB");
             } else {
-                if (currentCountry === 'worldwide') {
-                    tierCell.innerHTML = `${tierCap}<br>(${percentage.toFixed(1)}%)`;
-                } else {
-                    tierCell.innerHTML = `${tierCap}<br>(${percentage.toFixed(1)}% ${currentCountry})`;
-                }
+                controlsCell.innerHTML = `${item.controls}<br>(${percentage.toFixed(3)}%)`;
             }
-            dataRow.classList.add(tier);
-            dataRow.appendChild(tierCell);
-            tierCell.addEventListener('mouseover', () => {
-                tooltip.innerHTML = limitsString;
-                tooltip.style.display = 'block';
-            });
-            tierCell.addEventListener('mousemove', (e) => {
-                tooltip.style.left = (e.pageX - 170) + 'px';
-                tooltip.style.top = (e.pageY - 470) + 'px';
-            });
-            tierCell.addEventListener('mouseout', () => {
-                tooltip.style.display = 'none';
-            });
+            dataRow.appendChild(controlsCell);
+
+            // === DATE CELL ===
+            const dateCell = document.createElement('td');
+            const timestamp = formatTimestampWithTime(item.timestamp);
+            const [datePart, timePart] = timestamp.split(' ');
+            dateCell.innerHTML = `${datePart}<br>${timePart}`;
+            dataRow.appendChild(dateCell);
+
+            // === ROW EVENT LISTENERS ===
             dataRow.classList.add("shadowFun");
             dataRow.addEventListener('mouseover', () => {
                 dataRow.classList.add("highlightedCell");
             });
+            dataRow.addEventListener('mouseout', () => {
+                dataRow.classList.remove("highlightedCell");
+            });
+            dataRow.addEventListener('mouseout', () => {
+                tooltip.style.display = 'none';
+            });
+
+            // Score tooltips
             if (["Time", "FMC", "FMC MTM"].includes(scoreType) && item.time > 59999) {
                 scoreCell.addEventListener('mouseover', () => {
                     tooltip.textContent = formatTime(item.time);
@@ -2538,8 +2522,7 @@ function populateTableHistory(records, recordsListWR, scoreType, table, reverse)
             }
             if (scoreType === "Moves" && item.moves > 100000 && isAverage) {
                 scoreCell.addEventListener('mouseover', () => {
-                    tooltip.textContent = (item.moves / 1000)
-                        .toFixed(3);
+                    tooltip.textContent = (item.moves / 1000).toFixed(3);
                     tooltip.style.display = 'block';
                 });
                 scoreCell.addEventListener('mousemove', (e) => {
@@ -2547,15 +2530,6 @@ function populateTableHistory(records, recordsListWR, scoreType, table, reverse)
                     tooltip.style.top = (e.pageY - 20) + 'px';
                 });
             }
-            dataRow.addEventListener('mouseout', () => {
-                dataRow.classList.remove("highlightedCell");
-            });
-            dataRow.addEventListener('mouseout', () => {
-                tooltip.style.display = 'none';
-            });
-            const dateCell = document.createElement('td');
-            dateCell.textContent = formatTimestampWithTime(item.timestamp);
-            dataRow.appendChild(dateCell);
         }
     });
     return scoresCounter;
