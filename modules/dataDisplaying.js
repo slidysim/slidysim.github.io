@@ -1862,12 +1862,12 @@ function buildPageContent(config, request, wrTexts) {
     if (gameMode !== "Standard") {
         const modeText = formatGameModeText(gameMode, false);
         if (gameMode === allMarathons) {
-            return `<span class="gamma" style="font-weight: 700;">All </span> <span class="pinktext" style="font-weight: 900;">${width}x${request.height}</span><span class="gamma" style="font-weight: 700;"> marathons</span>`;
+            return `Leaderboard for <span class="gamma" style="font-weight: 700;">All </span> <span class="pinktext" style="font-weight: 900;">${width}x${request.height}</span><span class="gamma" style="font-weight: 700;"> marathons</span>`;
         }
-        return `<span class="pinktext" style="font-weight: 900;">${width}x${request.height}</span> <span class="gamma" style="font-weight: 700;">${modeText}</span>`;
+        return `Leaderboard for <span class="pinktext" style="font-weight: 900;">${width}x${request.height}</span> <span class="gamma" style="font-weight: 700;">${modeText}</span>`;
     }
 
-    return `<span class="pinktext" style="font-weight: 900;">${width}x${request.height}</span> sliding puzzle`;
+    return `Leaderboard for <span class="pinktext" style="font-weight: 900;">${width}x${request.height}</span> sliding puzzle`;
 }
 
 function buildControlsRow(displaySelect, controlSelect) {
