@@ -247,6 +247,7 @@ table.rankingCells td {
 
 table.rankingCells td {
     border-radius: 6px;
+    padding: 5px;
     font-size: 13px;
     box-shadow: 0 0 3px currentColor;
     box-sizing: content-box;
@@ -280,7 +281,7 @@ table.rankingCells td {
 .WRstable th,
 .WRstable td {
     min-width: 90px !important;
-    padding: 10px;
+    padding: 10px !important;
     border: 2px solid #555;
 }
 
@@ -524,7 +525,6 @@ table.rankingCells td {
 table td {
     background-color: transparent;
     font-size: 14px;
-    padding: 5px;
     text-align: center;
     min-width: 60px;
     height: 50px;
@@ -1180,7 +1180,7 @@ img {
 #contentDiv {
     opacity: 1; /* Start fully visible */
     transition: opacity 0.25s ease; /* Smooth transition for content div */
-    padding-bottom: 50px;
+    padding-bottom: 25px;
 }
 
 .tabs {
