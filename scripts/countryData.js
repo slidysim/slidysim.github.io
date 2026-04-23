@@ -15,7 +15,8 @@ const donatorsList = [
 const adminsList = [
     "dphdmn",
     "vovker",
-    "daanbe"
+    "daanbe",
+    "ivy"
 ];
 
 const rename_map = {
@@ -65,7 +66,7 @@ function appendFlagIconToNickname(nickname, minimal = false) {
 
 //countries list and emoji for users to add flags
 
-const userCountryMap = {
+let userCountryMap = {
     Australia: 'Australia',
     Belarus: 'Belarus',
     Belgium: 'Belgium',
@@ -343,6 +344,7 @@ const userCountryMap = {
     TheGameChallenger: 'Afghanistan'
 
   };
+
   
 
 const countryEmojis = {
@@ -640,3 +642,26 @@ const countryEmojis = {
     Zimbabwe: 'images/flags/Zimbabwe.png',
     cheat: 'images/flags/cheat.png'
 };
+
+// Update keys using rename_map (old names -> new names)
+for (const username of Object.keys(userCountryMap)) {
+    // Find if this username is an old name in rename_map
+    for (const [newName, oldName] of Object.entries(rename_map)) {
+        if (oldName === username) {
+            const country = userCountryMap[username];
+            delete userCountryMap[username];
+            userCountryMap[newName] = country;
+            break;
+        }
+    }
+}
+
+// Update donatorsList using rename_map (old names -> new names)
+for (let i = 0; i < donatorsList.length; i++) {
+    for (const [newName, oldName] of Object.entries(rename_map)) {
+        if (oldName === donatorsList[i]) {
+            donatorsList[i] = newName;
+            break;
+        }
+    }
+}

@@ -205,7 +205,7 @@ async function callGetScores(auth_token, display_type_text, control_type_text, p
             return -1;
         }
         //console.log("Scores fetched successfully:", scores);
-        const controlMap = {null: "Keyboard", 0: "Keyboard", 1: "Mouse", 4: "Click", 5: "Touch"};
+        const controlMap = { null: "Keyboard", 0: "Keyboard", 1: "Mouse", 4: "Click", 5: "Touch" };
         const scoresParsed = scores.map(entry => ({
             width: entry["size_n"],
             height: entry["size_m"],
@@ -213,7 +213,15 @@ async function callGetScores(auth_token, display_type_text, control_type_text, p
             controls: controlMap[entry["control_type"]],
             gameMode: entry["solve_type"] < 7 ? { 1: "Standard", 2: "2-N relay", 3: "BLD", 4: "Everything-up-to relay", 5: "Height relay", 6: "Width relay" }[entry["solve_type"]] : `Marathon ${entry["marathon_length"]}`,
             displayType: display_type_text,
-            nameFilter: rename_map[usermap[entry["userid"]]] || usermap[entry["userid"]] || 'Unknown',
+            nameFilter: (() => {
+                const name = usermap[entry["userid"]] || entry["userid"] || 'Unknown';
+                for (const [newName, oldName] of Object.entries(rename_map)) {
+                    if (oldName === name) {
+                        return newName;
+                    }
+                }
+                return name;
+            })(),
             avglen: entry["average_type"],
             time: entry["time"],
             moves: entry["moves"],
@@ -391,7 +399,7 @@ async function verifyLogin() {
 
     // No valid stored token - ask user for login choice
     const choice = confirm("Would you like to login as a registered user?\n\nPress OK to login with credentials\nPress Cancel to continue as Guest");
-    
+
     if (choice) {
         const loginSuccess = await promptForUserLogin();
         if (!loginSuccess) {
@@ -405,7 +413,7 @@ async function verifyLogin() {
 
 async function loginAsGuest() {
     const guestToken = generateToken("Guest", "4bohpp77zccxirzx9cvhbk");
-    
+
     try {
         const response = await fetch(`${dblink}/api/protected`, {
             method: 'GET',
@@ -419,7 +427,7 @@ async function loginAsGuest() {
             logged_in_as = "Guest";
             const userlinkel = document.getElementById("user_logged_in");
             userlinkel.textContent = "Guest";
-            
+
         } else if (response.status === 429) {
             alert("Too many requests. Please wait 5 seconds before trying again.");
             await new Promise(resolve => setTimeout(resolve, 5000));
