@@ -389,20 +389,21 @@ function createSheet(sortedLists, sheetType) {
                         });
                     }
                 }
-                if (["Time", "FMC", "FMC MTM"].includes(scoreType) && item.time > 59999) {
+                if (["Time", "FMC", "FMC MTM"].includes(scoreType) && (item.time > 59999 || (item.moves > 100000 && isAverage))) {
                     scoreCellElement.addEventListener('mouseover', () => {
-                        tooltip.textContent = formatTime(item.time);
+                        const movesDisplay = (item.moves / 1000).toFixed(3);
+                        const tps = (item.moves / item.time).toFixed(3);
+                        tooltip.textContent = formatTime(item.time) + " (" + (item.moves / 1000).toFixed(3) + " moves)";
                         tooltip.style.display = 'block';
                     });
                     scoreCellElement.addEventListener('mousemove', (e) => {
                         tooltip.style.left = (e.pageX - 150) + 'px';
-                        tooltip.style.top = (e.pageY - 20) + 'px';
+                        tooltip.style.top = (e.pageY - 40) + 'px';
                     });
                 }
                 if (scoreType === "Moves" && item.moves > 100000 && isAverage) {
                     scoreCellElement.addEventListener('mouseover', () => {
-                        tooltip.textContent = (item.moves / 1000)
-                            .toFixed(3);
+                        tooltip.textContent = (item.moves / 1000).toFixed(3);
                         tooltip.style.display = 'block';
                     });
                     scoreCellElement.addEventListener('mousemove', (e) => {
@@ -1616,7 +1617,7 @@ function calculateNxMTiers(WRList) {
 
 function isInvalidScore(result) {
     const scoreType = request.leaderboardType;
-    
+
     const valueMap = {
         "move": result.moves,
         "time": result.time,
@@ -1624,13 +1625,13 @@ function isInvalidScore(result) {
         "FMC": result.time,
         "FMC MTM": result.time
     };
-    
+
     const formattedType = {
         "move": "Moves",
         "time": "Time",
         "tps": "TPS"
     }[scoreType] || scoreType;
-    
+
     return isInvalid(valueMap[scoreType], formattedType);
 }
 
@@ -2510,15 +2511,17 @@ function populateTableHistory(records, recordsListWR, scoreType, table, reverse)
             });
 
             // Score tooltips
-            if (["Time", "FMC", "FMC MTM"].includes(scoreType) && item.time > 59999) {
-                scoreCell.addEventListener('mouseover', () => {
-                    tooltip.textContent = formatTime(item.time);
-                    tooltip.style.display = 'block';
-                });
-                scoreCell.addEventListener('mousemove', (e) => {
-                    tooltip.style.left = (e.pageX - 150) + 'px';
-                    tooltip.style.top = (e.pageY - 20) + 'px';
-                });
+            if (["Time", "FMC", "FMC MTM"].includes(scoreType)) {
+                if (item.time > 59999 || (item.moves > 100000 && isAverage)) {
+                    scoreCell.addEventListener('mouseover', () => {
+                        tooltip.textContent = formatTime(item.time) + " (" + (item.moves / 1000).toFixed(3) + " moves)";
+                        tooltip.style.display = 'block';
+                    });
+                    scoreCell.addEventListener('mousemove', (e) => {
+                        tooltip.style.left = (e.pageX - 150) + 'px';
+                        tooltip.style.top = (e.pageY - 40) + 'px';
+                    });
+                }
             }
             if (scoreType === "Moves" && item.moves > 100000 && isAverage) {
                 scoreCell.addEventListener('mouseover', () => {
