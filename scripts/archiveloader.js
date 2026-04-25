@@ -35,14 +35,43 @@ class LeaderboardArchiveLoader {
         }
     }
 
-    async decompressLZMA(arrayBuffer) {
-        const compressedStream = new Response(arrayBuffer).body;
-        const decompressedStream = new xzwasm.XzReadableStream(compressedStream);
-        const decompressedResponse = new Response(decompressedStream);
-        const outputBuffer = await decompressedResponse.arrayBuffer();
-        const text = new TextDecoder().decode(outputBuffer);
-        return text;
+async decompressLZMA(arrayBuffer) {
+    const compressedData = new Uint8Array(arrayBuffer);
+
+    const stream = new ReadableStream({
+        start(controller) {
+            controller.enqueue(compressedData);
+            controller.close();
+        }
+    });
+
+    const xzStream = new xzwasm.XzReadableStream(stream);
+    const reader = xzStream.getReader();
+
+    const chunks = [];
+    let totalLength = 0;
+
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (value) {
+            const chunk = new Uint8Array(value);
+            chunks.push(chunk);
+            totalLength += chunk.length;
+        }
     }
+
+    // Merge in one pass
+    const result = new Uint8Array(totalLength);
+    let offset = 0;
+
+    for (const chunk of chunks) {
+        result.set(chunk, offset);
+        offset += chunk.length;
+    }
+
+    return new TextDecoder().decode(result);
+}
 
     async getCombinationData(dateWithPrefix, displayType, controlType, pbType) {
         const key = `${displayType}_${controlType}_${pbType}`;
