@@ -622,7 +622,7 @@ function createSheetNxM(WRList) {
         contentDiv.innerHTML = notFoundError;
         return;
     }
-    tiersData = calculateNxMTiers(NxMRecords);
+    tiersData = calculateNxMTiers(NxMRecords, true);
     if (request.nameFilter === "") {
         createScoresAmountTable(contentDiv, tiersData);
     }
@@ -1656,14 +1656,13 @@ function formatTimestamp(timestamp) {
     return formattedDate;
 }
 
-function calculateNxMTiers(WRList) {
-    // Filter by selected avglen for accurate WR count
-    const filteredByAvglen = WRList.filter(record => record.avglen === NxMAvglenSelected);
-    const nameSet = new Set(filteredByAvglen.map(record => record.nameFilter));
+function calculateNxMTiers(WRList, filterByAvglen = false) {
+    const filteredList = filterByAvglen ? WRList.filter(record => record.avglen === NxMAvglenSelected) : WRList;
+    const nameSet = new Set(filteredList.map(record => record.nameFilter));
     const tiersMap = {};
     const scoresCount = {};
     nameSet.forEach(name => {
-        const filteredRecords = filteredByAvglen.filter(record => record.nameFilter === name);
+        const filteredRecords = filteredList.filter(record => record.nameFilter === name);
         const validScores = filteredRecords.filter(record => !isInvalidScore(record));
         if (validScores.length > 0) {
             const count = validScores.length;

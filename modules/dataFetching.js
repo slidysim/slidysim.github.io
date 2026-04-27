@@ -292,7 +292,8 @@ function filterDataByRequest(data, request) {
                     (entry.width > 2) && (entry.height > 2) &&
                     (entry.width === entry.height) &&
                     (entry.gameMode.includes("Marathon")) &&
-                    (request.nameFilter === "" || entry.nameFilter.toLowerCase() === request.nameFilter.toLowerCase())
+                    (request.nameFilter === "" || entry.nameFilter.toLowerCase() === request.nameFilter.toLowerCase()) &&
+                    (entry.avglen === 1)
                 );
             });
         }
@@ -310,7 +311,8 @@ function filterDataByRequest(data, request) {
             return (
                 (entry.gameMode.includes("Marathon")) &&
                 (request.width === entry.width) &&
-                (request.height === entry.height)
+                (request.height === entry.height) &&
+                (entry.avglen === 1)
             );
         });
     }
