@@ -154,6 +154,11 @@ function removeBannedScores(scores) {
 }
 
 function directUpdate() {
+    let sheetType = request.height;
+    if (sheetType === squaresSheetType && controlType === "both") {
+        changeControls("unique");
+        return;
+    }
     leaderboardData = removeBannedScores(leaderboardData);
     //console.log("direct update called");
     document.getElementById('power-iframe')?.remove();
@@ -174,7 +179,6 @@ function directUpdate() {
     tierLimiterTab.style.display = 'none';
     tooltip.classList.remove(...tooltip.classList);
     solveTypeDiv.style.display = 'block';
-    let sheetType = request.height;
     if ((request.gameMode === "All Solve Types" || request.gameMode === "Interesting" || request.gameMode === "Standard Singles") && (sheetType !== "History")) {
         radiostandardgamemode.checked = true;
         request.gameMode = "Standard";
