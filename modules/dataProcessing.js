@@ -301,10 +301,22 @@ function processNxMRecordsData(cleanedData) {
 
 // Helper function to analyze available avglens from data
 function analyzeAvailableAvglens(data) {
+    const controlMap = {
+        "mouse": "Mouse",
+        "keyboard": "Keyboard",
+        "click": "Click",
+        "touch": "Touch"
+    };
+    
     const avglenSet = new Set();
     for (const item of data) {
         if (item.avglen) {
-            avglenSet.add(item.avglen);
+            // Filter by control type
+            if (controlType === "both" || 
+                controlType === "unique" || 
+                item.controls === controlMap[controlType]) {
+                avglenSet.add(item.avglen);
+            }
         }
     }
     return Array.from(avglenSet).sort((a, b) => a - b);
