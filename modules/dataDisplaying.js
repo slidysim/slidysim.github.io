@@ -429,6 +429,71 @@ function createSheet(sortedLists, sheetType) {
     });
 }
 
+// Function to create avglen (average length) radio buttons for NxM sheet
+function createNxMAvglenSelector() {
+    const container = document.createElement('div');
+    container.id = 'nxm-avglen-selector';
+    container.style.cssText = 'display: flex; justify-content: center; align-items: center; gap: 10px; padding: 10px; background-color: #12121205; margin-bottom: 10px; flex-wrap: wrap;';
+    
+    const label = document.createElement('span');
+    label.textContent = 'Average: ';
+    label.style.cssText = 'color: #aaa; font-size: 14px;';
+    container.appendChild(label);
+    
+    // Create radio button group
+    const radioGroup = document.createElement('div');
+    radioGroup.className = 'radio-button-container';
+    radioGroup.style.cssText = 'display: flex; gap: 5px; margin: 0; flex-wrap: wrap; justify-content: center;';
+    
+    // Get available avglens and create radio buttons
+    const avglens = NxMAvglenOptions.length > 0 ? NxMAvglenOptions : [1];
+    
+    avglens.forEach(avglen => {
+        const radioBtn = document.createElement('div');
+        radioBtn.className = 'form_radio_btn';
+        
+        const input = document.createElement('input');
+        input.type = 'radio';
+        input.id = `avglen-${avglen}`;
+        input.name = 'nxm-avglen';
+        input.value = avglen;
+        
+        if (avglen === NxMAvglenSelected) {
+            input.checked = true;
+        }
+        
+        const labelEl = document.createElement('label');
+        labelEl.htmlFor = `avglen-${avglen}`;
+        labelEl.className = 'avglenLabel';
+        
+        // Format label text
+        if (avglen === 1) {
+            labelEl.textContent = 'Single';
+        } else {
+            labelEl.textContent = `ao${avglen}`;
+        }
+        
+        // Style for avglen labels
+        labelEl.style.cssText = 'padding: 5px 12px; line-height: 24px; font-size: 13px;';
+        
+        input.addEventListener('change', function() {
+            if (this.checked) {
+                NxMAvglenSelected = avglen;
+                // Re-process and re-render the NxM sheet with the new avglen
+                sendMyRequest();
+            }
+        });
+        
+        radioBtn.appendChild(input);
+        radioBtn.appendChild(labelEl);
+        radioGroup.appendChild(radioBtn);
+    });
+    
+    container.appendChild(radioGroup);
+    
+    return container;
+}
+
 function createNMSlider() {
     const container = document.createElement('div');
     container.style.display = 'flex';
@@ -566,6 +631,10 @@ function createSheetNxM(WRList) {
     tableContainer.classList.add('table-container');
     tableContainer.classList.add("bigContainer");
     contentDiv.appendChild(createNMSlider());
+    // Add avglen selector if there are multiple avglen options
+    if (NxMAvglenOptions.length > 1) {
+        contentDiv.appendChild(createNxMAvglenSelector());
+    }
     contentDiv.appendChild(tableContainer);
     const table = document.createElement('table');
     tableContainer.appendChild(table);
@@ -582,7 +651,7 @@ function createSheetNxM(WRList) {
     th.addEventListener("click", function () {
         NxMstyleDPH = !NxMstyleDPH;
         if (NxMSelected !== totalWRsAmount) {
-            createSheetNxM(NxMRecords.filter(item => item.nameFilter === NxMSelected));
+            createSheetNxM(NxMRecords.filter(item => item.nameFilter === NxMSelected && item.avglen === NxMAvglenSelected));
         } else {
             createSheetNxM(NxMRecords);
         }
@@ -1454,7 +1523,7 @@ function createScoresAmountTable(tableContainer, amountTiersInfo) {
             }
         } else {
             if (columnName !== totalWRsAmount) {
-                createSheetNxM(NxMRecords.filter(item => item.nameFilter === columnName));
+                createSheetNxM(NxMRecords.filter(item => item.nameFilter === columnName && item.avglen === NxMAvglenSelected));
             } else {
                 createSheetNxM(NxMRecords);
             }
@@ -1588,11 +1657,13 @@ function formatTimestamp(timestamp) {
 }
 
 function calculateNxMTiers(WRList) {
-    const nameSet = new Set(WRList.map(record => record.nameFilter));
+    // Filter by selected avglen for accurate WR count
+    const filteredByAvglen = WRList.filter(record => record.avglen === NxMAvglenSelected);
+    const nameSet = new Set(filteredByAvglen.map(record => record.nameFilter));
     const tiersMap = {};
     const scoresCount = {};
     nameSet.forEach(name => {
-        const filteredRecords = WRList.filter(record => record.nameFilter === name);
+        const filteredRecords = filteredByAvglen.filter(record => record.nameFilter === name);
         const validScores = filteredRecords.filter(record => !isInvalidScore(record));
         if (validScores.length > 0) {
             const count = validScores.length;

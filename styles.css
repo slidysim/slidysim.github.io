@@ -132,6 +132,29 @@ select:focus {
     background: white;
 }
 
+/* NxM Avglen selector styles */
+#nxm-avglen-selector {
+    background-color: #1a1a1a;
+    border-radius: 5px;
+    margin: 10px auto;
+    max-width: 90%;
+}
+
+#nxm-avglen-selector .form_radio_btn label.avglenLabel {
+    border: 1px solid #00bcd4;
+    color: #00bcd4;
+}
+
+#nxm-avglen-selector .form_radio_btn input[type=radio]:checked+label.avglenLabel {
+    background-color: #00bcd4;
+    color: #000;
+}
+
+#nxm-avglen-selector .form_radio_btn label.avglenLabel:hover {
+    background-color: #00e5ff;
+    color: #000;
+}
+
 .NxMContent {
     min-width: 100px;
     color: #fff;

@@ -276,11 +276,11 @@ function filterDataByRequest(data, request) {
         });
     }
     if (request.width === "All") {
+        // For NxM records, don't filter by avglen - we want to analyze all available averages
         return data.filter(entry => {
             return (
                 ((entry.width > 2) || (entry.height > 2)) &&
                 (request.gameMode === entry.gameMode) &&
-                (entry.avglen === 1) &&
                 (request.nameFilter === "" || entry.nameFilter.toLowerCase() === request.nameFilter.toLowerCase())
             );
         });
@@ -292,8 +292,7 @@ function filterDataByRequest(data, request) {
                     (entry.width > 2) && (entry.height > 2) &&
                     (entry.width === entry.height) &&
                     (entry.gameMode.includes("Marathon")) &&
-                    (request.nameFilter === "" || entry.nameFilter.toLowerCase() === request.nameFilter.toLowerCase()) &&
-                    (entry.avglen === 1)
+                    (request.nameFilter === "" || entry.nameFilter.toLowerCase() === request.nameFilter.toLowerCase())
                 );
             });
         }
@@ -311,8 +310,7 @@ function filterDataByRequest(data, request) {
             return (
                 (entry.gameMode.includes("Marathon")) &&
                 (request.width === entry.width) &&
-                (request.height === entry.height) &&
-                (entry.avglen === 1)
+                (request.height === entry.height)
             );
         });
     }

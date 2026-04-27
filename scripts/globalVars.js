@@ -52,6 +52,8 @@ var displayTypeSelect;
 var leaderboardTypeSelect;
 var controlTypeSelect;
 var NxMSelected;
+let NxMAvglenSelected = 1; // Currently selected avglen for NxM sheet (1 = single)
+let NxMAvglenOptions = []; // Available avglen options based on data
 let eventListenerReference = null;
 var newMaxCategories;
 let warningWasShown = false;

@@ -260,12 +260,24 @@ function processNxMRecordsData(cleanedData) {
     let controlsFilteredLists;
     rankingTabs.style.display = "none";
     usernameInput.style.display = "block";
-    organizedLists = cleanedData; //Already only singles
+    
+    // Analyze available avglens from the data
+    const availableAvglens = analyzeAvailableAvglens(cleanedData);
+    NxMAvglenOptions = availableAvglens;
+    
+    // Reset selected avglen if not available, otherwise keep current selection
+    if (!availableAvglens.includes(NxMAvglenSelected)) {
+        NxMAvglenSelected = availableAvglens.length > 0 ? availableAvglens[0] : 1;
+    }
+    
+    // Filter data by selected avglen
+    const filteredByAvglen = cleanedData.filter(item => item.avglen === NxMAvglenSelected);
+    organizedLists = filteredByAvglen;
     sortedLists = sortData(organizedLists, request.leaderboardType);
     if (controlType === "both") {
         controlType = "unique";
     }
-    controlsFilteredLists = getAllWRs(sortedLists, controlType);
+    controlsFilteredLists = getAllWRs(sortedLists, controlType, true); // Include avglen in uniqueness check
     NxMRecords.length = 0;
     NxMRecords = controlsFilteredLists;
     if (n_m_size_limit > 0) {
@@ -279,10 +291,23 @@ function processNxMRecordsData(cleanedData) {
             nameFilter: ""
         };
         organizedLists = filterDataByRequest(leaderboardData, modifiedRequest);
+        // Also filter by selected avglen for PB display
+        organizedLists = organizedLists.filter(item => item.avglen === NxMAvglenSelected);
         sortedLists = sortData(organizedLists, request.leaderboardType);
-        WRsDataForPBs = getAllWRs(sortedLists, controlType);
+        WRsDataForPBs = getAllWRs(sortedLists, controlType, true);
     }
     createSheetNxM(NxMRecords);
+}
+
+// Helper function to analyze available avglens from data
+function analyzeAvailableAvglens(data) {
+    const avglenSet = new Set();
+    for (const item of data) {
+        if (item.avglen) {
+            avglenSet.add(item.avglen);
+        }
+    }
+    return Array.from(avglenSet).sort((a, b) => a - b);
 }
 
 //"Public" function to process Kinch Rankings data
@@ -569,10 +594,13 @@ function filterBySingleControl(originalList, controlType) {
     return originalList.filter(item => item.controls === targetControl);
 }
 
-function filterByUniqueSize(originalList) {
+function filterByUniqueSize(originalList, includeAvglen = false) {
     const myset = new Set();
     return originalList.filter(item => {
-        mysize = item.width + "x" + item.height;
+        // Include avglen in the key when includeAvglen is true (for NxM records)
+        const mysize = includeAvglen 
+            ? item.width + "x" + item.height + "-" + item.avglen 
+            : item.width + "x" + item.height;
         if (!myset.has(mysize)) {
             myset.add(mysize);
             return true;
@@ -614,14 +642,14 @@ function filterBySquares(originalList) {
 
 //_________________"Private" functions for processNxMRecordsData_________________
 
-function getAllWRs(originalList, controlType) {
+function getAllWRs(originalList, controlType, includeAvglen = false) {
     let filteredList;
     if (controlType === "both" || controlType === "unique") {
         filteredList = originalList;
     } else {
         filteredList = filterBySingleControl(originalList, controlType);
     }
-    return filterByUniqueSize(filteredList);
+    return filterByUniqueSize(filteredList, includeAvglen);
 }
 
 //_________________"Private" functions for processNxMRecordsData ends_________________
