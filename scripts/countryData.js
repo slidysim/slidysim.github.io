@@ -156,6 +156,7 @@ let userCountryMap = {
     Lunarien: 'Czech Republic',
     wrist: 'Czech Republic',
     RZBAKA: 'Czech Republic',
+    OgYardel: 'Czech Republic',
   
     asdfghqwerty: 'Finland',
   
