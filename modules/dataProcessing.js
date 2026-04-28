@@ -640,10 +640,12 @@ function getSquareWRs(lists, controlType) {
 }
 
 function filterBySquares(originalList) {
-    const squaresSet = new Set();
+    // Keep one entry per (width, avglen) combination to preserve all averages
+    const squaresMap = new Map();
     return originalList.filter(item => {
-        if (!squaresSet.has(item.width)) {
-            squaresSet.add(item.width);
+        const key = item.width + '_' + item.avglen;
+        if (!squaresMap.has(key)) {
+            squaresMap.set(key, true);
             return true;
         }
         return false;

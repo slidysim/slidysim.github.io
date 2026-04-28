@@ -132,6 +132,46 @@ select:focus {
     background: white;
 }
 
+/* Transposed view toggle styles */
+.left-header-spacer {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 50px;
+    min-height: 42px;
+}
+
+.left-header-spacer:hover {
+    background-color: #333;
+    border-radius: 5px;
+    transform: scale(1.05);
+}
+
+.left-header-spacer::after {
+    content: '↻';
+    font-size: 24px;
+    color: #888;
+    margin-left: 5px;
+    transition: transform 0.3s ease;
+}
+
+.left-header-spacer:hover::after {
+    color: #00bcd4;
+    transform: rotate(180deg);
+}
+
+.left-header-spacer.transposed::after {
+    transform: rotate(180deg);
+    color: #00bcd4;
+}
+
+.left-header-spacer.transposed:hover::after {
+    transform: rotate(360deg);
+}
+
 /* NxM Avglen selector styles */
 #nxm-avglen-selector {
     background-color: #1a1a1a;

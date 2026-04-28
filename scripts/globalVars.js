@@ -2,6 +2,7 @@
 
 //default values
 var NxMstyleDPH = false; //default NxM table visibility
+var normalSheetTransposed = false; //default transposed view for normal createSheet tables
 var controlType = "unique"; //default control type selection (must be one of controlTypeSelectValues)
 var lastSquaresCB = true; //default value for "only interesting popular categories"
 var lastSliderValue = 20; //default value for "popular categories"

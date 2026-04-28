@@ -118,7 +118,20 @@ function createSheet(sortedLists, sheetType) {
     // Add h1 header to match data tables height
     const leftHeaderSpacer = document.createElement('h1');
     leftHeaderSpacer.classList.add('left-header-spacer');
-    leftHeaderSpacer.textContent = sheetType === squaresSheetType ? 'N' : '#';
+    leftHeaderSpacer.title = 'Click to toggle transposed view';
+    if (normalSheetTransposed) {
+        leftHeaderSpacer.classList.add('transposed');
+    }
+    // Add click handler for transposed view toggle
+    leftHeaderSpacer.addEventListener('click', function() {
+        normalSheetTransposed = !normalSheetTransposed;
+        if (normalSheetTransposed) {
+            leftHeaderSpacer.classList.add('transposed');
+        } else {
+            leftHeaderSpacer.classList.remove('transposed');
+        }
+        createSheet(sortedLists, sheetType);
+    });
     leftColumnContainer.appendChild(leftHeaderSpacer);
 
     const leftTable = document.createElement('table');
@@ -131,20 +144,39 @@ function createSheet(sortedLists, sheetType) {
     leftHeaderRow.classList.add('left-header-row');
     leftTable.appendChild(leftHeaderRow);
 
+    // Determine left column content based on transposed mode
+    let leftColumnItems;
+    let leftHeaderText = "#";
+    
+    if (normalSheetTransposed && mainHeaders.length > 1) {
+        // In transposed mode: left column shows the same headers as the table rows (Single, ao5, ao12, etc.)
+        leftColumnItems = mainHeaders;
+        leftHeaderText = "Type";
+    } else if (sheetType === squaresSheetType) {
+        // Normal squares mode: left column shows puzzle sizes
+        leftColumnItems = uniqueSizes;
+        leftHeaderText = "Size";
+    } else {
+        // Normal non-squares mode: left column shows rank numbers
+        leftColumnItems = Array.from({length: maxRowCount}, (_, i) => i + 1);
+        leftHeaderText = "#";
+    }
+
+    // Add header cell to leftHeaderRow
+    const leftHeaderCell = document.createElement('th');
+    leftHeaderCell.textContent = leftHeaderText;
+    leftHeaderRow.appendChild(leftHeaderCell);
+
     // Pre-generate ALL left column rows
-    for (let i = 0; i < maxRowCount; i++) {
+    leftColumnItems.forEach((item, i) => {
         const leftRow = document.createElement('tr');
 
-        let cellValue;
-        if (sheetType === squaresSheetType) {
-            cellValue = uniqueSizes[i] || "";
-        } else {
-            cellValue = i + 1;
-        }
+        let cellValue = item || "";
 
         const cell = createTableCell(cellValue);
 
-        if (sheetType === squaresSheetType && uniqueSizes[i]) {
+        // Add click handler for puzzle size selection (only in normal mode for squares)
+        if (!normalSheetTransposed && sheetType === squaresSheetType && uniqueSizes[i]) {
             cell.classList.add("clickable");
             cell.addEventListener("click", function () {
                 let newSize = uniqueSizes[i];
@@ -155,343 +187,358 @@ function createSheet(sortedLists, sheetType) {
             });
         }
 
+        // Add click handler for average type selection in transposed mode
+       // if (normalSheetTransposed && mainHeaders.length > 1) {
+            //cell.classList.add("clickable");
+          //  cell.addEventListener("click", function () {
+                // Filter by this average type (Single, ao5, ao12, etc.)
+                const avglenMap = { "Single": 1, "ao5": 5, "ao12": 12, "ao25": 25, "ao50": 50, "ao100": 100 };
+                const avglen = avglenMap[cellValue] || 1;
+                // Trigger avglen filter - this would require additional UI logic
+                // For now, just highlight/indicate selection
+                //console.log("Filter by avglen: " + avglen);
+         //   });
+       // }
+
         leftRow.appendChild(cell);
         leftTable.appendChild(leftRow);
+    });
+
+    // Helper function to create a table row for an item (shared between normal and transposed modes)
+    function createTableRowForItem(item, header, itemIndex, isNullItem = false) {
+        let percentageCurrent = 100;
+        const isAverage = (header !== "Single");
+        let mytableid = 0;
+        let bestValue;
+        
+        const tableRow = document.createElement('tr');
+        let scoreType = request.leaderboardType;
+        let mainValue;
+        let tierNameForReplay;
+        let isWRforReplay = false;
+        let reverse = false;
+        
+        if (isNullItem) {
+            // Create empty row for missing item
+            const nameCell = document.createElement('td');
+            nameCell.classList.add('gap-cell');
+            nameCell.textContent = sheetType === squaresSheetType ? uniqueSizes[itemIndex] : (itemIndex + 1);
+            tableRow.appendChild(nameCell);
+
+            const scoreCell = document.createElement('td');
+            scoreCell.classList.add('gap-cell');
+            scoreCell.textContent = header;
+            tableRow.appendChild(scoreCell);
+            return { row: tableRow, percentageCurrent: 100 };
+        }
+        
+        if (scoreType === "move") {
+            scoreType = "Moves"
+            mainValue = item.moves;
+        }
+        if (scoreType === "time") {
+            scoreType = "Time"
+            mainValue = item.time;
+        }
+        if (scoreType === "tps") {
+            scoreType = "TPS"
+            mainValue = item.tps;
+            reverse = true;
+        }
+        if (scoreType === "FMC" || scoreType === "FMC MTM") {
+            mainValue = item.time;
+        }
+        
+        let thisScoreInvalid = false;
+        let displayedName = appendFlagIconToNickname(item.nameFilter);
+        let limitsString = '';
+        let percentageInfoForNormal = "";
+        
+        if (sheetType !== squaresSheetType) {
+            // For non-squares sheet, calculate percentage based on first item in list
+            const firstItem = sortedLists[header]?.[0];
+            if (firstItem) {
+                let firstMainValue;
+                if (scoreType === "Moves") firstMainValue = firstItem.moves;
+                else if (scoreType === "TPS") firstMainValue = firstItem.tps;
+                else firstMainValue = firstItem.time;
+                
+                const percentage = calculatePercentage(mainValue, firstMainValue, reverse);
+                percentageInfoForNormal = percentage.toFixed(1) + "% ";
+                const tierName = getClassBasedOnPercentage(percentage, percentageTable);
+                tableRow.classList.add(tierName);
+                tierNameForReplay = tierName;
+                if (percentage === 100) {
+                    isWRforReplay = true;
+                    percentageInfoForNormal = "WR "
+                    tableRow.classList.add("WRPB");
+                }
+            }
+        } else {
+            if (!noNameFilter) {
+                bestValue = getBestValue(WRsDataForPBs[header], scoreType, item.width, item.height);
+                limitsString = `<p>${item.width}x${item.height} ${header} ${requirementsString} (${request.gameMode}):</p>`
+                const limit = getScoreLimitExact(100, bestValue, reverse);
+                const limitVisual = getScoreLimit(100, bestValue, reverse, scoreType, isAverage);
+                if (limit !== limitVisual) {
+                    limitsString += `<p><span class="alpha WRPB">100%: ${limitVisual} (${limit})</span></p>`;
+                } else {
+                    limitsString += `<p><span class="alpha WRPB">100%: ${limitVisual}</span></p>`;
+                }
+                for (const key in percentageTable) {
+                    if (percentageTable.hasOwnProperty(key)) {
+                        const percentageValue = percentageTable[key];
+                        const limit = getScoreLimitExact(percentageValue, bestValue, reverse);
+                        const limitVisual = getScoreLimit(percentageValue, bestValue, reverse, scoreType, isAverage);
+                        const categoryName = key.charAt(0).toUpperCase() + key.slice(1);
+                        if (limit !== limitVisual) {
+                            limitsString += `<p><span class="${key}">${categoryName} (${percentageValue}%): ${limitVisual} (${limit})</span></p>`;
+                        } else {
+                            limitsString += `<p><span class="${key}">${categoryName} (${percentageValue}%): ${limitVisual}</span></p>`;
+                        }
+                    }
+                }
+                const percentage = calculatePercentage(mainValue, bestValue, reverse);
+                percentageCurrent = percentage;
+                const tierName = getClassBasedOnPercentage(percentage, percentageTable);
+                tierNameForReplay = tierName;
+                tableRow.classList.add(tierName);
+                if (mainValue === bestValue) {
+                    displayedName = "WR";
+                    isWRforReplay = true;
+                    tableRow.classList.add("WRPB");
+                } else {
+                    displayedName = `${percentage.toFixed(3)}%`;
+                }
+            } else {
+                isWRforReplay = true;
+                tierNameForReplay = "alpha";
+                tableRow.classList.add(tiersMap[item.nameFilter]);
+            }
+            if (isInvalid(mainValue, scoreType)) {
+                thisScoreInvalid = true;
+                tableRow.style.color = 'gray';
+            }
+        }
+        
+        let scoreString = getScoreString(item.time, item.moves, item.tps, scoreType, isAverage);
+        const nameCellElement = createTableCellScore([displayedName, percentageInfoForNormal + getControlsAndDate(item.timestamp, item.controls)], 'name', "grayColor");
+        tableRow.appendChild(nameCellElement);
+        const scoreCellElement = createTableCellScore(scoreString, 'score', "grayColor");
+        tableRow.appendChild(scoreCellElement);
+        tableRow.classList.add("shadowFun");
+        
+        if (!thisScoreInvalid) {
+            if (sheetType !== squaresSheetType || noNameFilter) {
+                nameCellElement.classList.add("clickable");
+                nameCellElement.addEventListener("click", function () {
+                    if (request.width == request.height) {
+                        radioNxNWRs.checked = true;
+                        changePuzzleSize(radioNxNWRs.value);
+                    } else {
+                        radioNxMWRs.checked = true;
+                        changePuzzleSize(radioNxMWRs.value);
+                    }
+                    changeNameFilter(item.nameFilter);
+                });
+            }
+            if (sheetType === squaresSheetType && !noNameFilter) {
+                nameCellElement.addEventListener('mouseover', () => {
+                    tooltip.innerHTML = limitsString;
+                    tooltip.style.display = 'block';
+                });
+                nameCellElement.addEventListener('mousemove', (e) => {
+                    tooltip.style.left = (e.pageX - 170) + 'px';
+                    tooltip.style.top = (e.pageY - 470) + 'px';
+                });
+                nameCellElement.addEventListener('mouseout', () => {
+                    tooltip.style.display = 'none';
+                });
+            }
+        }
+        
+        tableRow.addEventListener('mouseover', () => {
+            tableRow.classList.add("highlightedCell");
+        });
+        
+        if (!debugMode) {
+            const videolink = videoLinkCheck(item.videolink);
+            let makeyoutubelink = false;
+            if (item.isWeb) {
+                scoreCellElement.firstChild.innerHTML = webElement + scoreCellElement.firstChild.textContent;
+            }
+            if (videolink) {
+                scoreCellElement.classList.add("clickable");
+                scoreCellElement.firstChild.innerHTML = youtubeElement + scoreCellElement.firstChild.textContent;
+                makeyoutubelink = true;
+            }
+            if (item.solve_data_available) {
+                makeyoutubelink = false;
+                scoreCellElement.classList.add("clickable");
+                let videoLinkForReplay = -1;
+                if (videolink) {
+                    videoLinkForReplay = videolink;
+                    scoreCellElement.firstChild.innerHTML = redEggElement + scoreCellElement.firstChild.textContent;
+                } else {
+                    scoreCellElement.firstChild.innerHTML = eggElement + scoreCellElement.firstChild.textContent;
+                }
+                const scoreTitle = getScoreTitle(videoLinkForReplay, item.width, item.height, item.displayType, item.nameFilter, item.controls, item.timestamp, tierNameForReplay, isWRforReplay, scoreType);
+                scoreCellElement.addEventListener('click', function (event) {
+                    getSolutionForScore(item, (error, solveData) => {
+                        if (error) {
+                            alert("Error while loading solvedata! Maybe server died for a second...", error);
+                        } else {
+                            handleSavedReplay(item, solveData, event, item.tps, item.width, item.height, scoreTitle, videoLinkForReplay, tierNameForReplay, isWRforReplay);
+                        }
+                    });
+                });
+            }
+            if (makeyoutubelink) {
+                scoreCellElement.addEventListener('click', function () {
+                    window.open(videolink, '_blank');
+                });
+            }
+        } else {
+            if (item.nameFilter === logged_in_as || logged_in_as === "vovker" || logged_in_as === "dphdmn") {
+                scoreCellElement.classList.add("clickable");
+                scoreCellElement.firstChild.textContent = getScoreIDIcon + scoreCellElement.firstChild.textContent;
+                scoreCellElement.addEventListener('click', function () {
+                    promptForVideoLink(item.time, item.moves, item.timestamp);
+                });
+            }
+        }
+        
+        if (["Time", "FMC", "FMC MTM"].includes(scoreType) && (item.time > 59999 || (item.moves > 100000 && isAverage))) {
+            scoreCellElement.addEventListener('mouseover', () => {
+                tooltip.textContent = formatTime(item.time) + " (" + (item.moves / 1000).toFixed(3) + " moves)";
+                tooltip.style.display = 'block';
+            });
+            scoreCellElement.addEventListener('mousemove', (e) => {
+                tooltip.style.left = (e.pageX - 150) + 'px';
+                tooltip.style.top = (e.pageY - 40) + 'px';
+            });
+        }
+        if (scoreType === "Moves" && item.moves > 100000 && isAverage) {
+            scoreCellElement.addEventListener('mouseover', () => {
+                tooltip.textContent = (item.moves / 1000).toFixed(3);
+                tooltip.style.display = 'block';
+            });
+            scoreCellElement.addEventListener('mousemove', (e) => {
+                tooltip.style.left = (e.pageX - 150) + 'px';
+                tooltip.style.top = (e.pageY - 20) + 'px';
+            });
+        }
+        
+        tableRow.addEventListener('mouseout', () => {
+            tableRow.classList.remove("highlightedCell");
+        });
+        scoreCellElement.addEventListener('mouseout', () => {
+            tooltip.style.display = 'none';
+        });
+
+        return { row: tableRow, percentageCurrent };
     }
 
-    mainHeaders.forEach((header, headerIndex) => {
-        if (sortedLists[header].length > 0) {
+    // Check if we should use transposed view
+    if (normalSheetTransposed && mainHeaders.length > 1) {
+        // Transposed view: each table represents one row (puzzle size for squares, rank for non-squares)
+        // and contains rows for each average type (Single, ao5, ao12)
+        
+        // Determine what to iterate over based on sheet type
+        const transposedItems = sheetType === squaresSheetType ? uniqueSizes : Array.from({length: maxRowCount}, (_, i) => i + 1);
+        
+        // Create a table for each item
+        transposedItems.forEach((itemKey, itemIndex) => {
             const tableContainer = document.createElement('div');
             tableContainer.classList.add('table-container');
             contentDiv.appendChild(tableContainer);
+            
             const headerElement = document.createElement('h1');
-            headerElement.textContent = header;
+            headerElement.textContent = itemKey;
+            
+            // Add click handler for puzzle size selection (only for squares)
+            if (sheetType === squaresSheetType) {
+                headerElement.classList.add('clickable');
+                headerElement.addEventListener('click', function () {
+                    customSizeInput.value = itemKey;
+                    radioCustomSize.value = itemKey;
+                    radioCustomSize.checked = true;
+                    changePuzzleSize(itemKey);
+                });
+            }
             tableContainer.appendChild(headerElement);
             tableContainer.classList.add("cardContainer");
+            
             const table = document.createElement('table');
             table.classList.add("normalCardTable");
             tableContainer.appendChild(table);
-            const tableHeaderRow = document.createElement('tr');
-            if (sheetType !== squaresSheetType || noNameFilter) {
-                tableHeaderRow.innerHTML = cardHeadersNormal;
-            } else {
-                tableHeaderRow.innerHTML = cardHeadersTier;
-            }
-
-            let mytableid = 0;
-            let bestValue;
-
-            // Determine items to process
-            let itemsToProcess;
-            if (sheetType === squaresSheetType) {
-                itemsToProcess = uniqueSizes.map(size => {
-                    return sortedLists[header].find(it => (it.width + "x" + it.height) === size) || null;
-                });
-            } else {
-                itemsToProcess = sortedLists[header];
-            }
-
-            itemsToProcess.forEach((item, itemIndex) => {
-                if (item === null) {
-                    const emptyRow = document.createElement('tr');
-                    emptyRow.classList.add('gap-row');
-
-                    const nameCell = document.createElement('td');
-                    nameCell.classList.add('gap-cell');
-                    nameCell.textContent = uniqueSizes[itemIndex];
-                    emptyRow.appendChild(nameCell);
-
-                    const scoreCell = document.createElement('td');
-                    scoreCell.classList.add('gap-cell');
-                    scoreCell.textContent = header;
-                    emptyRow.appendChild(scoreCell);
-
-                    table.appendChild(emptyRow);
-                    return;
-                }
-
-                let percentageCurrent = 100;
-                const isAverage = (header !== "Single");
-                mytableid++;
-                const tableRow = document.createElement('tr');
-                let scoreType = request.leaderboardType;
-                let mainValue;
-                let tierNameForReplay;
-                let isWRforReplay = false;
-                let reverse = false;
-                if (scoreType === "move") {
-                    scoreType = "Moves"
-                    mainValue = item.moves;
-                }
-                if (scoreType === "time") {
-                    scoreType = "Time"
-                    mainValue = item.time;
-                }
-                if (scoreType === "tps") {
-                    scoreType = "TPS"
-                    mainValue = item.tps;
-                    reverse = true;
-                }
-                if (scoreType === "FMC" || scoreType === "FMC MTM") {
-                    // Both FMC types use time for comparison
-                    mainValue = item.time;
-                }
-                if (mytableid === 1) {
-                    bestValue = mainValue;
-                }
-                let thisScoreInvalid = false;
-                let displayedName = appendFlagIconToNickname(item.nameFilter);
-                let limitsString = '';
-                let percentageInfoForNormal = "";
-                if (sheetType !== squaresSheetType) {
-                    const percentage = calculatePercentage(mainValue, bestValue, reverse);
-                    percentageInfoForNormal = percentage.toFixed(1) + "% ";
-                    const tierName = getClassBasedOnPercentage(percentage, percentageTable);
-                    tableRow.classList.add(tierName);
-                    tierNameForReplay = tierName;
-                    if (percentage === 100) {
-                        isWRforReplay = true;
-                        percentageInfoForNormal = "WR "
-                        tableRow.classList.add("WRPB");
-                    }
+            
+            // NO header row in transposed view - just data rows
+            
+            // Add rows for each header (Single, ao5, ao12, etc.)
+            mainHeaders.forEach((header, headerIndex) => {
+                let item;
+                if (sheetType === squaresSheetType) {
+                    item = sortedLists[header]?.find(it => (it.width + "x" + it.height) === itemKey) || null;
                 } else {
-                    if (!noNameFilter) {
-                        bestValue = getBestValue(WRsDataForPBs[header], scoreType, item.width, item.height);
-                        limitsString = `<p>${item.width}x${item.height} ${header} ${requirementsString} (${request.gameMode}):</p>`
-                        const limit = getScoreLimitExact(100, bestValue, reverse);
-                        const limitVisual = getScoreLimit(100, bestValue, reverse, scoreType, isAverage);
-                        if (limit !== limitVisual) {
-                            limitsString += `<p><span class="alpha WRPB">100%: ${limitVisual} (${limit})</span></p>`;
-                        } else {
-                            limitsString += `<p><span class="alpha WRPB">100%: ${limitVisual}</span></p>`;
-                        }
-                        for (const key in percentageTable) {
-                            if (percentageTable.hasOwnProperty(key)) {
-                                const percentageValue = percentageTable[key];
-                                const limit = getScoreLimitExact(percentageValue, bestValue, reverse);
-                                const limitVisual = getScoreLimit(percentageValue, bestValue, reverse, scoreType, isAverage);
-                                const categoryName = key.charAt(0)
-                                    .toUpperCase() + key.slice(1)
-                                if (limit !== limitVisual) {
-                                    limitsString += `<p><span class="${key}">${categoryName} (${percentageValue}%): ${limitVisual} (${limit})</span></p>`;
-                                } else {
-                                    limitsString += `<p><span class="${key}">${categoryName} (${percentageValue}%): ${limitVisual}</span></p>`;
-                                }
-                            }
-                        }
-                        const percentage = calculatePercentage(mainValue, bestValue, reverse);
-                        percentageCurrent = percentage;
-                        const tierName = getClassBasedOnPercentage(percentage, percentageTable);
-                        tierNameForReplay = tierName;
-                        tableRow.classList.add(tierName);
-                        if (mainValue === bestValue) {
-                            displayedName = "WR";
-                            isWRforReplay = true;
-                            tableRow.classList.add("WRPB");
-                        } else {
-                            displayedName = `${percentage.toFixed(3)}%`;
-                        }
-                    } else {
-                        isWRforReplay = true;
-                        tierNameForReplay = "alpha";
-                        tableRow.classList.add(tiersMap[item.nameFilter]);
-                    }
-                    if (isInvalid(mainValue, scoreType)) {
-                        thisScoreInvalid = true;
-                        tableRow.style.color = 'gray';
-                    }
+                    item = sortedLists[header]?.[itemIndex] || null;
                 }
-                let scoreString = getScoreString(item.time, item.moves, item.tps, scoreType, isAverage);
-                const nameCellElement = createTableCellScore([displayedName, percentageInfoForNormal + getControlsAndDate(item.timestamp, item.controls)], 'name', "grayColor");
-                tableRow.appendChild(nameCellElement);
-                const scoreCellElement = createTableCellScore(scoreString, 'score', "grayColor");
-                tableRow.appendChild(scoreCellElement);
-                tableRow.classList.add("shadowFun");
-                if (!thisScoreInvalid) {
-
-                    if (sheetType !== squaresSheetType || noNameFilter) {
-                        nameCellElement.classList.add("clickable");
-                        nameCellElement.addEventListener("click", function () {
-                            if (request.width == request.height) {
-                                radioNxNWRs.checked = true;
-                                changePuzzleSize(radioNxNWRs.value);
-                            } else {
-                                radioNxMWRs.checked = true;
-                                changePuzzleSize(radioNxMWRs.value);
-                            }
-                            changeNameFilter(item.nameFilter);
-                        });
-                    }
-                    if (sheetType === squaresSheetType && !noNameFilter) {
-                        nameCellElement.addEventListener('mouseover', () => {
-                            tooltip.innerHTML = limitsString;
-                            tooltip.style.display = 'block';
-                        });
-                        nameCellElement.addEventListener('mousemove', (e) => {
-                            tooltip.style.left = (e.pageX - 170) + 'px';
-                            tooltip.style.top = (e.pageY - 470) + 'px';
-                        });
-                        nameCellElement.addEventListener('mouseout', () => {
-                            tooltip.style.display = 'none';
-                        });
-                    }
-                }
-                tableRow.addEventListener('mouseover', () => {
-                    tableRow.classList.add("highlightedCell");
-                });
-                if (!debugMode) {
-                    const videolink = videoLinkCheck(item.videolink);
-                    makeyoutubelink = false;
-                    if (item.isWeb) {
-                        scoreCellElement.firstChild.innerHTML = webElement + scoreCellElement.firstChild.textContent;
-                    }
-                    if (videolink) {
-                        scoreCellElement.classList.add("clickable");
-                        scoreCellElement.firstChild.innerHTML = youtubeElement + scoreCellElement.firstChild.textContent;
-                        makeyoutubelink = true;
-                    }
-                    if (true//request.gameMode === "Standard"// && !isAverage//
-                    ) {
-                        if (item.solve_data_available) {
-                            makeyoutubelink = false;
-                            scoreCellElement.classList.add("clickable");
-                            let videoLinkForReplay = -1;
-                            if (videolink) {
-                                videoLinkForReplay = videolink;
-                                scoreCellElement.firstChild.innerHTML = redEggElement + scoreCellElement.firstChild.textContent;
-                            }
-                            else {
-                                scoreCellElement.firstChild.innerHTML = eggElement + scoreCellElement.firstChild.textContent;
-                            }
-                            const scoreTitle = getScoreTitle(videoLinkForReplay, item.width, item.height, item.displayType, item.nameFilter, item.controls, item.timestamp, tierNameForReplay, isWRforReplay, scoreType);
-                            scoreCellElement.addEventListener('click', function (event) {
-                                getSolutionForScore(item, (error, solveData) => {
-                                    if (error) {
-                                        alert("Error while loading solvedata! Maybe server died for a second...", error);
-                                    } else {
-                                        handleSavedReplay(item, solveData, event, item.tps, item.width, item.height, scoreTitle, videoLinkForReplay, tierNameForReplay, isWRforReplay);
-                                    }
-                                });
-                            });
-                        }
-                    }
-                    if (makeyoutubelink) {
-                        scoreCellElement.addEventListener('click', function () {
-                            window.open(videolink, '_blank');
-                        });
-                    }
-                } else {
-                    if (item.nameFilter === logged_in_as || logged_in_as === "vovker" || logged_in_as === "dphdmn") {
-                        scoreCellElement.classList.add("clickable");
-                        scoreCellElement.firstChild.textContent = getScoreIDIcon + scoreCellElement.firstChild.textContent;
-                        scoreCellElement.addEventListener('click', function () {
-                            promptForVideoLink(item.time, item.moves, item.timestamp);
-                        });
-                    }
-                }
-                if (["Time", "FMC", "FMC MTM"].includes(scoreType) && (item.time > 59999 || (item.moves > 100000 && isAverage))) {
-                    scoreCellElement.addEventListener('mouseover', () => {
-                        const movesDisplay = (item.moves / 1000).toFixed(3);
-                        const tps = (item.moves / item.time).toFixed(3);
-                        tooltip.textContent = formatTime(item.time) + " (" + (item.moves / 1000).toFixed(3) + " moves)";
-                        tooltip.style.display = 'block';
-                    });
-                    scoreCellElement.addEventListener('mousemove', (e) => {
-                        tooltip.style.left = (e.pageX - 150) + 'px';
-                        tooltip.style.top = (e.pageY - 40) + 'px';
-                    });
-                }
-                if (scoreType === "Moves" && item.moves > 100000 && isAverage) {
-                    scoreCellElement.addEventListener('mouseover', () => {
-                        tooltip.textContent = (item.moves / 1000).toFixed(3);
-                        tooltip.style.display = 'block';
-                    });
-                    scoreCellElement.addEventListener('mousemove', (e) => {
-                        tooltip.style.left = (e.pageX - 150) + 'px';
-                        tooltip.style.top = (e.pageY - 20) + 'px';
-                    });
-                }
-                tableRow.addEventListener('mouseout', () => {
-                    tableRow.classList.remove("highlightedCell");
-                });
-                scoreCellElement.addEventListener('mouseout', () => {
-                    tooltip.style.display = 'none';
-                });
-
-                if (noNameFilter || percentageCurrent >= getTierPercentageLimit()) {
-                    table.appendChild(tableRow);
+                const result = createTableRowForItem(item, header, itemIndex, item === null);
+                if (item !== null && (noNameFilter || result.percentageCurrent >= getTierPercentageLimit())) {
+                    table.appendChild(result.row);
+                } else if (item === null) {
+                    table.appendChild(result.row);
                 }
             });
+        });
+    } else {
+        // Normal view: original implementation
+        mainHeaders.forEach((header, headerIndex) => {
+            if (sortedLists[header].length > 0) {
+                const tableContainer = document.createElement('div');
+                tableContainer.classList.add('table-container');
+                contentDiv.appendChild(tableContainer);
+                const headerElement = document.createElement('h1');
+                headerElement.textContent = header;
+                tableContainer.appendChild(headerElement);
+                tableContainer.classList.add("cardContainer");
+                const table = document.createElement('table');
+                table.classList.add("normalCardTable");
+                tableContainer.appendChild(table);
+                const tableHeaderRow = document.createElement('tr');
+                if (sheetType !== squaresSheetType || noNameFilter) {
+                    tableHeaderRow.innerHTML = cardHeadersNormal;
+                } else {
+                    tableHeaderRow.innerHTML = cardHeadersTier;
+                }
 
-        } else {
-            headersCount--;
-        }
-    });
-}
+                // Determine items to process
+                let itemsToProcess;
+                if (sheetType === squaresSheetType) {
+                    itemsToProcess = uniqueSizes.map(size => {
+                        return sortedLists[header].find(it => (it.width + "x" + it.height) === size) || null;
+                    });
+                } else {
+                    itemsToProcess = sortedLists[header];
+                }
 
-// Function to create avglen (average length) radio buttons for NxM sheet
-function createNxMAvglenSelector() {
-    const container = document.createElement('div');
-    container.id = 'nxm-avglen-selector';
-    container.style.cssText = 'display: flex; justify-content: center; align-items: center; gap: 10px; padding: 10px; background-color: #12121205; margin-bottom: 10px; flex-wrap: wrap;';
-    
-    const label = document.createElement('span');
-    label.textContent = 'Average: ';
-    label.style.cssText = 'color: #aaa; font-size: 14px;';
-    container.appendChild(label);
-    
-    // Create radio button group
-    const radioGroup = document.createElement('div');
-    radioGroup.className = 'radio-button-container';
-    radioGroup.style.cssText = 'display: flex; gap: 5px; margin: 0; flex-wrap: wrap; justify-content: center;';
-    
-    // Get available avglens and create radio buttons
-    const avglens = NxMAvglenOptions.length > 0 ? NxMAvglenOptions : [1];
-    
-    avglens.forEach(avglen => {
-        const radioBtn = document.createElement('div');
-        radioBtn.className = 'form_radio_btn';
-        
-        const input = document.createElement('input');
-        input.type = 'radio';
-        input.id = `avglen-${avglen}`;
-        input.name = 'nxm-avglen';
-        input.value = avglen;
-        
-        if (avglen === NxMAvglenSelected) {
-            input.checked = true;
-        }
-        
-        const labelEl = document.createElement('label');
-        labelEl.htmlFor = `avglen-${avglen}`;
-        labelEl.className = 'avglenLabel';
-        
-        // Format label text
-        if (avglen === 1) {
-            labelEl.textContent = 'Single';
-        } else {
-            labelEl.textContent = `ao${avglen}`;
-        }
-        
-        // Style for avglen labels
-        labelEl.style.cssText = 'padding: 5px 12px; line-height: 24px; font-size: 13px;';
-        
-        input.addEventListener('change', function() {
-            if (this.checked) {
-                NxMAvglenSelected = avglen;
-                // Re-process and re-render the NxM sheet with the new avglen
-                sendMyRequest();
+                itemsToProcess.forEach((item, itemIndex) => {
+                    const result = createTableRowForItem(item, header, itemIndex, item === null);
+                    if (item !== null && (noNameFilter || result.percentageCurrent >= getTierPercentageLimit())) {
+                        table.appendChild(result.row);
+                    } else if (item === null) {
+                        table.appendChild(result.row);
+                    }
+                });
+
+            } else {
+                headersCount--;
             }
         });
-        
-        radioBtn.appendChild(input);
-        radioBtn.appendChild(labelEl);
-        radioGroup.appendChild(radioBtn);
-    });
+    }
     
-    container.appendChild(radioGroup);
-    
-    return container;
+    // Update select sizes after rendering
+    updateSelectSizes();
 }
 
 function createNMSlider() {
@@ -608,6 +655,71 @@ function createNMSlider() {
     container.appendChild(inputElement);
     container.appendChild(valueDisplay);
 
+    return container;
+}
+
+// Function to create avglen (average length) radio buttons for NxM sheet
+function createNxMAvglenSelector() {
+    const container = document.createElement('div');
+    container.id = 'nxm-avglen-selector';
+    container.style.cssText = 'display: flex; justify-content: center; align-items: center; gap: 10px; padding: 10px; background-color: #12121205; margin-bottom: 10px; flex-wrap: wrap;';
+    
+    const label = document.createElement('span');
+    label.textContent = 'Average: ';
+    label.style.cssText = 'color: #aaa; font-size: 14px;';
+    container.appendChild(label);
+    
+    // Create radio button group
+    const radioGroup = document.createElement('div');
+    radioGroup.className = 'radio-button-container';
+    radioGroup.style.cssText = 'display: flex; gap: 5px; margin: 0; flex-wrap: wrap; justify-content: center;';
+    
+    // Get available avglens and create radio buttons
+    const avglens = NxMAvglenOptions.length > 0 ? NxMAvglenOptions : [1];
+    
+    avglens.forEach(avglen => {
+        const radioBtn = document.createElement('div');
+        radioBtn.className = 'form_radio_btn';
+        
+        const input = document.createElement('input');
+        input.type = 'radio';
+        input.id = `avglen-${avglen}`;
+        input.name = 'nxm-avglen';
+        input.value = avglen;
+        
+        if (avglen === NxMAvglenSelected) {
+            input.checked = true;
+        }
+        
+        const labelEl = document.createElement('label');
+        labelEl.htmlFor = `avglen-${avglen}`;
+        labelEl.className = 'avglenLabel';
+        
+        // Format label text
+        if (avglen === 1) {
+            labelEl.textContent = 'Single';
+        } else {
+            labelEl.textContent = `ao${avglen}`;
+        }
+        
+        // Style for avglen labels
+        labelEl.style.cssText = 'padding: 5px 12px; line-height: 24px; font-size: 13px;';
+        
+        input.addEventListener('change', function() {
+            if (this.checked) {
+                NxMAvglenSelected = avglen;
+                // Re-process and re-render the NxM sheet with the new avglen
+                sendMyRequest();
+            }
+        });
+        
+        radioBtn.appendChild(input);
+        radioBtn.appendChild(labelEl);
+        radioGroup.appendChild(radioBtn);
+    });
+    
+    container.appendChild(radioGroup);
+    
     return container;
 }
 
