@@ -186,19 +186,22 @@ function createSheet(sortedLists, sheetType) {
                 changePuzzleSize(newSize);
             });
         }
-
-        // Add click handler for average type selection in transposed mode
-       // if (normalSheetTransposed && mainHeaders.length > 1) {
-            //cell.classList.add("clickable");
-          //  cell.addEventListener("click", function () {
-                // Filter by this average type (Single, ao5, ao12, etc.)
-                const avglenMap = { "Single": 1, "ao5": 5, "ao12": 12, "ao25": 25, "ao50": 50, "ao100": 100 };
-                const avglen = avglenMap[cellValue] || 1;
-                // Trigger avglen filter - this would require additional UI logic
-                // For now, just highlight/indicate selection
-                //console.log("Filter by avglen: " + avglen);
-         //   });
-       // }
+        
+        // Add click handler for marathon mode selection (both transposed and normal modes)
+        if (request.gameMode === allMarathons && typeof item === 'string' && item.includes('x')) {
+            cell.classList.add("clickable");
+            cell.addEventListener("click", function () {
+                //console.log(cell, item);
+                // Extract marathon number from header (e.g., "x10" -> 10)
+                const match = item.match(/x(\d+)/);
+                if (match && match[1]) {
+                    customMarathonInput.value = match[1];
+                    request.gameMode = "Marathon " + match[1];
+                    radioCustom.checked = true;
+                    sendMyRequest();
+                }
+            });
+        }
 
         leftRow.appendChild(cell);
         leftTable.appendChild(leftRow);
@@ -466,6 +469,21 @@ function createSheet(sortedLists, sheetType) {
                     changePuzzleSize(itemKey);
                 });
             }
+            
+            // Add click handler for marathon mode selection (in transposed mode for all marathons)
+            if (request.gameMode === allMarathons && typeof itemKey === 'string' && itemKey.includes('x')) {
+                headerElement.classList.add('clickable');
+                headerElement.addEventListener('click', function () {
+                    const match = itemKey.match(/x(\d+)/);
+                    if (match && match[1]) {
+                        customMarathonInput.value = match[1];
+                        request.gameMode = "Marathon " + match[1];
+                        radioCustom.checked = true;
+                        sendMyRequest();
+                    }
+                });
+            }
+            
             tableContainer.appendChild(headerElement);
             tableContainer.classList.add("cardContainer");
             
@@ -500,6 +518,21 @@ function createSheet(sortedLists, sheetType) {
                 contentDiv.appendChild(tableContainer);
                 const headerElement = document.createElement('h1');
                 headerElement.textContent = header;
+                
+                // Add click handler for marathon mode selection (in normal mode for all marathons)
+                if (request.gameMode === allMarathons && typeof header === 'string' && header.includes('x')) {
+                    headerElement.classList.add('clickable');
+                    headerElement.addEventListener('click', function () {
+                        const match = header.match(/x(\d+)/);
+                        if (match && match[1]) {
+                            customMarathonInput.value = match[1];
+                            request.gameMode = "Marathon " + match[1];
+                            radioCustom.checked = true;
+                            sendMyRequest();
+                        }
+                    });
+                }
+                
                 tableContainer.appendChild(headerElement);
                 tableContainer.classList.add("cardContainer");
                 const table = document.createElement('table');
