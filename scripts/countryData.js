@@ -31,7 +31,8 @@ const rename_map = {
     'ap_web': 'ap',
     'juunas': 'asdfghqwerty',
     'minsie': 'MegaminX',
-    '554': 'yzx'
+    '554': 'yzx',
+    'JonasCuber10': 'JonasCuber11'
 };
 
 function appendFlagIconToNickname(nickname, minimal = false) {
