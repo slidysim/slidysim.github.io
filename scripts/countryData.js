@@ -180,6 +180,7 @@ let userCountryMap = {
     JonasCuber11: 'Germany',
     dani2: 'Germany',
     HawaiiBlue: 'Germany',
+    fuenfeck: 'Germany',
   
     Rouxles: 'Hong Kong',
   
