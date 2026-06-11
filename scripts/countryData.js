@@ -32,7 +32,8 @@ const rename_map = {
     'juunas': 'asdfghqwerty',
     'minsie': 'MegaminX',
     '554': 'yzx',
-    'JonasCuber10': 'JonasCuber11'
+    'JonasCuber10': 'JonasCuber11',
+    'DreamerTheWolfFox': 'Dreamer'
 };
 
 function appendFlagIconToNickname(nickname, minimal = false) {
