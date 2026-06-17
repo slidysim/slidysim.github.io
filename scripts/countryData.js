@@ -152,6 +152,7 @@ let userCountryMap = {
     '13975': 'China',
     lzy: 'China',
     lulu: 'China',
+    CYY: 'China',
   
     Luisa15: 'Colombia',
     chaeerin: 'Colombia',
