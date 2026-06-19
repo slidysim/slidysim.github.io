@@ -148,6 +148,8 @@ function populate_table(table){
         }
     }
 
+    var placeCounter = 1;
+
     for(var i=num_tiers-1; i>0; i--){
         let effectiveTier = tiers[i];
         if (simplifiedView) {
@@ -277,7 +279,7 @@ function populate_table(table){
             var power_div = document.createElement("td");
 
             name_div.innerHTML = appendFlagIconToNickname(user[0], true);
-            place_div.textContent = user[1];
+            place_div.textContent = trueView ? placeCounter++ : user[1];
             power_div.textContent = user[2];
 
             user_row.className = "player-row";
