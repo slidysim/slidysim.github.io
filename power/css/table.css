@@ -23,6 +23,14 @@
     overflow: hidden;
 }
 
+.results-table td:nth-child(-n+3) {
+    overflow: visible;
+}
+
+.req-row td {
+    white-space: nowrap;
+}
+
 /* table header */
 
 .table-header {
@@ -91,6 +99,7 @@
 
 .player, .player-place, .player-power {
     font-weight: 700 !important;
+    white-space: nowrap;
 }
 
 .player {
