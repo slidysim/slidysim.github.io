@@ -355,6 +355,9 @@ async function verifyLogin() {
                 const userlinkel = document.getElementById("user_logged_in");
                 userlinkel.textContent = logged_in_as;
 
+                const loginBtn = document.getElementById("login_button");
+                if (loginBtn) loginBtn.style.display = "none";
+
                 userlinkel.addEventListener("click", function () {
                     try {
                         usernameInput.value = logged_in_as;
@@ -397,18 +400,8 @@ async function verifyLogin() {
         }
     }
 
-    // No valid stored token - ask user for login choice
-    const choice = confirm("Would you like to login as a registered user?\n\nPress OK to login with credentials\nPress Cancel to continue as Guest");
-
-    if (choice) {
-        const loginSuccess = await promptForUserLogin();
-        if (!loginSuccess) {
-            window.location.reload();
-            return;
-        }
-    } else {
-        await loginAsGuest();
-    }
+    // No valid stored token - auto-login as guest
+    await loginAsGuest();
 }
 
 async function loginAsGuest() {
@@ -427,6 +420,20 @@ async function loginAsGuest() {
             logged_in_as = "Guest";
             const userlinkel = document.getElementById("user_logged_in");
             userlinkel.textContent = "Guest";
+
+            userlinkel.addEventListener("click", function (e) {
+                e.preventDefault();
+                promptForUserLogin();
+            });
+
+            const loginBtn = document.getElementById("login_button");
+            if (loginBtn) {
+                loginBtn.style.display = "";
+                loginBtn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    promptForUserLogin();
+                });
+            }
 
         } else if (response.status === 429) {
             alert("Too many requests. Please wait 5 seconds before trying again.");
