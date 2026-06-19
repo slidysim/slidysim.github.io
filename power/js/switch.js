@@ -79,8 +79,10 @@ let tierlist = [
             } else {
                 if (switchBtn.checked) {
                     element.style.backgroundColor = "grey";
+                    element.style.color = "#bbb";
                 } else {
                     element.style.backgroundColor = "";
+                    element.style.color = "";
                 }
             }
         }
