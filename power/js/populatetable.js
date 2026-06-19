@@ -1,6 +1,4 @@
 
-import {FMCtiers, tiersNew, categoriesNew, tiersOld, categoriesOld, categoriesFMC, data } from "./data.js?v=1.0.126";
-
 let powerData;
 let tiers;
 let categories;
@@ -300,46 +298,36 @@ function populate_table(table){
     }
 }
 
-export function show_results_from_date(date){
-    if(date in data){
-        //const str = decompress(data[date]);
-        //const table = JSON.parse(str);
-        //populate_table(table);
-        //console.log(powerData);
-        populate_table(powerData);
-        // show the selected date on the button
-        var date_button = document.getElementById("date-button");
-        if (oldTiers) {
-            date_button.innerHTML = "Classic Power Rankings";
+export function show_results_from_date(){
+    populate_table(powerData);
+    var date_button = document.getElementById("date-button");
+    if (oldTiers) {
+        date_button.innerHTML = "Classic Power Rankings";
+    } else {
+        if (fmcPower){
+            date_button.innerHTML = "FMC Power Rankings";
         } else {
-            if (fmcPower){
-                date_button.innerHTML = "FMC Power Rankings";
-            } else {
-                date_button.innerHTML = "Modern Power Rankings";
-            }
+            date_button.innerHTML = "Modern Power Rankings";
         }
     }
 }
 window.addEventListener('message', (event) => {
-    const [eventPowerData, eventOldTiers, gettingFMCPower, eventuserFinalTierMap] = event.data;
-    //console.log(eventPowerData, eventOldTiers);
+    const [eventPowerData, eventOldTiers, gettingFMCPower, eventuserFinalTierMap, eventTiers, eventFMCtiers, eventTiersOld, eventCategoriesNew, eventCategoriesOld, eventCategoriesFMC] = event.data;
     powerData = eventPowerData;
     oldTiers = eventOldTiers;
     userFinalTierMap = eventuserFinalTierMap;
     fmcPower = gettingFMCPower;
-    var dates = Object.keys(data);
-    var latest = dates[dates.length-1];
     
     if (oldTiers) {
-        tiers = tiersOld;
-        categories = categoriesOld;
+        tiers = eventTiersOld;
+        categories = eventCategoriesOld;
     } else {
         if (fmcPower) {
-            tiers = FMCtiers;
-            categories = categoriesFMC;
+            tiers = eventFMCtiers;
+            categories = eventCategoriesFMC;
         } else {
-        tiers = tiersNew;
-        categories = categoriesNew;
+        tiers = eventTiers;
+        categories = eventCategoriesNew;
         }
     }
     num_tiers = tiers.length;
@@ -350,7 +338,7 @@ window.addEventListener('message', (event) => {
         simplifiedDiv.style.display = oldTiers ? "none" : "";
     }
 
-    show_results_from_date(latest);
+    show_results_from_date();
 });
 
 const simplifiedBtn = document.getElementById("switch-simplified");
