@@ -8,6 +8,7 @@ let oldTiers;
 let userFinalTierMap;
 let fmcPower;
 let simplifiedView = false;
+let trueView = false;
 
 
 function isSubTierIII(name) {
@@ -109,6 +110,43 @@ function populate_table(table){
             tier_events_row.appendChild(div);
         }
         
+    if (trueView) {
+        var trueTierMap = [];
+        for (var u = 0; u < table.length; u++) {
+            const user = table[u];
+            if (!user) { trueTierMap[u] = -1; continue; }
+            var incomplete = false;
+            for (var c = 0; c < num_categories; c++) {
+                if (user[c + 3] == -1) { incomplete = true; break; }
+            }
+            if (incomplete) { trueTierMap[u] = -1; continue; }
+            var worst = num_tiers;
+            for (var c = 0; c < num_categories; c++) {
+                const t = result_tier(c, user[c + 3]);
+                if (t < worst) worst = t;
+            }
+            trueTierMap[u] = worst;
+        }
+    }
+    // In simplified view, map sub-tier I/II worst tiers to their III (parent color)
+    if (trueView && simplifiedView) {
+        for (var u = 0; u < table.length; u++) {
+            const w = trueTierMap[u];
+            if (w === -1) continue;
+            const name = tiers[w]["name"];
+            if (isSubTierIorII(name)) {
+                const base = getBaseTierName(name);
+                var found = -1;
+                for (var k = w + 1; k < num_tiers; k++) {
+                    if (tiers[k]["name"].startsWith(base + " ") && isSubTierIII(tiers[k]["name"])) {
+                        found = k;
+                        break;
+                    }
+                }
+                trueTierMap[u] = found;
+            }
+        }
+    }
 
     for(var i=num_tiers-1; i>0; i--){
         let effectiveTier = tiers[i];
@@ -198,29 +236,38 @@ function populate_table(table){
         }
 
         // add the users to the table
+        if (trueView) next_user = 0;
         while(true){
             const user = table[next_user];
             // if the user is undefined or the user's power is too low, stop adding new rows
             if (user === undefined) {
                 break;
             }
-            // if the user's power is too low, stop adding new rows
-            if(user[2] < effectiveTier["limit"] && effectiveTier["limit"]>1){ 
-                break;
-            }
-            let tierMatch;
-            if (simplifiedView && isSubTierIII(tiers[i]["name"])) {
-                const baseName = getBaseTierName(tiers[i]["name"]);
-                tierMatch = !userFinalTierMap[user[0]].startsWith(baseName);
+
+            if (trueView) {
+                if (trueTierMap[next_user] !== i) {
+                    next_user++;
+                    continue;
+                }
             } else {
-                tierMatch = userFinalTierMap[user[0]] != effectiveTier["name"];
-            }
-            if(tierMatch){
-                //don't add users if no scores for valid tier
-                if (effectiveTier["name"] != "Beginner") {
+                // if the user's power is too low, stop adding new rows
+                if(user[2] < effectiveTier["limit"] && effectiveTier["limit"]>1){ 
                     break;
                 }
-                
+                let tierMatch;
+                if (simplifiedView && isSubTierIII(tiers[i]["name"])) {
+                    const baseName = getBaseTierName(tiers[i]["name"]);
+                    tierMatch = !userFinalTierMap[user[0]].startsWith(baseName);
+                } else {
+                    tierMatch = userFinalTierMap[user[0]] != effectiveTier["name"];
+                }
+                if(tierMatch){
+                    //don't add users if no scores for valid tier
+                    if (effectiveTier["name"] != "Beginner") {
+                        break;
+                    }
+                    
+                }
             }
 
             // create a new row and the cells for the username, place, power
@@ -238,7 +285,7 @@ function populate_table(table){
             place_div.className = "player-place";
             power_div.className = "player-power";
             let attrName;
-            if (simplifiedView && isSubTierIII(tiers[i]["name"])) {
+            if (!trueView && simplifiedView && isSubTierIII(tiers[i]["name"])) {
                 attrName = userFinalTierMap[user[0]].toLowerCase().replace(" ","-");
             } else {
                 attrName = tier_name;
@@ -250,7 +297,7 @@ function populate_table(table){
             place_div.setAttribute("tier", attrName);
             power_div.setAttribute("tier", attrName);
 
-                if((i !== tiers.length - 1) && (user[2] > tiers[i+1]["limit"])){
+                if(!trueView && (i !== tiers.length - 1) && (user[2] > tiers[i+1]["limit"])){
                 power_div.setAttribute("class", "player-power power_req_reached");
                 power_div.setAttribute("title", "Missing one score of the higher tier to rank up.");
                 }
@@ -345,6 +392,15 @@ const simplifiedBtn = document.getElementById("switch-simplified");
 if (simplifiedBtn) {
     simplifiedBtn.addEventListener("change", () => {
         simplifiedView = simplifiedBtn.checked;
+        populate_table(powerData);
+        document.dispatchEvent(new Event("table-repopulated"));
+    });
+}
+
+const trueBtn = document.getElementById("switch-true");
+if (trueBtn) {
+    trueBtn.addEventListener("change", () => {
+        trueView = trueBtn.checked;
         populate_table(powerData);
         document.dispatchEvent(new Event("table-repopulated"));
     });

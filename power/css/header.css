@@ -75,7 +75,8 @@
 
 .page-header #switch,
 .page-header #switch-reqs,
-.page-header #switch-simplified {
+.page-header #switch-simplified,
+.page-header #switch-true {
     display: none;
 }
 
