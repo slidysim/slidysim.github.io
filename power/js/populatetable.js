@@ -239,7 +239,12 @@ function populate_table(table){
             name_div.className = "player";
             place_div.className = "player-place";
             power_div.className = "player-power";
-            let attrName = tier_name;
+            let attrName;
+            if (simplifiedView && isSubTierIII(tiers[i]["name"])) {
+                attrName = userFinalTierMap[user[0]].toLowerCase().replace(" ","-");
+            } else {
+                attrName = tier_name;
+            }
             if (oldTiers) {
                 attrName += "OLD";
             }
