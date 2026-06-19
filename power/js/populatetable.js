@@ -9,7 +9,21 @@ let num_categories;
 let oldTiers;
 let userFinalTierMap;
 let fmcPower;
+let simplifiedView = false;
 
+
+function isSubTierIII(name) {
+    return !!name.match(/ (III)$/);
+}
+
+function isSubTierIorII(name) {
+    const m = name.match(/ (I{1,3})$/);
+    return m && (m[1] === "I" || m[1] === "II");
+}
+
+function getBaseTierName(name) {
+    return name.replace(/ (I{1,3})$/, "");
+}
 
 function format(time, noTrail=false) {
     if (time == -1) {
@@ -50,6 +64,12 @@ function result_tier(category, time){
 
 function populate_table(table){
     var results_table = document.getElementById("results-table");
+
+    // remove previous wrapper if it exists
+    var prevWrapper = results_table.previousElementSibling;
+    if (prevWrapper && prevWrapper.className === "results-table") {
+        prevWrapper.remove();
+    }
 
     // remove the previous table, if there was one
     while(results_table.hasChildNodes()){
@@ -93,8 +113,18 @@ function populate_table(table){
         
 
     for(var i=num_tiers-1; i>0; i--){
-        const tier = tiers[i];
-        const tier_name = tier["name"].toLowerCase().replace(" ","-");
+        let effectiveTier = tiers[i];
+        if (simplifiedView) {
+            const name = effectiveTier["name"];
+            if (isSubTierIorII(name)) {
+                continue;
+            }
+            if (isSubTierIII(name)) {
+                const iTier = tiers[i - 2];
+                effectiveTier = { ...effectiveTier, limit: iTier["limit"], power: iTier["power"], times: iTier["times"] };
+            }
+        }
+        const tier_name = effectiveTier["name"].toLowerCase().replace(" ","-");
 
         // table of all results of users in this tier
         var tier_table = document.createElement("table");
@@ -119,10 +149,15 @@ function populate_table(table){
         // tier name row
         var tier_name_div = document.createElement("td");
 
+        let displayName = effectiveTier["name"];
+        const displayNameAttr = effectiveTier["name"].toLowerCase().replace(" ","-");
+        if (simplifiedView && isSubTierIII(tiers[i]["name"])) {
+            displayName = getBaseTierName(effectiveTier["name"]);
+        }
         // fill up the whole width of the table (columns = username, place, power, categories)
         tier_name_div.colSpan = num_categories+3;
-        tier_name_div.textContent = tier["name"];
-        const name = tier["name"].toLowerCase().replace(" ","-");
+        tier_name_div.textContent = displayName;
+        const name = displayNameAttr;
         let attrName = name;
         if (oldTiers) {
             attrName += "OLD";
@@ -134,17 +169,17 @@ function populate_table(table){
             tier_req_row.appendChild(tdel);
         }
 
-        tier_req_row.children[0].innerHTML = tier["name"].replace(/ /g, '<br>');
+        tier_req_row.children[0].innerHTML = displayName.replace(/ /g, '<br>');
         tier_req_row.children[0].style.minWidth = "132px";
-        tier_req_row.children[1].textContent = tier["power"];
-        tier_req_row.children[2].textContent = tier["limit"];
-        if (tier["limit"] == 9999999) {
+        tier_req_row.children[1].textContent = effectiveTier["power"];
+        tier_req_row.children[2].textContent = effectiveTier["limit"];
+        if (effectiveTier["limit"] == 9999999) {
             tier_req_row.children[2].textContent = "∞";
         }
 
         for(var j=0; j<num_categories; j++){
             var div = document.createElement("td");
-            div.textContent = format(tier["times"][j], true);
+            div.textContent = format(effectiveTier["times"][j], true);
             div.setAttribute("tierf", attrName);
             tier_req_row.appendChild(div);
         }
@@ -172,12 +207,19 @@ function populate_table(table){
                 break;
             }
             // if the user's power is too low, stop adding new rows
-            if(user[2] < tier["limit"] && tier["limit"]>1){ 
+            if(user[2] < effectiveTier["limit"] && effectiveTier["limit"]>1){ 
                 break;
             }
-            if(userFinalTierMap[user[0]] != tier["name"]){
+            let tierMatch;
+            if (simplifiedView && isSubTierIII(tiers[i]["name"])) {
+                const baseName = getBaseTierName(tiers[i]["name"]);
+                tierMatch = !userFinalTierMap[user[0]].startsWith(baseName);
+            } else {
+                tierMatch = userFinalTierMap[user[0]] != effectiveTier["name"];
+            }
+            if(tierMatch){
                 //don't add users if no scores for valid tier
-                if (tier["name"] != "Beginner") {
+                if (effectiveTier["name"] != "Beginner") {
                     break;
                 }
                 
@@ -297,5 +339,20 @@ window.addEventListener('message', (event) => {
     }
     num_tiers = tiers.length;
     num_categories = categories.length;
+
+    const simplifiedDiv = document.getElementById("switch-div-simplified");
+    if (simplifiedDiv) {
+        simplifiedDiv.style.display = oldTiers ? "none" : "";
+    }
+
     show_results_from_date(latest);
 });
+
+const simplifiedBtn = document.getElementById("switch-simplified");
+if (simplifiedBtn) {
+    simplifiedBtn.addEventListener("change", () => {
+        simplifiedView = simplifiedBtn.checked;
+        populate_table(powerData);
+        document.dispatchEvent(new Event("table-repopulated"));
+    });
+}

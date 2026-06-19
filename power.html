@@ -2,27 +2,40 @@
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <title>Slidysim Tier Ranks</title>
         <link rel="icon" type="image/png" href="images/egg.png">
-        <link rel="stylesheet" href="power/css/style.css?v=1.0.138">
+        <link rel="stylesheet" href="power/css/style.css?v=1.0.147">
     </head>
 
     <body>
         <div class="page-header">
             <button class="menu-btn"><i class="menu-icon"></i></button>
             <button class="date-button" id="date-button">Power Rankings</button>
-            <div class="switch-div">
-                <input type="checkbox" id="switch">
-                <label for="switch"></label>
-                <div class="more-infos">
-                    <p><span>Off:</span> All colors are shown</p>
-                    <p><span>On:</span> Only tier's color and above are shown</p>
+            <div class="header-right">
+                <div class="switch-div" id="switch-div-simplified" style="display:none">
+                    <span class="switch-label">Group</span>
+                    <input type="checkbox" id="switch-simplified" style="display:none" title="Simplified view - Grouping sub-tiers into a single one">
+                    <label for="switch-simplified"></label>
+                    <div class="more-infos">
+                        <p><span>Off:</span> All sub-tiers are shown separately</p>
+                        <p><span>On:</span> Sub-tiers are grouped into a single tier</p>
+                    </div>
                 </div>
-            </div>
-            <div class="switch-div">
-                <input type="checkbox" id="switch-reqs">
-                <label for="switch-reqs"></label>
-                <div class="more-infos">
-                    <p><span>Off:</span> All Requirements are shown</p>
-                    <p><span>On:</span> Only Leaderboard is shown</p>
+                <div class="switch-div">
+                    <span class="switch-label">Color</span>
+                    <input type="checkbox" id="switch" title="Only tier's color and above are shown" style="display:none">
+                    <label for="switch"></label>
+                    <div class="more-infos">
+                        <p><span>Off:</span> All colors are shown</p>
+                        <p><span>On:</span> Only tier's color and above are shown</p>
+                    </div>
+                </div>
+                <div class="switch-div">
+                    <span class="switch-label">Reqs</span>
+                    <input type="checkbox" id="switch-reqs" title="Only Leaderboard is shown" style="display:none">
+                    <label for="switch-reqs"></label>
+                    <div class="more-infos">
+                        <p><span>Off:</span> All Requirements are shown</p>
+                        <p><span>On:</span> Only Leaderboard is shown</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -57,9 +70,9 @@
             <a href="https://www.youtube.com/channel/UCKzRppIfkDedp3Ktkf24xcA/videos" target="_blank" title="New Tab">Osipov Alexander</a>
         </div>
         <script src="scripts/countryData.js"></script>
-        <script src="power/js/dynamicPower.js?v=1.0.150"></script>
-        <script src="power/js/populatetable.js?v=1.0.191" type="module"></script>
+        <script src="power/js/dynamicPower.js?v=1.0.151"></script>
+        <script src="power/js/populatetable.js?v=1.0.198" type="module"></script>
         <script src="power/js/menu.js"></script>
-        <script defer="" src="power/js/switch.js?v=1.0.149"></script>
+        <script defer="" src="power/js/switch.js?v=1.0.155"></script>
         
 </body></html>

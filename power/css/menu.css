@@ -6,6 +6,7 @@
     clip-path: circle(0 at 0 0);
     height: calc(100vh - var(--header_height));
     width: 20%;
+    min-width: 280px;
     background-color: rgba(23, 23, 27, 0.65);
     backdrop-filter: blur(1em);
     transition: .5s ease-in-out;

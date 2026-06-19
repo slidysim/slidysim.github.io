@@ -58,6 +58,15 @@ let tierlist = [
       });
   });
   
+  function getGroupTier(t) {
+      const simplified = document.getElementById("switch-simplified");
+      if (simplified && simplified.checked && mainList === tierlist) {
+          const mapped = t.replace(/-(i|ii)$/, "-iii");
+          if (mainList.indexOf(mapped) !== -1) return mapped;
+      }
+      return t;
+  }
+
   function changeTable(tier_table) {
     const escapedTierTable = tier_table.replace(/\+/g, "\\+").replace("OLD", "");
     const selector = `#${escapedTierTable}-table .player-row > *`;
@@ -65,25 +74,26 @@ let tierlist = [
 
     elements.forEach((element) => {
         const tier = element.getAttribute("tier");
+        if (!tier) return;
 
-        if (tier) {
+        const groupTier = getGroupTier(tier);
+        const groupTable = getGroupTier(tier_table);
 
-            if (mainList.indexOf(tier) <= mainList.indexOf(tier_table)) {
-                if (mainList.indexOf(tier) < mainList.indexOf(tier_table)) {
-                    if (switchBtn.checked) {
-                        element.style.fontWeight = "800";
-                    } else {
-                        element.style.fontWeight = "";
-                    }
-                }
-            } else {
+        if (mainList.indexOf(groupTier) <= mainList.indexOf(groupTable)) {
+            if (mainList.indexOf(groupTier) < mainList.indexOf(groupTable)) {
                 if (switchBtn.checked) {
-                    element.style.backgroundColor = "grey";
-                    element.style.color = "#bbb";
+                    element.style.fontWeight = "800";
                 } else {
-                    element.style.backgroundColor = "";
-                    element.style.color = "";
+                    element.style.fontWeight = "";
                 }
+            }
+        } else {
+            if (switchBtn.checked) {
+                element.style.backgroundColor = "grey";
+                element.style.color = "#bbb";
+            } else {
+                element.style.backgroundColor = "";
+                element.style.color = "";
             }
         }
     });
@@ -132,4 +142,16 @@ let tierlist = [
     }
   }
   toggleTableVisibility.toggled = false;
+
+  document.addEventListener("table-repopulated", () => {
+      if (switchBtn.checked) {
+          mainList.forEach((tier) => {
+              changeTable(tier);
+          });
+      }
+      if (switchBtnReqs.checked) {
+          toggleTableVisibility.toggled = false;
+          toggleTableVisibility();
+      }
+  });
   
