@@ -47,7 +47,7 @@ function calculatePlayerPower(savedPlayerScores, tiers, fmc=false) {
             }
         });
         if (totalPower === 303030 && isOldPower) {
-            totalPower = getDynamicSum(playerTimes)
+            totalPower = PowerCalc.getDynamicSum(playerTimes)
         }
         // Determine player's supposed tier by total power
         let supposedTierIndex = 0;

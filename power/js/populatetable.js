@@ -261,7 +261,7 @@ function populate_table(table){
             user_row.appendChild(place_div);
             user_row.appendChild(power_div);
             if (oldTiers) {
-                const dynamicSum = getDynamicSum(user.slice(3));
+                const dynamicSum = PowerCalc.getDynamicSum(user.slice(3));
                 if (dynamicSum > 303030){
                     if (user[2] > 303030){
                         //power_div.innerHTML += `<br><span style="fontSize=10px;color:cyan">${dynamicSum}</span>`;
