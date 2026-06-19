@@ -192,6 +192,7 @@ function populate_table(table){
         if (simplifiedView && isSubTierIII(tiers[i]["name"])) {
             displayName = getBaseTierName(effectiveTier["name"]);
         }
+        if (trueView) displayName = "True\u00A0" + displayName;
         // fill up the whole width of the table (columns = username, place, power, categories)
         tier_name_div.colSpan = num_categories+3;
         tier_name_div.textContent = displayName;
