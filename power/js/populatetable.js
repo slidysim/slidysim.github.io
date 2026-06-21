@@ -48,6 +48,13 @@ function resetSort() {
     sortColumn = null;
 }
 
+function hasScores(user) {
+    for (var c = 0; c < num_categories; c++) {
+        if (user[c + 3] != -1) return true;
+    }
+    return false;
+}
+
 function getTooltip() {
     return document.getElementById("score-tooltip");
 }
@@ -364,6 +371,7 @@ function populate_table(table){
         for (var u = 0; u < table.length; u++) {
             const user = table[u];
             if (user === undefined) break;
+            if (!hasScores(user)) continue;
             allUsers.push(user);
         }
         allUsers.sort((a, b) => {
@@ -518,6 +526,11 @@ function populate_table(table){
                     }
                     
                 }
+            }
+
+            if (!hasScores(user)) {
+                next_user++;
+                continue;
             }
 
             tierUsers.push(user);
