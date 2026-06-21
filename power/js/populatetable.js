@@ -63,6 +63,7 @@ function setupResetHeaderCell(cell) {
     cell.addEventListener("click", () => {
         resetSort();
         populate_table(powerData);
+        document.dispatchEvent(new Event("table-repopulated"));
     });
 }
 
@@ -348,6 +349,7 @@ function populate_table(table){
                 sortedPlayerRow = user;
                 categoryOrder = computeCategoryOrder(user);
                 populate_table(powerData);
+                document.dispatchEvent(new Event("table-repopulated"));
             });
             place_div.className = "player-place";
             power_div.className = "player-power";
