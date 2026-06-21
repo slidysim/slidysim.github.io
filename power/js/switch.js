@@ -102,7 +102,9 @@ let tierlist = [
   const switchBtnReqs = document.getElementById("switch-reqs");
   
   switchBtnReqs.addEventListener("change", () => {
-    toggleTableVisibility();
+    if (document.body.dataset.columnSort !== "1") {
+        toggleTableVisibility();
+    }
   });
   
   function toggleTableVisibility() {
@@ -149,7 +151,7 @@ let tierlist = [
               changeTable(tier);
           });
       }
-      if (switchBtnReqs.checked) {
+      if (switchBtnReqs.checked && document.body.dataset.columnSort !== "1") {
           toggleTableVisibility.toggled = false;
           toggleTableVisibility();
       }

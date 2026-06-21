@@ -11,6 +11,8 @@ let simplifiedView = false;
 let trueView = false;
 let categoryOrder = [];
 let sortedPlayerRow = null;
+let sortColumn = null;
+let sortAsc = true;
 
 function catIdx(j) {
     return sortedPlayerRow ? categoryOrder[j] : j;
@@ -43,6 +45,7 @@ function computeCategoryOrder(player) {
 function resetSort() {
     sortedPlayerRow = null;
     categoryOrder = [];
+    sortColumn = null;
 }
 
 function getTooltip() {
@@ -62,11 +65,27 @@ function setupResetHeaderCell(cell) {
     });
     cell.addEventListener("click", () => {
         resetSort();
+        ["switch-true", "switch-simplified", "switch", "switch-reqs"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.checked = false;
+        });
+        trueView = false;
+        simplifiedView = false;
         populate_table(powerData);
         document.dispatchEvent(new Event("table-repopulated"));
     });
 }
 
+function setupSortableHeaderCell(cell, col) {
+    if (!cell || col === undefined) return;
+    cell.style.cursor = "pointer";
+    cell.addEventListener("click", () => {
+        if (sortColumn === col) sortAsc = !sortAsc;
+        else { sortColumn = col; sortAsc = true; }
+        populate_table(powerData);
+        document.dispatchEvent(new Event("table-repopulated"));
+    });
+}
 
 function isSubTierIII(name) {
     return !!name.match(/ (III)$/);
@@ -158,13 +177,18 @@ function populate_table(table){
         for(var j=0; j<3; j++){
             tier_events_row.appendChild(document.createElement("td"));
         }
-        tier_events_row.children[0].textContent = sortedPlayerRow ? "Reset sorting" : "Name";
+        tier_events_row.children[0].textContent = (sortedPlayerRow || sortColumn !== null) ? "Reset sorting" : "Name";
         setupResetHeaderCell(tier_events_row.children[0]);
-        tier_events_row.children[1].textContent = "Place";
-        tier_events_row.children[2].textContent = "Power";
+        tier_events_row.children[1].textContent = "Place" + (sortColumn === 1 ? (sortAsc ? " ▲" : " ▼") : "");
+        setupSortableHeaderCell(tier_events_row.children[1], 1);
+        tier_events_row.children[2].textContent = "Power" + (sortColumn === 2 ? (sortAsc ? " ▲" : " ▼") : "");
+        setupSortableHeaderCell(tier_events_row.children[2], 2);
         for(var j=0; j<num_categories; j++){
             var div = document.createElement("td");
             div.innerHTML = categories[catIdx(j)].replace(/ /g, '<br>');
+            const col = catIdx(j) + 3;
+            if (sortColumn === col) div.innerHTML += sortAsc ? " ▲" : " ▼";
+            setupSortableHeaderCell(div, col);
             tier_events_row.appendChild(div);
         }
         
@@ -207,6 +231,165 @@ function populate_table(table){
     }
 
     var placeCounter = 1;
+
+    const isColSort = sortColumn !== null;
+
+    const renderUserRow = function(user, tierTable, tierAttrName, tierIndex) {
+        var user_row = document.createElement("tr");
+        var name_div = document.createElement("td");
+        var place_div = document.createElement("td");
+        var power_div = document.createElement("td");
+
+        name_div.innerHTML = appendFlagIconToNickname(user[0], true);
+        place_div.textContent = trueView ? placeCounter++ : user[1];
+        power_div.textContent = user[2];
+
+        user_row.className = "player-row";
+        name_div.className = "player";
+        name_div.classList.add("sortable-player");
+        name_div.addEventListener("click", (e) => {
+            e.stopPropagation();
+            sortedPlayerRow = user;
+            categoryOrder = computeCategoryOrder(user);
+            populate_table(powerData);
+            document.dispatchEvent(new Event("table-repopulated"));
+        });
+        place_div.className = "player-place";
+        power_div.className = "player-power";
+        let attrName = tierAttrName;
+        if (oldTiers) attrName += "OLD";
+        name_div.setAttribute("tier", attrName);
+        place_div.setAttribute("tier", attrName);
+        power_div.setAttribute("tier", attrName);
+
+        if(tierIndex !== undefined && !trueView && (tierIndex !== tiers.length - 1) && (user[2] > tiers[tierIndex+1]["limit"])){
+            power_div.setAttribute("class", "player-power power_req_reached");
+            power_div.setAttribute("title", "Missing one score of the higher tier to rank up.");
+        }
+
+        tierTable.appendChild(user_row);
+        user_row.appendChild(name_div);
+        user_row.appendChild(place_div);
+        user_row.appendChild(power_div);
+        if (oldTiers) {
+            const dynamicSum = PowerCalc.getDynamicSum(user.slice(3));
+            if (dynamicSum > 303030 && user[2] <= 303030){
+                power_div.innerHTML += `<br><span style="fontSize=10px;">${dynamicSum}</span>`;
+            }
+        }
+        const playerOrder = computeCategoryOrder(user);
+        for(var j=0; j<num_categories; j++){
+            const origC = catIdx(j);
+            let time = user[origC + 3];
+            var div = document.createElement("td");
+            div.textContent = format(time, fmcPower);
+            const rank = playerOrder.length - playerOrder.indexOf(origC);
+            div.dataset.rank = rank;
+            div.dataset.total = playerOrder.length;
+            if (time != -1) {
+                const ti = result_tier(origC, time);
+                let ahead, target;
+                if (ti < 0) {
+                    target = tiers[0].times[origC];
+                    ahead = (target - time) / target * 100;
+                } else if (ti >= num_tiers - 1) {
+                    target = tiers[ti].times[origC];
+                    ahead = (target - time) / target * 100;
+                } else {
+                    target = tiers[ti + 1].times[origC];
+                    ahead = (target - time) / target * 100;
+                }
+                const arrow = (ti >= 0 && ti < num_tiers - 1) ? "\u2192 " : "";
+                const targetStr = format(target, true);
+                const sign = ahead >= 0 ? "+" : "";
+                const pct = ahead.toFixed(2);
+                const tierName = ti >= 0 && ti < num_tiers ? tiers[ti].name : tiers[0].name;
+                const tierSlug = tierName.toLowerCase().replace(" ","-");
+                const diff = target - time;
+                const diffSign = diff >= 0 ? "+" : "-";
+                div.dataset.diff = diffSign + format(Math.abs(diff));
+                div.dataset.tierName = tierName;
+                div.dataset.tierSlug = oldTiers ? tierSlug + "OLD" : tierSlug;
+                div.dataset.arrow = arrow;
+                div.dataset.target = targetStr;
+                div.dataset.ahead = sign + pct + "%";
+                if (arrow) {
+                    const nextName = tiers[ti + 1].name;
+                    const nextSlug = nextName.toLowerCase().replace(" ","-");
+                    div.dataset.nextTier = nextName;
+                    div.dataset.nextTierSlug = oldTiers ? nextSlug + "OLD" : nextSlug;
+                }
+                div.addEventListener("mouseenter", function () {
+                    const tip = getTooltip();
+                    const rect = this.getBoundingClientRect();
+                    let h = "<span class=\"tip-tier\" tierf=\"" + this.dataset.tierSlug + "\">" + this.dataset.tierName + "</span>";
+                    if (this.dataset.arrow) {
+                        h += " " + this.dataset.arrow + this.dataset.target + " (" + this.dataset.diff + ") for <span tierf=\"" + this.dataset.nextTierSlug + "\">" + this.dataset.nextTier + "</span>";
+                    } else {
+                        h += " " + this.dataset.target;
+                    }
+                    h += " (" + this.dataset.rank + "/" + this.dataset.total + ")";
+                    tip.innerHTML = h;
+                    tip.style.display = "block";
+                    const tipW = tip.offsetWidth;
+                    const tipH = tip.offsetHeight;
+                    let left = rect.left;
+                    let top = rect.bottom + 4;
+                    if (left + tipW > window.innerWidth - 8) left = window.innerWidth - tipW - 8;
+                    if (top + tipH > window.innerHeight - 8) top = rect.top - tipH - 4;
+                    if (left < 8) left = 8;
+                    if (top < 8) top = 8;
+                    tip.style.left = left + "px";
+                    tip.style.top = top + "px";
+                });
+                div.addEventListener("mouseleave", function () {
+                    getTooltip().style.display = "none";
+                });
+            }
+            user_row.appendChild(div);
+            const t = result_tier(origC, time);
+            if(t != -1){
+                const name = tiers[t]["name"].toLowerCase().replace(" ","-");
+                let attrName = name;
+                if (oldTiers) attrName += "OLD";
+                div.setAttribute("tier", attrName);
+            }
+        }
+    };
+
+    // --- Global sort mode (Power or category column) ---
+    if (isColSort) {
+        document.body.dataset.columnSort = "1";
+        const allUsers = [];
+        for (var u = 0; u < table.length; u++) {
+            const user = table[u];
+            if (user === undefined) break;
+            allUsers.push(user);
+        }
+        allUsers.sort((a, b) => {
+            const va = a[sortColumn];
+            const vb = b[sortColumn];
+            if (va === -1 && vb !== -1) return 1;
+            if (vb === -1 && va !== -1) return -1;
+            return sortAsc ? va - vb : vb - va;
+        });
+        var global_table = document.createElement("table");
+        results_table.appendChild(global_table);
+
+        for (const user of allUsers) {
+            const userTier = userFinalTierMap[user[0]];
+            const userTierName = userTier ? userTier.toLowerCase().replace(" ","-") : "";
+            renderUserRow(user, global_table, userTierName);
+        }
+
+        var reqsChk = document.getElementById("switch-reqs");
+        if (reqsChk) {
+            reqsChk.checked = true;
+        }
+        return;
+    }
+
+    document.body.dataset.columnSort = "0";
 
     for(var i=num_tiers-1; i>0; i--){
         let effectiveTier = tiers[i];
@@ -285,19 +468,25 @@ function populate_table(table){
         for(var j=0; j<3; j++){
             tier_events_row.appendChild(document.createElement("td"));
         }
-        tier_events_row.children[0].textContent = sortedPlayerRow ? "Reset sorting" : "Name";
+        tier_events_row.children[0].textContent = (sortedPlayerRow || sortColumn !== null) ? "Reset sorting" : "Name";
         setupResetHeaderCell(tier_events_row.children[0]);
-        tier_events_row.children[1].textContent = "Place";
-        tier_events_row.children[2].textContent = "Power";
+        tier_events_row.children[1].textContent = "Place" + (sortColumn === 1 ? (sortAsc ? " ▲" : " ▼") : "");
+        setupSortableHeaderCell(tier_events_row.children[1], 1);
+        tier_events_row.children[2].textContent = "Power" + (sortColumn === 2 ? (sortAsc ? " ▲" : " ▼") : "");
+        setupSortableHeaderCell(tier_events_row.children[2], 2);
 
         for(var j=0; j<num_categories; j++){
             var div = document.createElement("td");
             div.innerHTML = categories[catIdx(j)].replace(/ /g, '<br>');
+            const col = catIdx(j) + 3;
+            if (sortColumn === col) div.innerHTML += sortAsc ? " ▲" : " ▼";
+            setupSortableHeaderCell(div, col);
             tier_events_row.appendChild(div);
         }
 
         // add the users to the table
         if (trueView) next_user = 0;
+        const tierUsers = [];
         while(true){
             const user = table[next_user];
             // if the user is undefined or the user's power is too low, stop adding new rows
@@ -331,150 +520,24 @@ function populate_table(table){
                 }
             }
 
-            // create a new row and the cells for the username, place, power
-            var user_row = document.createElement("tr");
-            var name_div = document.createElement("td");
-            var place_div = document.createElement("td");
-            var power_div = document.createElement("td");
-
-            name_div.innerHTML = appendFlagIconToNickname(user[0], true);
-            place_div.textContent = trueView ? placeCounter++ : user[1];
-            power_div.textContent = user[2];
-
-            user_row.className = "player-row";
-            name_div.className = "player";
-            name_div.classList.add("sortable-player");
-            name_div.addEventListener("click", (e) => {
-                e.stopPropagation();
-                sortedPlayerRow = user;
-                categoryOrder = computeCategoryOrder(user);
-                populate_table(powerData);
-                document.dispatchEvent(new Event("table-repopulated"));
-            });
-            place_div.className = "player-place";
-            power_div.className = "player-power";
-            let attrName;
-            if (!trueView && simplifiedView && isSubTierIII(tiers[i]["name"])) {
-                attrName = userFinalTierMap[user[0]].toLowerCase().replace(" ","-");
-            } else {
-                attrName = tier_name;
-            }
-            if (oldTiers) {
-                attrName += "OLD";
-            }
-            name_div.setAttribute("tier", attrName);
-            place_div.setAttribute("tier", attrName);
-            power_div.setAttribute("tier", attrName);
-
-                if(!trueView && (i !== tiers.length - 1) && (user[2] > tiers[i+1]["limit"])){
-                power_div.setAttribute("class", "player-power power_req_reached");
-                power_div.setAttribute("title", "Missing one score of the higher tier to rank up.");
-                }
-
-
-            tier_table.appendChild(user_row);
-            user_row.appendChild(name_div);
-            user_row.appendChild(place_div);
-            user_row.appendChild(power_div);
-            if (oldTiers) {
-                const dynamicSum = PowerCalc.getDynamicSum(user.slice(3));
-                if (dynamicSum > 303030){
-                    if (user[2] > 303030){
-                        //power_div.innerHTML += `<br><span style="fontSize=10px;color:cyan">${dynamicSum}</span>`;
-                    } else {
-                        power_div.innerHTML += `<br><span style="fontSize=10px;">${dynamicSum}</span>`;
-                    }
-                }
-                
-            }
-            // add the users results
-            const playerOrder = computeCategoryOrder(user);
-            for(var j=0; j<num_categories; j++){
-                const origC = catIdx(j);
-                let time = user[origC + 3];
-
-                var div = document.createElement("td");
-                div.textContent = format(time, fmcPower);
-                const rank = playerOrder.length - playerOrder.indexOf(origC);
-                div.dataset.rank = rank;
-                div.dataset.total = playerOrder.length;
-                if (time != -1) {
-                    const ti = result_tier(origC, time);
-                    let ahead, target;
-                    if (ti < 0) {
-                        target = tiers[0].times[origC];
-                        ahead = (target - time) / target * 100;
-                    } else if (ti >= num_tiers - 1) {
-                        target = tiers[ti].times[origC];
-                        ahead = (target - time) / target * 100;
-                    } else {
-                        target = tiers[ti + 1].times[origC];
-                        ahead = (target - time) / target * 100;
-                    }
-                    const arrow = (ti >= 0 && ti < num_tiers - 1) ? "\u2192 " : "";
-                    const targetStr = format(target, true);
-                    const sign = ahead >= 0 ? "+" : "";
-                    const pct = ahead.toFixed(2);
-                    const tierName = ti >= 0 && ti < num_tiers ? tiers[ti].name : tiers[0].name;
-                    const tierSlug = tierName.toLowerCase().replace(" ","-");
-                    const diff = target - time;
-                    const diffSign = diff >= 0 ? "+" : "-";
-                    div.dataset.diff = diffSign + format(Math.abs(diff));
-                    div.dataset.tierName = tierName;
-                    div.dataset.tierSlug = oldTiers ? tierSlug + "OLD" : tierSlug;
-                    div.dataset.arrow = arrow;
-                    div.dataset.target = targetStr;
-                    div.dataset.ahead = sign + pct + "%";
-                    if (arrow) {
-                        const nextName = tiers[ti + 1].name;
-                        const nextSlug = nextName.toLowerCase().replace(" ","-");
-                        div.dataset.nextTier = nextName;
-                        div.dataset.nextTierSlug = oldTiers ? nextSlug + "OLD" : nextSlug;
-                    }
-                    div.addEventListener("mouseenter", function () {
-                        const tip = getTooltip();
-                        const rect = this.getBoundingClientRect();
-                        let h = "<span class=\"tip-tier\" tierf=\"" + this.dataset.tierSlug + "\">" + this.dataset.tierName + "</span>";
-                        if (this.dataset.arrow) {
-                            h += " " + this.dataset.arrow + this.dataset.target + " (" + this.dataset.diff + ") for <span tierf=\"" + this.dataset.nextTierSlug + "\">" + this.dataset.nextTier + "</span>";
-                        } else {
-                            h += " " + this.dataset.target;
-                        }
-                        h += " (" + this.dataset.rank + "/" + this.dataset.total + ")";
-                        tip.innerHTML = h;
-                        tip.style.display = "block";
-                        const tipW = tip.offsetWidth;
-                        const tipH = tip.offsetHeight;
-                        let left = rect.left;
-                        let top = rect.bottom + 4;
-                        if (left + tipW > window.innerWidth - 8) left = window.innerWidth - tipW - 8;
-                        if (top + tipH > window.innerHeight - 8) top = rect.top - tipH - 4;
-                        if (left < 8) left = 8;
-                        if (top < 8) top = 8;
-                        tip.style.left = left + "px";
-                        tip.style.top = top + "px";
-                    });
-                    div.addEventListener("mouseleave", function () {
-                        getTooltip().style.display = "none";
-                    });
-                }
-
-                user_row.appendChild(div);
-
-                const t = result_tier(origC, time);
-
-                // tier is -1 if below the first rank
-                if(t != -1){
-                    const name = tiers[t]["name"].toLowerCase().replace(" ","-");
-                    let attrName = name;
-                    if (oldTiers) {
-                        attrName += "OLD";
-                    }
-                    div.setAttribute("tier", attrName);
-                }
-            }
-
+            tierUsers.push(user);
             next_user++;
+        }
+
+        const tierAttrName = (function() {
+            if (!trueView && simplifiedView && isSubTierIII(tiers[i]["name"])) {
+                return null; // will be computed per user
+            }
+            return tier_name;
+        })();
+
+        for (const user of tierUsers) {
+            let ta = tierAttrName;
+            if (ta === null) {
+                const userTier = userFinalTierMap[user[0]];
+                ta = userTier ? userTier.toLowerCase().replace(" ","-") : "";
+            }
+            renderUserRow(user, tier_table, ta, i);
         }
     }
 }
