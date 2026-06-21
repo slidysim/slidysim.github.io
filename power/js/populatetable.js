@@ -237,6 +237,8 @@ function populate_table(table){
         }
     }
 
+
+
     var placeCounter = 1;
 
     const isColSort = sortColumn !== null;
@@ -399,6 +401,14 @@ function populate_table(table){
 
     document.body.dataset.columnSort = "0";
 
+    const unrankedUsers = [];
+    for (var uu = 0; uu < table.length; uu++) {
+        const u = table[uu];
+        if (u === undefined) break;
+        if (hasScores(u) && u[2] == 0) unrankedUsers.push(u);
+    }
+    const unrankedNames = new Set(unrankedUsers.map(u => u[0]));
+
     for(var i=num_tiers-1; i>0; i--){
         let effectiveTier = tiers[i];
         if (simplifiedView) {
@@ -533,6 +543,11 @@ function populate_table(table){
                 continue;
             }
 
+            if (unrankedNames.has(user[0])) {
+                next_user++;
+                continue;
+            }
+
             tierUsers.push(user);
             next_user++;
         }
@@ -551,6 +566,52 @@ function populate_table(table){
                 ta = userTier ? userTier.toLowerCase().replace(" ","-") : "";
             }
             renderUserRow(user, tier_table, ta, i);
+        }
+    }
+
+    // Unranked row for players with scores but 0 power
+    if (unrankedUsers.length > 0) {
+        var unranked_table = document.createElement("table");
+        unranked_table.id = "unranked-table";
+        results_table.appendChild(unranked_table);
+        var unranked_head = document.createElement("thead");
+        var unranked_req_row = document.createElement("tr");
+        var unranked_events_row = document.createElement("tr");
+        unranked_head.className = "table-header";
+        unranked_req_row.className = "req-row";
+        unranked_events_row.className = "events-row";
+        unranked_table.appendChild(unranked_head);
+        unranked_events_row.style.display = 'none';
+        unranked_head.appendChild(unranked_req_row);
+        unranked_head.appendChild(unranked_events_row);
+        const unrankedTierName = "unranked";
+        for(var j=0; j<3; j++){
+            var tdel = document.createElement("td");
+            tdel.setAttribute("tierf", unrankedTierName + (oldTiers ? "OLD" : ""));
+            unranked_req_row.appendChild(tdel);
+        }
+        unranked_req_row.children[0].textContent = "Unranked";
+        unranked_req_row.children[1].textContent = "0";
+        unranked_req_row.children[2].textContent = "0";
+        for(var j=0; j<num_categories; j++){
+            var div = document.createElement("td");
+            div.textContent = format(tiers[num_tiers-1]["times"][catIdx(j)], true);
+            div.setAttribute("tierf", unrankedTierName + (oldTiers ? "OLD" : ""));
+            unranked_req_row.appendChild(div);
+        }
+        for(var j=0; j<3; j++){
+            unranked_events_row.appendChild(document.createElement("td"));
+        }
+        unranked_events_row.children[0].textContent = "Name";
+        unranked_events_row.children[1].textContent = "Place";
+        unranked_events_row.children[2].textContent = "Power";
+        for(var j=0; j<num_categories; j++){
+            var tdel = document.createElement("td");
+            tdel.innerHTML = categories[catIdx(j)].replace(/ /g, '<br>');
+            unranked_events_row.appendChild(tdel);
+        }
+        for (const user of unrankedUsers) {
+            renderUserRow(user, unranked_table, unrankedTierName);
         }
     }
 }
