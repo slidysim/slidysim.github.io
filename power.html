@@ -2,7 +2,7 @@
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <title>Slidysim Tier Ranks</title>
         <link rel="icon" type="image/png" href="images/egg.png">
-        <link rel="stylesheet" href="power/css/style.css?v=1.0.149">
+        <link rel="stylesheet" href="power/css/style.css?v=1.0.155">
     </head>
 
     <body>
@@ -10,41 +10,25 @@
             <button class="menu-btn"><i class="menu-icon"></i></button>
             <button class="date-button" id="date-button">Power Rankings</button>
             <div class="header-right">
-                <div class="switch-div">
+                <div class="switch-div" data-tt="Off: All players are shown&#10;On: Group players by their worst category tier">
                     <span class="switch-label">True</span>
                     <input type="checkbox" id="switch-true" title="Only players with all categories completed" style="display:none">
                     <label for="switch-true"></label>
-                    <div class="more-infos">
-                        <p><span>Off:</span> All players are shown</p>
-                        <p><span>On:</span> Group players by their worst category tier</p>
-                    </div>
                 </div>
-                <div class="switch-div" id="switch-div-simplified" style="display:none">
+                <div class="switch-div" id="switch-div-simplified" style="display:none" data-tt="Off: All sub-tiers are shown separately&#10;On: Sub-tiers are grouped into a single tier">
                     <span class="switch-label">Group</span>
                     <input type="checkbox" id="switch-simplified" style="display:none" title="Simplified view - Grouping sub-tiers into a single one">
                     <label for="switch-simplified"></label>
-                    <div class="more-infos">
-                        <p><span>Off:</span> All sub-tiers are shown separately</p>
-                        <p><span>On:</span> Sub-tiers are grouped into a single tier</p>
-                    </div>
                 </div>
-                <div class="switch-div">
+                <div class="switch-div" data-tt="Off: All colors are shown&#10;On: Only tier's color and above are shown">
                     <span class="switch-label">Color</span>
                     <input type="checkbox" id="switch" title="Only tier's color and above are shown" style="display:none">
                     <label for="switch"></label>
-                    <div class="more-infos">
-                        <p><span>Off:</span> All colors are shown</p>
-                        <p><span>On:</span> Only tier's color and above are shown</p>
-                    </div>
                 </div>
-                <div class="switch-div">
+                <div class="switch-div" data-tt="Off: All Requirements are shown&#10;On: Only Leaderboard is shown">
                     <span class="switch-label">Reqs</span>
                     <input type="checkbox" id="switch-reqs" title="Only Leaderboard is shown" style="display:none">
                     <label for="switch-reqs"></label>
-                    <div class="more-infos">
-                        <p><span>Off:</span> All Requirements are shown</p>
-                        <p><span>On:</span> Only Leaderboard is shown</p>
-                    </div>
                 </div>
             </div>
         </div>
@@ -78,10 +62,11 @@
             <a href="https://www.youtube.com/channel/UCCldkGVeUbQ1C_Lqiubq49Q/videos" target="_blank" title="New Tab">gottagitgud</a>
             <a href="https://www.youtube.com/channel/UCKzRppIfkDedp3Ktkf24xcA/videos" target="_blank" title="New Tab">Osipov Alexander</a>
         </div>
+        <div id="score-tooltip" class="score-tooltip" style="display:none; position:fixed; z-index:9999; padding:4px 10px; border-radius:4px; font-size:11px; white-space:nowrap; pointer-events:none; background:#1a1a1a; border:1px solid #555; color:#ddd; line-height:1.4;"></div>
         <script src="scripts/countryData.js"></script>
-        <script src="power/js/dynamicPower.js?v=1.0.152"></script>
-        <script src="power/js/populatetable.js?v=1.0.215" type="module"></script>
+        <script src="power/js/dynamicPower.js?v=1.0.154"></script>
+        <script src="power/js/populatetable.js?v=1.0.237" type="module"></script>
         <script src="power/js/menu.js"></script>
-        <script defer="" src="power/js/switch.js?v=1.0.155"></script>
+        <script defer="" src="power/js/switch.js?v=1.0.157"></script>
         
 </body></html>

@@ -9,6 +9,62 @@ let userFinalTierMap;
 let fmcPower;
 let simplifiedView = false;
 let trueView = false;
+let categoryOrder = [];
+let sortedPlayerRow = null;
+
+function catIdx(j) {
+    return sortedPlayerRow ? categoryOrder[j] : j;
+}
+
+function computeCategoryOrder(player) {
+    const scored = [];
+    for (let c = 0; c < num_categories; c++) {
+        const time = player[c + 3];
+        let tierIdx, ahead;
+        if (time == -1) {
+            tierIdx = -2;
+            ahead = -Infinity;
+        } else {
+            tierIdx = result_tier(c, time);
+            if (tierIdx < 0) {
+                ahead = (tiers[0].times[c] - time) / tiers[0].times[c] * 100;
+            } else if (tierIdx >= num_tiers - 1) {
+                ahead = (tiers[tierIdx].times[c] - time) / tiers[tierIdx].times[c] * 100;
+            } else {
+                ahead = (tiers[tierIdx + 1].times[c] - time) / tiers[tierIdx + 1].times[c] * 100;
+            }
+        }
+        scored.push({ idx: c, tierIdx, ahead });
+    }
+    scored.sort((a, b) => a.tierIdx - b.tierIdx || a.ahead - b.ahead);
+    return scored.map(s => s.idx);
+}
+
+function resetSort() {
+    sortedPlayerRow = null;
+    categoryOrder = [];
+}
+
+function getTooltip() {
+    return document.getElementById("score-tooltip");
+}
+
+function setupResetHeaderCell(cell) {
+    cell.style.minWidth = "132px";
+    cell.style.cursor = "pointer";
+    cell.addEventListener("mouseenter", () => {
+        cell.style.backgroundColor = "#3a3a3a";
+        cell.style.color = "#ffffff";
+    });
+    cell.addEventListener("mouseleave", () => {
+        cell.style.backgroundColor = "";
+        cell.style.color = "";
+    });
+    cell.addEventListener("click", () => {
+        resetSort();
+        populate_table(powerData);
+    });
+}
 
 
 function isSubTierIII(name) {
@@ -62,6 +118,7 @@ function result_tier(category, time){
 
 
 function populate_table(table){
+    if (sortedPlayerRow && !table.includes(sortedPlayerRow)) resetSort();
     var results_table = document.getElementById("results-table");
 
     // remove previous wrapper if it exists
@@ -100,13 +157,13 @@ function populate_table(table){
         for(var j=0; j<3; j++){
             tier_events_row.appendChild(document.createElement("td"));
         }
-        tier_events_row.children[0].textContent = "Name";
-        tier_events_row.children[0].style.minWidth = "132px";
+        tier_events_row.children[0].textContent = sortedPlayerRow ? "Reset sorting" : "Name";
+        setupResetHeaderCell(tier_events_row.children[0]);
         tier_events_row.children[1].textContent = "Place";
         tier_events_row.children[2].textContent = "Power";
         for(var j=0; j<num_categories; j++){
             var div = document.createElement("td");
-            div.innerHTML = categories[j].replace(/ /g, '<br>');
+            div.innerHTML = categories[catIdx(j)].replace(/ /g, '<br>');
             tier_events_row.appendChild(div);
         }
         
@@ -218,7 +275,7 @@ function populate_table(table){
 
         for(var j=0; j<num_categories; j++){
             var div = document.createElement("td");
-            div.textContent = format(effectiveTier["times"][j], true);
+            div.textContent = format(effectiveTier["times"][catIdx(j)], true);
             div.setAttribute("tierf", attrName);
             tier_req_row.appendChild(div);
         }
@@ -227,14 +284,14 @@ function populate_table(table){
         for(var j=0; j<3; j++){
             tier_events_row.appendChild(document.createElement("td"));
         }
-        tier_events_row.children[0].textContent = "Name";
-        tier_events_row.children[0].style.minWidth = "132px";
+        tier_events_row.children[0].textContent = sortedPlayerRow ? "Reset sorting" : "Name";
+        setupResetHeaderCell(tier_events_row.children[0]);
         tier_events_row.children[1].textContent = "Place";
         tier_events_row.children[2].textContent = "Power";
 
         for(var j=0; j<num_categories; j++){
             var div = document.createElement("td");
-            div.innerHTML = categories[j].replace(/ /g, '<br>');
+            div.innerHTML = categories[catIdx(j)].replace(/ /g, '<br>');
             tier_events_row.appendChild(div);
         }
 
@@ -285,6 +342,13 @@ function populate_table(table){
 
             user_row.className = "player-row";
             name_div.className = "player";
+            name_div.classList.add("sortable-player");
+            name_div.addEventListener("click", (e) => {
+                e.stopPropagation();
+                sortedPlayerRow = user;
+                categoryOrder = computeCategoryOrder(user);
+                populate_table(powerData);
+            });
             place_div.className = "player-place";
             power_div.className = "player-power";
             let attrName;
@@ -322,15 +386,80 @@ function populate_table(table){
                 
             }
             // add the users results
+            const playerOrder = computeCategoryOrder(user);
             for(var j=0; j<num_categories; j++){
-                let time = user[j+3];
+                const origC = catIdx(j);
+                let time = user[origC + 3];
 
                 var div = document.createElement("td");
                 div.textContent = format(time, fmcPower);
+                const rank = playerOrder.length - playerOrder.indexOf(origC);
+                div.dataset.rank = rank;
+                div.dataset.total = playerOrder.length;
+                if (time != -1) {
+                    const ti = result_tier(origC, time);
+                    let ahead, target;
+                    if (ti < 0) {
+                        target = tiers[0].times[origC];
+                        ahead = (target - time) / target * 100;
+                    } else if (ti >= num_tiers - 1) {
+                        target = tiers[ti].times[origC];
+                        ahead = (target - time) / target * 100;
+                    } else {
+                        target = tiers[ti + 1].times[origC];
+                        ahead = (target - time) / target * 100;
+                    }
+                    const arrow = (ti >= 0 && ti < num_tiers - 1) ? "\u2192 " : "";
+                    const targetStr = format(target, true);
+                    const sign = ahead >= 0 ? "+" : "";
+                    const pct = ahead.toFixed(2);
+                    const tierName = ti >= 0 && ti < num_tiers ? tiers[ti].name : tiers[0].name;
+                    const tierSlug = tierName.toLowerCase().replace(" ","-");
+                    const diff = target - time;
+                    const diffSign = diff >= 0 ? "+" : "-";
+                    div.dataset.diff = diffSign + format(Math.abs(diff));
+                    div.dataset.tierName = tierName;
+                    div.dataset.tierSlug = oldTiers ? tierSlug + "OLD" : tierSlug;
+                    div.dataset.arrow = arrow;
+                    div.dataset.target = targetStr;
+                    div.dataset.ahead = sign + pct + "%";
+                    if (arrow) {
+                        const nextName = tiers[ti + 1].name;
+                        const nextSlug = nextName.toLowerCase().replace(" ","-");
+                        div.dataset.nextTier = nextName;
+                        div.dataset.nextTierSlug = oldTiers ? nextSlug + "OLD" : nextSlug;
+                    }
+                    div.addEventListener("mouseenter", function () {
+                        const tip = getTooltip();
+                        const rect = this.getBoundingClientRect();
+                        let h = "<span class=\"tip-tier\" tierf=\"" + this.dataset.tierSlug + "\">" + this.dataset.tierName + "</span>";
+                        if (this.dataset.arrow) {
+                            h += " " + this.dataset.arrow + this.dataset.target + " (" + this.dataset.diff + ") for <span tierf=\"" + this.dataset.nextTierSlug + "\">" + this.dataset.nextTier + "</span>";
+                        } else {
+                            h += " " + this.dataset.target;
+                        }
+                        h += " (" + this.dataset.rank + "/" + this.dataset.total + ")";
+                        tip.innerHTML = h;
+                        tip.style.display = "block";
+                        const tipW = tip.offsetWidth;
+                        const tipH = tip.offsetHeight;
+                        let left = rect.left;
+                        let top = rect.bottom + 4;
+                        if (left + tipW > window.innerWidth - 8) left = window.innerWidth - tipW - 8;
+                        if (top + tipH > window.innerHeight - 8) top = rect.top - tipH - 4;
+                        if (left < 8) left = 8;
+                        if (top < 8) top = 8;
+                        tip.style.left = left + "px";
+                        tip.style.top = top + "px";
+                    });
+                    div.addEventListener("mouseleave", function () {
+                        getTooltip().style.display = "none";
+                    });
+                }
 
                 user_row.appendChild(div);
 
-                const t = result_tier(j, time);
+                const t = result_tier(origC, time);
 
                 // tier is -1 if below the first rank
                 if(t != -1){
@@ -383,6 +512,8 @@ window.addEventListener('message', (event) => {
     num_tiers = tiers.length;
     num_categories = categories.length;
 
+    resetSort();
+
     const simplifiedDiv = document.getElementById("switch-div-simplified");
     if (simplifiedDiv) {
         simplifiedDiv.style.display = oldTiers ? "none" : "";
@@ -408,3 +539,42 @@ if (trueBtn) {
         document.dispatchEvent(new Event("table-repopulated"));
     });
 }
+
+const resultsTable = document.getElementById("results-table");
+if (resultsTable) {
+    resultsTable.addEventListener("mouseleave", () => {
+        getTooltip().style.display = "none";
+    });
+}
+
+document.querySelectorAll(".switch-div").forEach(sd => {
+    const label = sd.querySelector("label");
+    if (!label) return;
+    const tt = sd.getAttribute("data-tt");
+    if (!tt) return;
+    const lines = tt.split("\n");
+    const html = lines.map(l => {
+        const idx = l.indexOf(": ");
+        if (idx === -1) return l;
+        return "<span>" + l.substring(0, idx) + "</span>" + l.substring(idx);
+    }).join("<br>");
+    label.addEventListener("mouseenter", function () {
+        const tip = getTooltip();
+        const rect = this.getBoundingClientRect();
+        tip.innerHTML = html;
+        tip.style.display = "block";
+        const tipW = tip.offsetWidth;
+        const tipH = tip.offsetHeight;
+        let left = rect.left + rect.width / 2 - tipW / 2;
+        let top = rect.bottom + 4;
+        if (left + tipW > window.innerWidth - 8) left = window.innerWidth - tipW - 8;
+        if (top + tipH > window.innerHeight - 8) top = rect.top - tipH - 4;
+        if (left < 8) left = 8;
+        if (top < 8) top = 8;
+        tip.style.left = left + "px";
+        tip.style.top = top + "px";
+    });
+    label.addEventListener("mouseleave", function () {
+        getTooltip().style.display = "none";
+    });
+});

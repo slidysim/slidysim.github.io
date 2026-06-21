@@ -50,6 +50,12 @@
     cursor: default;
 }
 
+@media (max-width: 700px) {
+    .page-header .date-button {
+        display: none;
+    }
+}
+
 .header-right {
     margin-left: auto;
     display: flex;
@@ -129,39 +135,4 @@
     clip-path: circle(150% at 0 50%);
 }
 
-.page-header .switch-div:hover .more-infos,
-.more-infos:hover {
-    opacity: 1;
-}
 
-.more-infos {
-    display: block;
-    position: absolute;
-    border-radius: .5em;
-    width: 200%;
-    top: 110%;
-    right: 0;
-    opacity: 0;
-    background: hsl(var(--header_clr) / 0.5);
-    backdrop-filter: blur(1em);
-    padding: .75em;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: rgb(190, 190, 190);
-    box-shadow: .1em .1em .4em black;
-    transition: opacity .5s .5s;
-}
-
-.more-infos * {
-    font-size: 1.5rem;
-}
-
-.more-infos span {
-    font-weight: 700;
-}
-
-@supports not (backdrop-filter: blur(1em)) {
-    .more-infos {
-        background-color: hsl(var(--header_clr));
-    }
-}

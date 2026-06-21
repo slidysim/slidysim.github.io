@@ -63,6 +63,8 @@
     color: rgb(170, 170, 170);
 }
 
+
+
 /* player rows */
 
 .player-row {
@@ -106,6 +108,13 @@
     font-size: 1.05em;
     min-width: 132px !important;
     max-width: 132px !important;
+}
+
+.sortable-player {
+    cursor: pointer;
+}
+.sortable-player:hover {
+    filter: brightness(0.85);
 }
 
 /* tiers with better matching text colors */
@@ -198,3 +207,21 @@
 [tierf="bronzeOLD"]       { color: #b45f06; text-shadow: 0px 0px 10px #b45f06; }
 [tierf="beginnerOLD"]     { color: #93c47d; text-shadow: 0px 0px 10px #93c47d; }
 [tierf="unrankedOLD"]     { color: #666666; text-shadow: 0px 0px 10px #666666; }
+
+.score-tooltip {
+    position: fixed;
+    z-index: 9999;
+    display: none;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    white-space: nowrap;
+    pointer-events: none;
+    background: #1a1a1a;
+    border: 1px solid #555;
+    color: #ddd;
+    line-height: 1.4;
+}
+.score-tooltip .tip-tier {
+    font-weight: 700;
+}
