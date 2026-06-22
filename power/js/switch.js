@@ -499,6 +499,13 @@ let tierlist = [
 
         powerData.forEach(function(player) {
           if (!player) return;
+          if (isTrueTries) {
+            var incomplete = false;
+            for (var c = 0; c < categories.length; c++) {
+              if (player[3 + c] === -1) { incomplete = true; break; }
+            }
+            if (incomplete) return;
+          }
           var score = player[3 + catIdx];
           if (score === -1) return;
           var bestTier = -1;
