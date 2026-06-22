@@ -426,6 +426,18 @@ let tierlist = [
     var selectedCats = getSelectedCategories();
     var isCategoryMode = selectedCats.length > 0;
 
+    var hideEmptyEl = document.getElementById("switch-empty");
+    var isHideEmpty = hideEmptyEl && hideEmptyEl.checked;
+    if (isCategoryMode && isHideEmpty) {
+      if (tierChart) { tierChart.destroy(); tierChart = null; }
+      var canvas = document.getElementById('tier-chart');
+      var ctx = canvas && canvas.getContext('2d');
+      if (ctx) { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+      var titleEl = document.getElementById("chart-title");
+      if (titleEl) titleEl.textContent = "Hide Empty cannot be used with category-specific graphs";
+      return;
+    }
+
     var simplifiedEl = document.getElementById("switch-simplified");
     var isSimplified = simplifiedEl && simplifiedEl.checked;
     var trueEl = document.getElementById("switch-true");
