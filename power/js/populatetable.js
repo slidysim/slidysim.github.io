@@ -576,7 +576,7 @@ function populate_table(table){
     }
 
     // Unranked row for players with scores but 0 power
-    if (unrankedUsers.length > 0) {
+    if (!trueView && unrankedUsers.length > 0) {
         var unranked_table = document.createElement("table");
         unranked_table.id = "unranked-table";
         results_table.appendChild(unranked_table);
