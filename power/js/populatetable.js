@@ -613,7 +613,7 @@ function populate_table(table){
         unranked_req_row.children[2].textContent = "0";
         for(var j=0; j<num_categories; j++){
             var div = document.createElement("td");
-            div.textContent = format(tiers[num_tiers-1]["times"][catIdx(j)], true);
+            div.textContent = "\u221E";
             div.setAttribute("tierf", unrankedTierName + (oldTiers ? "OLD" : ""));
             unranked_req_row.appendChild(div);
         }
