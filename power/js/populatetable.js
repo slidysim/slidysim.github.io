@@ -13,6 +13,7 @@ let categoryOrder = [];
 let sortedPlayerRow = null;
 let sortColumn = null;
 let sortAsc = true;
+let __truePlaces = {};
 
 function catIdx(j) {
     return sortedPlayerRow ? categoryOrder[j] : j;
@@ -251,7 +252,8 @@ function populate_table(table){
         var power_div = document.createElement("td");
 
         name_div.innerHTML = appendFlagIconToNickname(user[0], true);
-        place_div.textContent = trueView ? (sortColumn !== null && user.__place ? user.__place : placeCounter++) : user[1];
+        place_div.textContent = trueView ? (sortColumn !== null && user.__place ? user.__place : (__truePlaces[user[0]] || placeCounter++)) : user[1];
+        if (trueView && sortColumn === null) __truePlaces[user[0]] = parseInt(place_div.textContent);
         power_div.textContent = user[2];
 
         user_row.className = "player-row";
@@ -381,7 +383,7 @@ function populate_table(table){
                     if (user[c + 3] == -1) { incomplete = true; break; }
                 }
                 if (incomplete) continue;
-                user.__place = placeCounter++;
+                user.__place = __truePlaces[user[0]] || placeCounter++;
                 const ti = trueTierMap[u];
                 user.__tier = (ti >= 0 && ti < num_tiers) ? tiers[ti]["name"].toLowerCase().replace(" ","-") : "";
             }
@@ -666,7 +668,19 @@ function notifyParentSwitchState() {
         var el = document.getElementById(id);
         if (el) state[id] = el.checked;
     });
-    try { parent.postMessage({type: "powerSwitchState", state: state}, '*'); } catch(e) {}
+    try { parent.postMessage({type: "powerSwitchState", state: state}, '*'); } catch(e) {    }
+}
+
+function renderSortedTableWithSavedStateReal(savedCol, savedAsc) {
+    __truePlaces = {};
+    populate_table(powerData);
+    document.dispatchEvent(new Event("table-repopulated"));
+    if (savedCol !== null) {
+        sortColumn = savedCol;
+        sortAsc = savedAsc;
+        populate_table(powerData);
+        document.dispatchEvent(new Event("table-repopulated"));
+    }
 }
 
 window.addEventListener('message', (event) => {
@@ -721,9 +735,11 @@ if (simplifiedBtn) {
 const trueBtn = document.getElementById("switch-true");
 if (trueBtn) {
     trueBtn.addEventListener("change", () => {
+        var savedCol = sortColumn;
+        var savedAsc = sortAsc;
+        resetSort();
         trueView = trueBtn.checked;
-        populate_table(powerData);
-        document.dispatchEvent(new Event("table-repopulated"));
+        renderSortedTableWithSavedStateReal(savedCol, savedAsc);
     });
 }
 
