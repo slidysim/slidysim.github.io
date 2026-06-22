@@ -76,6 +76,7 @@ function setupResetHeaderCell(cell) {
             const el = document.getElementById(id);
             if (el) el.checked = false;
         });
+        notifyParentSwitchState();
         trueView = false;
         simplifiedView = false;
         populate_table(powerData);
@@ -381,6 +382,8 @@ function populate_table(table){
                 }
                 if (incomplete) continue;
                 user.__place = placeCounter++;
+                const ti = trueTierMap[u];
+                user.__tier = (ti >= 0 && ti < num_tiers) ? tiers[ti]["name"].toLowerCase().replace(" ","-") : "";
             }
             allUsers.push(user);
         }
@@ -395,8 +398,7 @@ function populate_table(table){
         results_table.appendChild(global_table);
 
         for (const user of allUsers) {
-            const userTier = userFinalTierMap[user[0]];
-            const userTierName = userTier ? userTier.toLowerCase().replace(" ","-") : "";
+            const userTierName = trueView ? (user.__tier || "") : (userFinalTierMap[user[0]] ? userFinalTierMap[user[0]].toLowerCase().replace(" ","-") : "");
             renderUserRow(user, global_table, userTierName);
         }
 
