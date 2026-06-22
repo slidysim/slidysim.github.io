@@ -280,6 +280,13 @@ let tierlist = [
         tierChart.data.datasets[di].hoverBorderColor = ds.hoverBorderColor;
       });
       if (labelColors) tierChart.options.scales.x.ticks.color = labelColors;
+      var pctBtn = document.getElementById("switch-percent");
+      var cumBtn = document.getElementById("switch-cumulative");
+      if (pctBtn && pctBtn.checked && cumBtn && cumBtn.checked) {
+        tierChart.options.scales.y.max = 100;
+      } else {
+        delete tierChart.options.scales.y.max;
+      }
       tierChart.__total = total;
       tierChart.__reqTimes = reqTimes2D;
       tierChart.__categoryTotals = categoryTotals;
@@ -302,6 +309,19 @@ let tierlist = [
     var dataLabelsPlugin = createDataLabelsPlugin(isCategoryMode, numCats);
 
     var ctx = document.getElementById('tier-chart').getContext('2d');
+    var pctBtn = document.getElementById("switch-percent");
+    var cumBtn = document.getElementById("switch-cumulative");
+    var isPctMode = pctBtn && pctBtn.checked;
+    var yAxisOpts = {
+      beginAtZero: true,
+      ticks: {
+        color: '#999',
+        precision: 0,
+        font: { size: 10 }
+      },
+      grid: { color: '#2a2a2a' }
+    };
+    if (isPctMode && cumBtn && cumBtn.checked) yAxisOpts.max = 100;
     tierChart = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -382,15 +402,7 @@ let tierlist = [
             },
             grid: { color: '#2a2a2a' }
           },
-          y: {
-            beginAtZero: true,
-            ticks: {
-              color: '#999',
-              precision: 0,
-              font: { size: 10 }
-            },
-            grid: { color: '#2a2a2a' }
-          }
+          y: yAxisOpts
         }
       },
       plugins: [dataLabelsPlugin]
