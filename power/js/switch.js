@@ -324,20 +324,14 @@ let tierlist = [
                 return item.dataset.label + ': ' + val + ' (' + pct.toFixed(1) + '%)' + (req ? ' \u2264' + req : '');
               },
               labelColor: function(item) {
-                if (item.datasetIndex !== undefined && item.chart && item.chart.__isCategoryMode) {
-                  var color = getCategoryColor(item.datasetIndex);
-                  return { borderColor: color, backgroundColor: color };
-                }
                 var chart = item.chart;
                 var ids = chart.__allBarIds || [];
                 var tfMap = chart.__tierfMap || {};
                 var id = ids[item.dataIndex];
-                return { borderColor: '#666', backgroundColor: id && tfMap[id] ? getTierLabelColor(tfMap[id]) : '#666' };
+                var color = id && tfMap[id] ? getTierLabelColor(tfMap[id]) : '#666';
+                return { borderColor: color, backgroundColor: color };
               },
               labelTextColor: function(item) {
-                if (item.datasetIndex !== undefined && item.chart && item.chart.__isCategoryMode) {
-                  return getCategoryColor(item.datasetIndex);
-                }
                 var chart = item.chart;
                 var ids = chart.__allBarIds || [];
                 var tfMap = chart.__tierfMap || {};
