@@ -672,8 +672,14 @@ function applySwitchStates(states) {
         var valEl = document.getElementById("chart-ignore-val");
         if (valEl) valEl.textContent = states["chart-ignore"];
     }
-    var catEl = document.getElementById("chart-category");
-    if (catEl && states["chart-category"] !== undefined) catEl.value = states["chart-category"];
+    var catPanel = document.getElementById("chart-category-panel");
+    if (catPanel && states["chart-category"] !== undefined) {
+        var selected = states["chart-category"].split(",").filter(Boolean);
+        catPanel.querySelectorAll('input[type="checkbox"]').forEach(function(cb) {
+            cb.checked = selected.indexOf(cb.value) !== -1;
+        });
+        if (typeof updateCategoryTrigger === "function") updateCategoryTrigger();
+    }
 }
 
 function notifyParentSwitchState() {
@@ -685,8 +691,14 @@ function notifyParentSwitchState() {
     state["chart-toggle"] = _chartToggleState;
     var ignoreEl = document.getElementById("chart-ignore");
     if (ignoreEl) state["chart-ignore"] = ignoreEl.value;
-    var catEl = document.getElementById("chart-category");
-    if (catEl) state["chart-category"] = catEl.value;
+    var catPanel = document.getElementById("chart-category-panel");
+    if (catPanel) {
+        var selected = [];
+        catPanel.querySelectorAll('input[type="checkbox"]').forEach(function(cb) {
+            if (cb.checked) selected.push(cb.value);
+        });
+        state["chart-category"] = selected.join(",");
+    }
     try { parent.postMessage({type: "powerSwitchState", state: state}, '*'); } catch(e) {    }
 }
 window.notifyParentSwitchState = notifyParentSwitchState;
@@ -729,6 +741,7 @@ window.addEventListener('message', (event) => {
     num_tiers = tiers.length;
     num_categories = categories.length;
 
+    if (typeof populateCategoryPanel === "function") populateCategoryPanel();
     resetSort();
     applySwitchStates(data[10]);
 
