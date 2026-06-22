@@ -47,7 +47,15 @@
     top: 50%;
     transform: translate(-50%, -50%);
     white-space: nowrap;
-    cursor: default;
+    cursor: pointer;
+}
+.page-header .date-button::after {
+    content: ' 📊';
+    font-size: 0.7em;
+    opacity: 0.5;
+}
+.page-header .date-button:hover {
+    filter: brightness(85%);
 }
 
 @media (max-width: 700px) {

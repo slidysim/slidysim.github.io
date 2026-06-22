@@ -99,6 +99,178 @@ let tierlist = [
     });
 }
   
+  let tierChart = null;
+  let _chartWasVisible = false;
+
+  function getTierLabelColor(tierf) {
+    const el = document.createElement('span');
+    el.setAttribute('tierf', tierf);
+    el.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;';
+    document.body.appendChild(el);
+    const color = getComputedStyle(el).color;
+    document.body.removeChild(el);
+    return color || '#999';
+  }
+
+  function updateTierChart() {
+    if (document.body.dataset.columnSort === "1") return;
+
+    const tables = document.querySelectorAll('table[id$="-table"]');
+
+    const labels = [];
+    const counts = [];
+    const bgColors = [];
+    const labelColors = [];
+
+    tables.forEach(table => {
+      const count = table.querySelectorAll('.player-row').length;
+
+      const reqRow = table.querySelector('tr.req-row');
+      let displayName = table.id.replace('-table', '');
+      let tierf = null;
+      if (reqRow) {
+        const tierfEl = reqRow.querySelector('[tierf]');
+        if (tierfEl) tierf = tierfEl.getAttribute('tierf');
+        if (reqRow.children[0]) {
+          displayName = reqRow.children[0].innerText.trim().replace(/\u00A0/g, ' ').replace(/\n/g, ' ');
+        }
+      }
+
+      labels.push(displayName);
+      counts.push(count);
+      const c = tierf ? getTierLabelColor(tierf) : '#666';
+      bgColors.push(c);
+      labelColors.push(c);
+    });
+
+    labels.reverse();
+    counts.reverse();
+    bgColors.reverse();
+    labelColors.reverse();
+
+    const cumulativeBtn = document.getElementById("switch-cumulative");
+    const isCumulative = cumulativeBtn && cumulativeBtn.checked;
+
+    var total = 0;
+    for (var i = 0; i < counts.length; i++) total += counts[i];
+
+    var chartData;
+    if (isCumulative) {
+      chartData = [];
+      var sum = 0;
+      for (var i = counts.length - 1; i >= 0; i--) {
+        sum += counts[i];
+        chartData[i] = sum;
+      }
+    } else {
+      chartData = counts;
+    }
+
+    const datalabelsPlugin = {
+      id: 'datalabels',
+      afterDraw: function(chart) {
+        const ctx = chart.ctx;
+        const meta = chart.getDatasetMeta(0);
+        ctx.save();
+        ctx.textAlign = 'center';
+
+        meta.data.forEach(function(bar, i) {
+          var val = chart.data.datasets[0].data[i];
+          if (val === 0) return;
+          var pct = total > 0 ? val / total * 100 : 0;
+
+          ctx.font = 'bold 11px monospace';
+          ctx.fillStyle = '#ddd';
+          ctx.shadowColor = 'rgba(0,0,0,0.8)';
+          ctx.shadowBlur = 3;
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(val, bar.x, bar.y - 22);
+
+          ctx.font = '9px monospace';
+          ctx.fillStyle = '#999';
+          ctx.shadowBlur = 0;
+          ctx.textBaseline = 'top';
+          ctx.fillText('(' + pct.toFixed(1) + '%)', bar.x, bar.y - 22 + 5);
+        });
+        ctx.restore();
+      }
+    };
+
+    if (!tierChart) {
+      const ctx = document.getElementById('tier-chart').getContext('2d');
+      tierChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+            datasets: [{
+            label: 'Players',
+            data: chartData,
+            backgroundColor: bgColors,
+            borderColor: bgColors,
+            borderWidth: 1,
+            borderRadius: 3,
+            hoverBackgroundColor: bgColors,
+            hoverBorderColor: bgColors,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 300 },
+          events: [],
+          layout: {
+            padding: { top: 56, bottom: 8 }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: false }
+          },
+          scales: {
+            x: {
+              ticks: {
+                color: labelColors,
+                maxRotation: 45,
+                font: { size: 10, weight: 'bold' }
+              },
+              grid: { color: '#2a2a2a' }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: {
+                color: '#999',
+                precision: 0,
+                font: { size: 10 }
+              },
+              grid: { color: '#2a2a2a' }
+            }
+          }
+        },
+        plugins: [datalabelsPlugin]
+      });
+    } else {
+      tierChart.data.labels = labels;
+      tierChart.data.datasets[0].data = chartData;
+      tierChart.data.datasets[0].backgroundColor = bgColors;
+      tierChart.data.datasets[0].borderColor = bgColors;
+      tierChart.data.datasets[0].hoverBackgroundColor = bgColors;
+      tierChart.data.datasets[0].hoverBorderColor = bgColors;
+      tierChart.options.scales.x.ticks.color = labelColors;
+      tierChart.update();
+    }
+  }
+
+  document.getElementById("date-button").addEventListener("click", () => {
+    if (document.body.dataset.columnSort === "1") return;
+    const container = document.getElementById("chart-container");
+    const isVisible = container.style.display !== "none";
+    container.style.display = isVisible ? "none" : "block";
+    if (!isVisible) {
+      updateTierChart();
+      requestAnimationFrame(() => { if (tierChart) tierChart.resize(); });
+    }
+    document.dispatchEvent(new Event("chart-state-changed"));
+  });
+
   const switchBtnReqs = document.getElementById("switch-reqs");
   
   switchBtnReqs.addEventListener("change", () => {
@@ -135,5 +307,28 @@ let tierlist = [
       if (document.body.dataset.columnSort !== "1") {
           applyReqsVisibility();
       }
+      const chartContainer = document.getElementById("chart-container");
+      if (document.body.dataset.columnSort === "1") {
+        if (chartContainer && chartContainer.style.display !== "none") {
+          _chartWasVisible = true;
+          chartContainer.style.display = "none";
+        }
+      } else {
+        if (_chartWasVisible) {
+          _chartWasVisible = false;
+          chartContainer.style.display = "block";
+          updateTierChart();
+        } else if (chartContainer && chartContainer.style.display !== "none") {
+          updateTierChart();
+        }
+      }
+  });
+
+  document.getElementById("switch-cumulative").addEventListener("change", () => {
+    var container = document.getElementById("chart-container");
+    if (container && container.style.display !== "none") {
+      updateTierChart();
+      requestAnimationFrame(function() { if (tierChart) tierChart.resize(); });
+    }
   });
   

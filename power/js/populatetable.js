@@ -73,7 +73,7 @@ function setupResetHeaderCell(cell) {
     });
     cell.addEventListener("click", () => {
         resetSort();
-        ["switch-true", "switch-simplified", "switch", "switch-reqs", "switch-empty"].forEach(id => {
+        ["switch-true", "switch-simplified", "switch", "switch-reqs", "switch-empty", "switch-cumulative"].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.checked = false;
         });
@@ -648,7 +648,8 @@ export function show_results_from_date(){
     }
 }
 
-const SWITCH_IDS = ["switch-true", "switch-simplified", "switch", "switch-reqs", "switch-empty"];
+const SWITCH_IDS = ["switch-true", "switch-simplified", "switch", "switch-reqs", "switch-empty", "switch-cumulative"];
+let _chartToggleState = false;
 
 function applySwitchStates(states) {
     if (!states) return;
@@ -660,6 +661,11 @@ function applySwitchStates(states) {
     if (trueEl) trueView = trueEl.checked;
     var simEl = document.getElementById("switch-simplified");
     if (simEl) simplifiedView = simEl.checked;
+    var chartEl = document.getElementById("chart-container");
+    if (chartEl && states["chart-toggle"] !== undefined) {
+        chartEl.style.display = states["chart-toggle"] ? "block" : "none";
+        _chartToggleState = states["chart-toggle"];
+    }
 }
 
 function notifyParentSwitchState() {
@@ -668,6 +674,7 @@ function notifyParentSwitchState() {
         var el = document.getElementById(id);
         if (el) state[id] = el.checked;
     });
+    state["chart-toggle"] = _chartToggleState;
     try { parent.postMessage({type: "powerSwitchState", state: state}, '*'); } catch(e) {    }
 }
 
@@ -721,6 +728,12 @@ window.addEventListener('message', (event) => {
 SWITCH_IDS.forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.addEventListener("change", notifyParentSwitchState);
+});
+
+document.addEventListener("chart-state-changed", function() {
+    var chartEl = document.getElementById("chart-container");
+    _chartToggleState = chartEl && chartEl.style.display !== "none";
+    notifyParentSwitchState();
 });
 
 const simplifiedBtn = document.getElementById("switch-simplified");
