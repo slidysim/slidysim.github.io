@@ -164,72 +164,122 @@ let tierlist = [
     trigger.textContent = selected.length > 0 ? selected.length + " categories \u25BE" : "Overall \u25BE";
   }
 
-  function createDataLabelsPlugin(isCategoryMode) {
+  function createDataLabelsPlugin(isCategoryMode, numCats) {
     return {
       id: 'datalabels',
-      afterDraw: function(chart) {
+      afterDatasetsDraw: function(chart) {
         var ctx = chart.ctx;
+
+        var totalBars = 0;
+        chart.data.datasets.forEach(function(ds) { totalBars += ds.data.length; });
+        if (totalBars > 67) return;
+
         ctx.save();
-        ctx.textAlign = 'center';
 
-        chart.data.datasets.forEach(function(dataset, di) {
-          var meta = chart.getDatasetMeta(di);
-          var catTotal = chart.__categoryTotals ? chart.__categoryTotals[di] : chart.__total;
+        try {
+          ctx.textAlign = 'center';
 
-          meta.data.forEach(function(bar, i) {
-            var val = dataset.data[i];
-            if (val === 0 && !isCategoryMode) return;
+          chart.data.datasets.forEach(function(dataset, di) {
+            var meta = chart.getDatasetMeta(di);
+            var catTotal = chart.__categoryTotals ? chart.__categoryTotals[di] : chart.__total;
 
-            if (val !== 0) {
-              var pct = catTotal > 0 ? val / catTotal * 100 : 0;
+            meta.data.forEach(function(bar, i) {
+              var val = dataset.data[i];
+              if (val === 0 && !isCategoryMode) return;
 
-              ctx.font = 'bold 11px monospace';
-              ctx.fillStyle = '#ddd';
-              ctx.shadowColor = 'rgba(0,0,0,0.8)';
-              ctx.shadowBlur = 3;
-              ctx.textBaseline = 'bottom';
-              ctx.fillText(val, bar.x, bar.y - 30);
+              if (val === 0) return;
 
-              ctx.font = '9px monospace';
-              ctx.fillStyle = '#999';
-              ctx.shadowBlur = 0;
-              ctx.textBaseline = 'top';
-              ctx.fillText('(' + pct.toFixed(1) + '%)', bar.x, bar.y - 30 + 5);
-            }
+              if (numCats > 1) {
+                var pct = catTotal > 0 ? val / catTotal * 100 : 0;
 
-            if (isCategoryMode && chart.__reqTimes && chart.__reqTimes[di] && chart.__reqTimes[di][i]) {
-              ctx.font = '11px monospace';
-              ctx.fillStyle = chart.data.datasets[di].borderColor || '#777';
-              ctx.shadowBlur = 0;
-              ctx.textBaseline = 'top';
-              ctx.fillText("\u2264" + chart.__reqTimes[di][i], bar.x, bar.y - 30 + 5 + 13);
-            }
+                ctx.font = '8px monospace';
+                ctx.fillStyle = '#ddd';
+                ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                ctx.shadowBlur = 3;
+                ctx.textBaseline = 'bottom';
+                ctx.fillText(val, bar.x, bar.y - 16);
+
+                ctx.font = '7px monospace';
+                ctx.fillStyle = '#999';
+                ctx.shadowBlur = 0;
+                ctx.textBaseline = 'bottom';
+                ctx.fillText(pct.toFixed(1) + '%', bar.x, bar.y - 5);
+
+                var barH = bar.y - bar.baseY;
+                if (barH > 16 && dataset.label) {
+                  var abbr = dataset.label.length > 5 ? dataset.label.substring(0, 4) + '\u2026' : dataset.label;
+                  ctx.font = 'bold 8px monospace';
+                  ctx.fillStyle = '#000';
+                  ctx.shadowBlur = 0;
+                  ctx.textBaseline = 'middle';
+                  ctx.fillText(abbr, bar.x, bar.baseY + barH / 2);
+                }
+                return;
+              }
+
+            var pct = catTotal > 0 ? val / catTotal * 100 : 0;
+
+            ctx.font = 'bold 11px monospace';
+            ctx.fillStyle = '#ddd';
+            ctx.shadowColor = 'rgba(0,0,0,0.8)';
+            ctx.shadowBlur = 3;
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(val, bar.x, bar.y - 22);
+
+            ctx.font = '9px monospace';
+            ctx.fillStyle = '#999';
+            ctx.shadowBlur = 0;
+            ctx.textBaseline = 'top';
+            ctx.fillText(pct.toFixed(1) + '%', bar.x, bar.y - 22 + 5);
+            });
           });
-        });
+        } finally {
+          ctx.restore();
+        }
 
-        ctx.restore();
+        ctx.globalAlpha = 1;
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
       }
     };
   }
 
-  function buildOrUpdateChart(labels, datasets, reqTimes2D, categoryTotals, total, isCategoryMode, labelColors) {
+  function buildOrUpdateChart(labels, datasets, reqTimes2D, categoryTotals, total, isCategoryMode, labelColors, allBarIds, tierfMap) {
+    var canUpdate = tierChart && !tierChart._destroyed &&
+      tierChart.__isCategoryMode === isCategoryMode &&
+      tierChart.data.datasets.length === datasets.length &&
+      tierChart.data.datasets.every(function(ds, i) { return ds.label === datasets[i].label; });
+
+    if (canUpdate) {
+      tierChart.data.labels = labels;
+      datasets.forEach(function(ds, di) {
+        tierChart.data.datasets[di].data = ds.data;
+        tierChart.data.datasets[di].backgroundColor = ds.backgroundColor;
+        tierChart.data.datasets[di].borderColor = ds.borderColor;
+        tierChart.data.datasets[di].hoverBackgroundColor = ds.hoverBackgroundColor;
+        tierChart.data.datasets[di].hoverBorderColor = ds.hoverBorderColor;
+      });
+      if (labelColors) tierChart.options.scales.x.ticks.color = labelColors;
+      tierChart.__total = total;
+      tierChart.__reqTimes = reqTimes2D;
+      tierChart.__categoryTotals = categoryTotals;
+      tierChart.__allBarIds = allBarIds || null;
+      tierChart.__tierfMap = tierfMap || null;
+      tierChart.__isCategoryMode = isCategoryMode;
+      tierChart.update();
+      return;
+    }
+
     if (tierChart) {
       tierChart.destroy();
       tierChart = null;
     }
 
-    var topPad = isCategoryMode ? 70 : 56;
-    var dataLabelsPlugin = createDataLabelsPlugin(isCategoryMode);
-
-    var ignoreSlider = document.getElementById("chart-ignore");
-    if (ignoreSlider) {
-      ignoreSlider.max = labels.length;
-      if (parseInt(ignoreSlider.value) > labels.length) {
-        ignoreSlider.value = labels.length;
-        var valEl = document.getElementById("chart-ignore-val");
-        if (valEl) valEl.textContent = labels.length;
-      }
-    }
+    var numCats = datasets.length;
+    var topPad = isCategoryMode ? 70 : 40;
+    var dataLabelsPlugin = createDataLabelsPlugin(isCategoryMode, numCats);
 
     var ctx = document.getElementById('tier-chart').getContext('2d');
     tierChart = new Chart(ctx, {
@@ -242,17 +292,60 @@ let tierlist = [
         responsive: true,
         maintainAspectRatio: false,
         animation: { duration: 300 },
-        events: [],
+        events: isCategoryMode ? ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'] : [],
         layout: {
           padding: { top: topPad, bottom: 8 }
         },
         plugins: {
-          legend: isCategoryMode ? {
-            display: true,
-            position: 'top',
-            labels: { color: '#999', font: { size: 9 }, boxWidth: 12, boxHeight: 8, padding: 8 }
-          } : { display: false },
-          tooltip: { enabled: false }
+          legend: { display: false },
+          tooltip: isCategoryMode ? {
+            enabled: true,
+            mode: 'index',
+            intersect: false,
+            backgroundColor: 'rgb(20,20,20)',
+            titleColor: '#ddd',
+            bodyColor: '#bbb',
+            borderColor: '#333',
+            borderWidth: 1,
+            padding: 8,
+            titleFont: { size: 10, weight: 'bold' },
+            bodyFont: { size: 10 },
+            callbacks: {
+              title: function(items) { return items[0].label; },
+              label: function(item) {
+                var chart = item.chart;
+                var di = item.datasetIndex;
+                var ii = item.dataIndex;
+                var val = item.raw;
+                if (val === 0) return null;
+                var catTotal = (chart.__categoryTotals || [])[di] || 0;
+                var pct = catTotal > 0 ? val / catTotal * 100 : 0;
+                var req = (chart.__reqTimes || [])[di] ? (chart.__reqTimes[di][ii] || '') : '';
+                return item.dataset.label + ': ' + val + ' (' + pct.toFixed(1) + '%)' + (req ? ' \u2264' + req : '');
+              },
+              labelColor: function(item) {
+                if (item.datasetIndex !== undefined && item.chart && item.chart.__isCategoryMode) {
+                  var color = getCategoryColor(item.datasetIndex);
+                  return { borderColor: color, backgroundColor: color };
+                }
+                var chart = item.chart;
+                var ids = chart.__allBarIds || [];
+                var tfMap = chart.__tierfMap || {};
+                var id = ids[item.dataIndex];
+                return { borderColor: '#666', backgroundColor: id && tfMap[id] ? getTierLabelColor(tfMap[id]) : '#666' };
+              },
+              labelTextColor: function(item) {
+                if (item.datasetIndex !== undefined && item.chart && item.chart.__isCategoryMode) {
+                  return getCategoryColor(item.datasetIndex);
+                }
+                var chart = item.chart;
+                var ids = chart.__allBarIds || [];
+                var tfMap = chart.__tierfMap || {};
+                var id = ids[item.dataIndex];
+                return id && tfMap[id] ? getTierLabelColor(tfMap[id]) : '#bbb';
+              }
+            }
+          } : { enabled: false }
         },
         scales: {
           x: {
@@ -280,6 +373,8 @@ let tierlist = [
     tierChart.__reqTimes = reqTimes2D;
     tierChart.__categoryTotals = categoryTotals;
     tierChart.__isCategoryMode = isCategoryMode;
+    tierChart.__allBarIds = allBarIds || null;
+    tierChart.__tierfMap = tierfMap || null;
   }
 
   function updateTierChart() {
@@ -290,6 +385,31 @@ let tierlist = [
     var selectedCats = getSelectedCategories();
     var isCategoryMode = selectedCats.length > 0;
 
+    var simplifiedEl = document.getElementById("switch-simplified");
+    var isSimplified = simplifiedEl && simplifiedEl.checked;
+    var trueEl = document.getElementById("switch-true");
+    var isTrueTries = trueEl && trueEl.checked;
+    var cumulativeBtn = document.getElementById("switch-cumulative");
+    var isCumulative = cumulativeBtn && cumulativeBtn.checked;
+    var ignoreInput = document.getElementById("chart-ignore");
+    var ignoreN = ignoreInput ? Math.max(0, parseInt(ignoreInput.value) || 0) : 0;
+
+    var titleEl = document.getElementById("chart-title");
+    if (titleEl) {
+      var titleParts = [];
+      if (isTrueTries) titleParts.push("True");
+      if (isSimplified) titleParts.push("Grouped");
+      if (isCumulative) titleParts.push("Cumulative");
+      if (isCategoryMode) {
+        titleParts.push("Category Distribution:");
+        titleParts.push(selectedCats.join(", "));
+      } else {
+        titleParts.push("Tier Distribution");
+      }
+      if (ignoreN > 0) titleParts.push("(skip " + ignoreN + ")");
+      titleEl.textContent = titleParts.join(" ");
+    }
+
     var tables = document.querySelectorAll('table[id$="-table"]');
 
     if (isCategoryMode) {
@@ -299,6 +419,7 @@ let tierlist = [
 
       var tierNames = {};
       var tierfMap = {};
+      var tierReqRows = {};
       tables.forEach(function(table) {
         var reqRow = table.querySelector('tr.req-row');
         var id = table.id.replace('-table', '');
@@ -313,20 +434,18 @@ let tierlist = [
         }
         tierNames[id] = displayName;
         tierfMap[id] = tierf;
+        tierReqRows[id] = reqRow;
       });
 
       var labelIds = [];
       tables.forEach(function(table) {
-        var id = table.id.replace('-table', '');
-        if (id !== "unranked") labelIds.push(id);
+        labelIds.push(table.id.replace('-table', ''));
       });
 
       var datasets = [];
       var allLabels = [];
+      var allBarIds = [];
       var allReqTimes = [];
-
-      var simplifiedEl = document.getElementById("switch-simplified");
-      var isSimplified = simplifiedEl && simplifiedEl.checked;
 
       selectedCats.forEach(function(cat, di) {
         var catIdx = categories.indexOf(cat);
@@ -356,7 +475,7 @@ let tierlist = [
         var reqs = [];
         labelIds.forEach(function(id) {
           data.push(tierCounts[id] || 0);
-          var reqRow = tables.length ? document.querySelector('#' + id + '-table tr.req-row') : null;
+          var reqRow = tierReqRows[id];
           if (reqRow && reqRow.children[3 + catIdx]) {
             reqs.push(reqRow.children[3 + catIdx].textContent.trim());
           } else {
@@ -367,10 +486,13 @@ let tierlist = [
         data.reverse();
         reqs.reverse();
 
-        if (allLabels.length === 0) allLabels = labelIds.map(function(id) { return tierNames[id]; }).reverse();
-        var barColors = labelIds.map(function(id) {
+        if (allLabels.length === 0) {
+          allLabels = labelIds.map(function(id) { return tierNames[id]; }).reverse();
+          allBarIds = labelIds.slice().reverse();
+        }
+        var barColors = allBarIds.map(function(id) {
           return tierfMap[id] ? getTierLabelColor(tierfMap[id]) : '#666';
-        }).reverse();
+        });
         datasets.push({
           label: cat,
           data: data,
@@ -381,21 +503,43 @@ let tierlist = [
           hoverBackgroundColor: barColors,
           hoverBorderColor: barColors,
         });
-        allReqTimes.push(reqs);
-      });
+      allReqTimes.push(reqs);
+    });
 
-      var ignoreInput = document.getElementById("chart-ignore");
-      var ignoreN = ignoreInput ? Math.max(0, parseInt(ignoreInput.value) || 0) : 0;
-      if (ignoreN > 0) {
-        var n = Math.min(ignoreN, allLabels.length);
-        allLabels.splice(0, n);
-        datasets.forEach(function(ds) { ds.data.splice(0, n); });
-        allReqTimes.forEach(function(rt) { rt.splice(0, n); });
+    var totalTiers = allLabels.length;
+    var skipSlider = document.getElementById("chart-ignore");
+    var maxSkip = Math.max(0, totalTiers - 1);
+    if (skipSlider) {
+      skipSlider.max = maxSkip;
+      if (parseInt(skipSlider.value) > maxSkip) {
+        skipSlider.value = maxSkip;
+        var valEl = document.getElementById("chart-ignore-val");
+        if (valEl) valEl.textContent = maxSkip;
       }
-      if (allLabels.length === 0) return;
+    }
 
-      var cumulativeBtn = document.getElementById("switch-cumulative");
-      var isCumulative = cumulativeBtn && cumulativeBtn.checked;
+    ignoreN = ignoreInput ? Math.max(0, parseInt(ignoreInput.value) || 0) : 0;
+    if (ignoreN > 0) {
+      var n = Math.min(ignoreN, allLabels.length);
+      allLabels = allLabels.slice(n);
+      allBarIds = allBarIds.slice(n);
+      datasets = datasets.map(function(ds) {
+        return {
+          label: ds.label,
+          data: ds.data.slice(n),
+          backgroundColor: Array.isArray(ds.backgroundColor) ? ds.backgroundColor.slice(n) : ds.backgroundColor,
+          borderColor: Array.isArray(ds.borderColor) ? ds.borderColor.slice(n) : ds.borderColor,
+          borderWidth: 1,
+          borderRadius: 3,
+          hoverBackgroundColor: Array.isArray(ds.hoverBackgroundColor) ? ds.hoverBackgroundColor.slice(n) : ds.hoverBackgroundColor,
+          hoverBorderColor: Array.isArray(ds.hoverBorderColor) ? ds.hoverBorderColor.slice(n) : ds.hoverBorderColor,
+        };
+      });
+      allReqTimes = allReqTimes.map(function(rt) { return rt.slice(n); });
+    }
+    if (allLabels.length === 0) return;
+
+    isCumulative = cumulativeBtn && cumulativeBtn.checked;
       var categoryTotals = datasets.map(function(ds) {
         return ds.data.reduce(function(a, b) { return a + b; }, 0);
       });
@@ -412,7 +556,10 @@ let tierlist = [
       var total = 0;
       datasets.forEach(function(ds) { ds.data.forEach(function(v) { total += v; }); });
 
-      buildOrUpdateChart(allLabels, datasets, allReqTimes, categoryTotals, total, true);
+      var catLabelColors = allBarIds.map(function(id) {
+        return tierfMap[id] ? getTierLabelColor(tierfMap[id]) : '#999';
+      });
+      buildOrUpdateChart(allLabels, datasets, allReqTimes, categoryTotals, total, true, catLabelColors, allBarIds, tierfMap);
 
     } else {
       var labels = [];
@@ -444,19 +591,29 @@ let tierlist = [
       bgColors.reverse();
       labelColors.reverse();
 
-      var ignoreInput = document.getElementById("chart-ignore");
-      var ignoreN = ignoreInput ? Math.max(0, parseInt(ignoreInput.value) || 0) : 0;
+      var totalTiers = labels.length;
+      var skipSlider = document.getElementById("chart-ignore");
+      var maxSkip = Math.max(0, totalTiers - 1);
+      if (skipSlider) {
+        skipSlider.max = maxSkip;
+        if (parseInt(skipSlider.value) > maxSkip) {
+          skipSlider.value = maxSkip;
+          var valEl = document.getElementById("chart-ignore-val");
+          if (valEl) valEl.textContent = maxSkip;
+        }
+      }
+
+      ignoreN = ignoreInput ? Math.max(0, parseInt(ignoreInput.value) || 0) : 0;
       if (ignoreN > 0) {
         var n = Math.min(ignoreN, labels.length);
-        labels.splice(0, n);
-        counts.splice(0, n);
-        bgColors.splice(0, n);
-        labelColors.splice(0, n);
+        labels = labels.slice(n);
+        counts = counts.slice(n);
+        bgColors = bgColors.slice(n);
+        labelColors = labelColors.slice(n);
       }
       if (counts.length === 0) return;
 
-      var cumulativeBtn = document.getElementById("switch-cumulative");
-      var isCumulative = cumulativeBtn && cumulativeBtn.checked;
+      isCumulative = cumulativeBtn && cumulativeBtn.checked;
       if (isCumulative) {
         var sum = 0;
         for (var i = counts.length - 1; i >= 0; i--) {
@@ -479,7 +636,7 @@ let tierlist = [
         hoverBorderColor: bgColors,
       };
 
-      buildOrUpdateChart(labels, [dataset], [], [], total, false, labelColors);
+      buildOrUpdateChart(labels, [dataset], [], [], total, false, labelColors, null, null);
     }
   }
 
