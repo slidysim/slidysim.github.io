@@ -241,6 +241,8 @@ function populate_table(table){
 
 
 
+
+
     var placeCounter = 1;
 
     const isColSort = sortColumn !== null;
@@ -587,6 +589,23 @@ function populate_table(table){
         }
     }
 
+    // Collect True Unranked players (complete, not placed in any tier table)
+    var trueUnranked = [];
+    if (trueView) {
+      for (var u = 0; u < table.length; u++) {
+        const user = table[u];
+        if (!user) continue;
+        if (!hasScores(user)) continue;
+        if (trueTierMap[u] >= 1) continue;
+        var allScored = true;
+        for (var c = 0; c < num_categories; c++) {
+          if (user[c + 3] == -1) { allScored = false; break; }
+        }
+        if (!allScored) continue;
+        trueUnranked.push(user);
+      }
+    }
+
     // Unranked row for players with scores but 0 power
     if (!trueView && unrankedUsers.length > 0) {
         var unranked_table = document.createElement("table");
@@ -608,7 +627,7 @@ function populate_table(table){
             tdel.setAttribute("tierf", unrankedTierName + (oldTiers ? "OLD" : ""));
             unranked_req_row.appendChild(tdel);
         }
-        unranked_req_row.children[0].textContent = "Unranked";
+        unranked_req_row.children[0].textContent = trueView ? "True Unranked" : "Unranked";
         unranked_req_row.children[1].textContent = "0";
         unranked_req_row.children[2].textContent = "0";
         for(var j=0; j<num_categories; j++){
@@ -630,6 +649,58 @@ function populate_table(table){
         }
         for (const user of unrankedUsers) {
             renderUserRow(user, unranked_table, unrankedTierName);
+        }
+    }
+
+    // True Unranked row for complete players whose worst category has no tier
+    if (trueView) {
+        const hideEmpty = document.getElementById("switch-empty")?.checked;
+        if (hideEmpty && trueUnranked.length === 0) {
+            // hidden by Hide Empty
+        } else {
+        var tu_table = document.createElement("table");
+        tu_table.id = "unranked-table";
+        results_table.appendChild(tu_table);
+        var tu_head = document.createElement("thead");
+        var tu_req_row = document.createElement("tr");
+        var tu_events_row = document.createElement("tr");
+        tu_head.className = "table-header";
+        tu_req_row.className = "req-row";
+        tu_events_row.className = "events-row";
+        tu_table.appendChild(tu_head);
+        tu_events_row.style.display = 'none';
+        tu_head.appendChild(tu_req_row);
+        tu_head.appendChild(tu_events_row);
+        const tuTierName = "unranked";
+        for(var j=0; j<3; j++){
+            var tdel = document.createElement("td");
+            tdel.setAttribute("tierf", tuTierName + (oldTiers ? "OLD" : ""));
+            tu_req_row.appendChild(tdel);
+        }
+                tu_req_row.children[0].innerHTML = "True Unranked".replace(/ /g, '<br>');
+        tu_req_row.children[0].style.minWidth = "132px";
+        tu_req_row.children[1].textContent = "0";
+        tu_req_row.children[2].textContent = "0";
+        for(var j=0; j<num_categories; j++){
+            var div = document.createElement("td");
+            div.textContent = "\u221E";
+            div.setAttribute("tierf", tuTierName + (oldTiers ? "OLD" : ""));
+            tu_req_row.appendChild(div);
+        }
+        for(var j=0; j<3; j++){
+            tu_events_row.appendChild(document.createElement("td"));
+        }
+        tu_events_row.children[0].textContent = "Name";
+        tu_events_row.children[1].textContent = "Place";
+        tu_events_row.children[2].textContent = "Power";
+        for(var j=0; j<num_categories; j++){
+            var tdel = document.createElement("td");
+            tdel.innerHTML = categories[catIdx(j)].replace(/ /g, '<br>');
+            tu_events_row.appendChild(tdel);
+        }
+        for (const user of trueUnranked) {
+            renderUserRow(user, tu_table, tuTierName);
+        }
         }
     }
 }
