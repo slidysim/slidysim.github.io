@@ -181,23 +181,36 @@ let tierlist = [
 
           chart.data.datasets.forEach(function(dataset, di) {
             var meta = chart.getDatasetMeta(di);
-            var catTotal = (chart.__categoryTotals && chart.__categoryTotals[di] !== undefined) ? chart.__categoryTotals[di] : chart.__total;
+            var rawData = chart.__rawData || [];
+            var rawBarData = rawData[di] || [];
+            var rawCatTotal = (chart.__rawCategoryTotals && chart.__rawCategoryTotals[di] !== undefined) ? chart.__rawCategoryTotals[di] : 0;
+            var cumulativeBtn = document.getElementById("switch-cumulative");
+            var isCumulativeMode = cumulativeBtn && cumulativeBtn.checked;
 
             meta.data.forEach(function(bar, i) {
               var val = dataset.data[i];
+              var rawVal = rawBarData[i] !== undefined ? rawBarData[i] : val;
+              var displayVal;
+              if (isCumulativeMode) {
+                var cumSum = 0;
+                for (var jj = rawBarData.length - 1; jj >= i; jj--) cumSum += (rawBarData[jj] || 0);
+                displayVal = cumSum;
+              } else {
+                displayVal = rawVal;
+              }
               if (val === 0 && !isCategoryMode) return;
 
               if (val === 0) return;
 
               if (numCats > 1) {
-                var pct = catTotal > 0 ? val / catTotal * 100 : 0;
+                var pct = rawCatTotal > 0 ? displayVal / rawCatTotal * 100 : 0;
 
                 ctx.font = 'bold 9px monospace';
                 ctx.fillStyle = '#ddd';
                 ctx.shadowColor = 'rgba(0,0,0,0.8)';
                 ctx.shadowBlur = 3;
                 ctx.textBaseline = 'bottom';
-                ctx.fillText(val, bar.x, bar.y - 18);
+                ctx.fillText(displayVal, bar.x, bar.y - 18);
 
                 var tierId = (chart.__allBarIds || [])[i];
                 var tf = tierId ? (chart.__tierfMap || {})[tierId] : null;
@@ -220,14 +233,14 @@ let tierlist = [
                 return;
               }
 
-            var pct = catTotal > 0 ? val / catTotal * 100 : 0;
+            var pct = rawCatTotal > 0 ? displayVal / rawCatTotal * 100 : 0;
 
             ctx.font = 'bold 11px monospace';
             ctx.fillStyle = '#ddd';
             ctx.shadowColor = 'rgba(0,0,0,0.8)';
             ctx.shadowBlur = 3;
             ctx.textBaseline = 'bottom';
-            ctx.fillText(val, bar.x, bar.y - 22);
+            ctx.fillText(displayVal, bar.x, bar.y - 22);
 
             var bgArr = dataset.backgroundColor;
             var pctColor = (Array.isArray(bgArr) && bgArr[i]) || '#999';
@@ -251,7 +264,7 @@ let tierlist = [
     };
   }
 
-  function buildOrUpdateChart(labels, datasets, reqTimes2D, categoryTotals, total, isCategoryMode, labelColors, allBarIds, tierfMap) {
+  function buildOrUpdateChart(labels, datasets, reqTimes2D, categoryTotals, total, isCategoryMode, labelColors, allBarIds, tierfMap, rawData, rawCategoryTotals) {
     var canUpdate = tierChart && !tierChart._destroyed &&
       tierChart.__isCategoryMode === isCategoryMode &&
       tierChart.data.datasets.length === datasets.length &&
@@ -273,6 +286,8 @@ let tierlist = [
       tierChart.__allBarIds = allBarIds || null;
       tierChart.__tierfMap = tierfMap || null;
       tierChart.__isCategoryMode = isCategoryMode;
+      tierChart.__rawData = rawData;
+      tierChart.__rawCategoryTotals = rawCategoryTotals;
       tierChart.update();
       return;
     }
@@ -323,10 +338,22 @@ let tierlist = [
                 var ii = item.dataIndex;
                 var val = item.raw;
                 if (val === 0) return null;
-                var catTotal = (chart.__categoryTotals || [])[di] || 0;
-                var pct = catTotal > 0 ? val / catTotal * 100 : 0;
+                var rawData = chart.__rawData || [];
+                var rawVal = (rawData[di] && rawData[di][ii] !== undefined) ? rawData[di][ii] : val;
+                var cumulativeBtn = document.getElementById("switch-cumulative");
+                var displayVal;
+                if (cumulativeBtn && cumulativeBtn.checked) {
+                  var cumSum = 0;
+                  var rawArr = rawData[di] || [];
+                  for (var jj = rawArr.length - 1; jj >= ii; jj--) cumSum += (rawArr[jj] || 0);
+                  displayVal = cumSum;
+                } else {
+                  displayVal = rawVal;
+                }
+                var rawCatTotal = (chart.__rawCategoryTotals && chart.__rawCategoryTotals[di] !== undefined) ? chart.__rawCategoryTotals[di] : 0;
+            var pct = rawCatTotal > 0 ? displayVal / rawCatTotal * 100 : 0;
                 var req = (chart.__reqTimes || [])[di] ? (chart.__reqTimes[di][ii] || '') : '';
-                return item.dataset.label + ': ' + val + ' (' + pct.toFixed(1) + '%)' + (req ? ' \u2264' + req : '');
+                return item.dataset.label + ': ' + displayVal + ' (' + pct.toFixed(1) + '%)' + (req ? ' \u2264' + req : '');
               },
               labelColor: function(item) {
                 var chart = item.chart;
@@ -374,6 +401,9 @@ let tierlist = [
     tierChart.__isCategoryMode = isCategoryMode;
     tierChart.__allBarIds = allBarIds || null;
     tierChart.__tierfMap = tierfMap || null;
+    tierChart.__rawData = rawData;
+    tierChart.__rawCategoryTotals = rawCategoryTotals;
+    tierChart.update();
   }
 
   function updateTierChart() {
@@ -399,6 +429,8 @@ let tierlist = [
       if (isTrueTries) titleParts.push("True");
       if (isSimplified) titleParts.push("Grouped");
       if (isCumulative) titleParts.push("Cumulative");
+      var percentBtn = document.getElementById("switch-percent");
+      if (percentBtn && percentBtn.checked) titleParts.push("Percent");
       if (isCategoryMode) {
         titleParts.push("Category Distribution:");
         titleParts.push(selectedCats.join(", "));
@@ -538,11 +570,25 @@ let tierlist = [
     }
     if (allLabels.length === 0) return;
 
-    isCumulative = cumulativeBtn && cumulativeBtn.checked;
-      var categoryTotals = datasets.map(function(ds) {
-        return ds.data.reduce(function(a, b) { return a + b; }, 0);
-      });
-      if (isCumulative) {
+      isCumulative = cumulativeBtn && cumulativeBtn.checked;
+        var categoryTotals = datasets.map(function(ds) {
+          return ds.data.reduce(function(a, b) { return a + b; }, 0);
+        });
+        var rawCategoryTotals = categoryTotals.slice();
+        var rawData2D = datasets.map(function(ds) { return ds.data.slice(); });
+        var percentBtn = document.getElementById("switch-percent");
+        var isPercentMode = percentBtn && percentBtn.checked;
+        if (isPercentMode) {
+          datasets.forEach(function(ds, di) {
+            var ct = categoryTotals[di];
+            if (ct > 0) {
+              for (var i = 0; i < ds.data.length; i++) {
+                ds.data[i] = ds.data[i] / ct * 100;
+              }
+            }
+          });
+        }
+        if (isCumulative) {
         datasets.forEach(function(ds) {
           var sum = 0;
           for (var i = ds.data.length - 1; i >= 0; i--) {
@@ -558,7 +604,7 @@ let tierlist = [
       var catLabelColors = allBarIds.map(function(id) {
         return tierfMap[id] ? getTierLabelColor(tierfMap[id]) : '#999';
       });
-      buildOrUpdateChart(allLabels, datasets, allReqTimes, categoryTotals, total, true, catLabelColors, allBarIds, tierfMap);
+      buildOrUpdateChart(allLabels, datasets, allReqTimes, categoryTotals, total, true, catLabelColors, allBarIds, tierfMap, rawData2D, rawCategoryTotals);
 
     } else {
       var labels = [];
@@ -613,6 +659,18 @@ let tierlist = [
       if (counts.length === 0) return;
 
       isCumulative = cumulativeBtn && cumulativeBtn.checked;
+      var percentBtn = document.getElementById("switch-percent");
+      var isPercentMode = percentBtn && percentBtn.checked;
+      var rawCounts = counts.slice();
+      var rawCategoryTotal = 0;
+      for (var i = 0; i < rawCounts.length; i++) rawCategoryTotal += rawCounts[i];
+      if (isPercentMode) {
+        var totalSum = 0;
+        for (var i = 0; i < counts.length; i++) totalSum += counts[i];
+        if (totalSum > 0) {
+          for (var i = 0; i < counts.length; i++) counts[i] = counts[i] / totalSum * 100;
+        }
+      }
       if (isCumulative) {
         var sum = 0;
         for (var i = counts.length - 1; i >= 0; i--) {
@@ -635,7 +693,7 @@ let tierlist = [
         hoverBorderColor: bgColors,
       };
 
-      buildOrUpdateChart(labels, [dataset], [], [], total, false, labelColors, null, null);
+      buildOrUpdateChart(labels, [dataset], [], [], total, false, labelColors, null, null, [rawCounts], [rawCategoryTotal]);
     }
   }
 
@@ -705,6 +763,14 @@ let tierlist = [
   });
 
   document.getElementById("switch-cumulative").addEventListener("change", () => {
+    var container = document.getElementById("chart-container");
+    if (container && container.style.display !== "none") {
+      updateTierChart();
+      requestAnimationFrame(function() { if (tierChart) tierChart.resize(); });
+    }
+  });
+
+  document.getElementById("switch-percent").addEventListener("change", () => {
     var container = document.getElementById("chart-container");
     if (container && container.style.display !== "none") {
       updateTierChart();

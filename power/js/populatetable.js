@@ -73,7 +73,7 @@ function setupResetHeaderCell(cell) {
     });
     cell.addEventListener("click", () => {
         resetSort();
-        ["switch-true", "switch-simplified", "switch", "switch-reqs", "switch-empty", "switch-cumulative"].forEach(id => {
+        ["switch-true", "switch-simplified", "switch", "switch-reqs", "switch-empty", "switch-cumulative", "switch-percent"].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.checked = false;
         });
@@ -648,7 +648,7 @@ export function show_results_from_date(){
     }
 }
 
-const SWITCH_IDS = ["switch-true", "switch-simplified", "switch", "switch-reqs", "switch-empty", "switch-cumulative"];
+const SWITCH_IDS = ["switch-true", "switch-simplified", "switch", "switch-reqs", "switch-empty", "switch-cumulative", "switch-percent"];
 let _chartToggleState = false;
 
 function applySwitchStates(states) {
