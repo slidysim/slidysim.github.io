@@ -181,7 +181,7 @@ let tierlist = [
 
           chart.data.datasets.forEach(function(dataset, di) {
             var meta = chart.getDatasetMeta(di);
-            var catTotal = chart.__categoryTotals ? chart.__categoryTotals[di] : chart.__total;
+            var catTotal = (chart.__categoryTotals && chart.__categoryTotals[di] !== undefined) ? chart.__categoryTotals[di] : chart.__total;
 
             meta.data.forEach(function(bar, i) {
               var val = dataset.data[i];
@@ -192,18 +192,21 @@ let tierlist = [
               if (numCats > 1) {
                 var pct = catTotal > 0 ? val / catTotal * 100 : 0;
 
-                ctx.font = '8px monospace';
+                ctx.font = 'bold 9px monospace';
                 ctx.fillStyle = '#ddd';
                 ctx.shadowColor = 'rgba(0,0,0,0.8)';
                 ctx.shadowBlur = 3;
                 ctx.textBaseline = 'bottom';
-                ctx.fillText(val, bar.x, bar.y - 16);
+                ctx.fillText(val, bar.x, bar.y - 18);
 
-                ctx.font = '7px monospace';
-                ctx.fillStyle = '#999';
+                var tierId = (chart.__allBarIds || [])[i];
+                var tf = tierId ? (chart.__tierfMap || {})[tierId] : null;
+                var pctColor = tf ? getTierLabelColor(tf) : '#999';
+                ctx.font = '9px monospace';
+                ctx.fillStyle = pctColor;
                 ctx.shadowBlur = 0;
                 ctx.textBaseline = 'bottom';
-                ctx.fillText(pct.toFixed(1) + '%', bar.x, bar.y - 5);
+                ctx.fillText(pct.toFixed(1) + '%', bar.x, bar.y - 7);
 
                 var barH = bar.y - bar.baseY;
                 if (barH > 16 && dataset.label) {
@@ -226,8 +229,10 @@ let tierlist = [
             ctx.textBaseline = 'bottom';
             ctx.fillText(val, bar.x, bar.y - 22);
 
+            var bgArr = dataset.backgroundColor;
+            var pctColor = (Array.isArray(bgArr) && bgArr[i]) || '#999';
             ctx.font = '9px monospace';
-            ctx.fillStyle = '#999';
+            ctx.fillStyle = pctColor;
             ctx.shadowBlur = 0;
             ctx.textBaseline = 'top';
             ctx.fillText(pct.toFixed(1) + '%', bar.x, bar.y - 22 + 5);
