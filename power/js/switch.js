@@ -177,7 +177,7 @@ let tierlist = [
         meta.data.forEach(function(bar, i) {
           var val = chart.data.datasets[0].data[i];
           if (val === 0) return;
-          var pct = total > 0 ? val / total * 100 : 0;
+          var pct = chart.__total > 0 ? val / chart.__total * 100 : 0;
 
           ctx.font = 'bold 11px monospace';
           ctx.fillStyle = '#ddd';
@@ -247,6 +247,7 @@ let tierlist = [
         },
         plugins: [datalabelsPlugin]
       });
+      tierChart.__total = total;
     } else {
       tierChart.data.labels = labels;
       tierChart.data.datasets[0].data = chartData;
@@ -255,6 +256,7 @@ let tierlist = [
       tierChart.data.datasets[0].hoverBackgroundColor = bgColors;
       tierChart.data.datasets[0].hoverBorderColor = bgColors;
       tierChart.options.scales.x.ticks.color = labelColors;
+      tierChart.__total = total;
       tierChart.update();
     }
   }
