@@ -39,6 +39,11 @@
         </div>
 
         <div id="chart-container" style="display:none; background:#1a1a1a; border-bottom:1px solid #333; height:440px; width:100%; overflow:clip; box-sizing:border-box; margin-top:60px; position:relative;">
+            <div style="position:absolute; top:6px; left:10px; z-index:1; display:flex; align-items:center; gap:4px; color:#999; font-size:11px;">
+                <span>Skip</span>
+                <input type="range" id="chart-ignore" value="0" min="0" style="width:120px; height:14px; vertical-align:middle; accent-color:#666; margin:0; cursor:pointer;">
+                <span id="chart-ignore-val">0</span>
+            </div>
             <div style="position:absolute; top:6px; right:10px; z-index:1;">
                 <label style="color:#999; font-size:11px; cursor:pointer; user-select:none;">
                     <input type="checkbox" id="switch-cumulative" style="vertical-align:middle; margin:0; accent-color:#555;"> Cumulative
@@ -80,8 +85,8 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
         <script src="scripts/countryData.js"></script>
         <script src="power/js/dynamicPower.js?v=1.0.154"></script>
-        <script src="power/js/populatetable.js?v=1.0.270" type="module"></script>
+        <script src="power/js/populatetable.js?v=1.0.273" type="module"></script>
         <script src="power/js/menu.js"></script>
-        <script defer="" src="power/js/switch.js?v=1.0.171"></script>
+        <script defer="" src="power/js/switch.js?v=1.0.174"></script>
         
 </body></html>

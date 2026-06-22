@@ -666,6 +666,12 @@ function applySwitchStates(states) {
         chartEl.style.display = states["chart-toggle"] ? "block" : "none";
         _chartToggleState = states["chart-toggle"];
     }
+    var ignoreEl = document.getElementById("chart-ignore");
+    if (ignoreEl && states["chart-ignore"] !== undefined) {
+        ignoreEl.value = states["chart-ignore"];
+        var valEl = document.getElementById("chart-ignore-val");
+        if (valEl) valEl.textContent = states["chart-ignore"];
+    }
 }
 
 function notifyParentSwitchState() {
@@ -675,8 +681,11 @@ function notifyParentSwitchState() {
         if (el) state[id] = el.checked;
     });
     state["chart-toggle"] = _chartToggleState;
+    var ignoreEl = document.getElementById("chart-ignore");
+    if (ignoreEl) state["chart-ignore"] = ignoreEl.value;
     try { parent.postMessage({type: "powerSwitchState", state: state}, '*'); } catch(e) {    }
 }
+window.notifyParentSwitchState = notifyParentSwitchState;
 
 function renderSortedTableWithSavedStateReal(savedCol, savedAsc) {
     __truePlaces = {};

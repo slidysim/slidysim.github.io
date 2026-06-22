@@ -148,6 +148,27 @@ let tierlist = [
     bgColors.reverse();
     labelColors.reverse();
 
+    var ignoreSlider = document.getElementById("chart-ignore");
+    if (ignoreSlider) {
+      ignoreSlider.max = counts.length;
+      if (parseInt(ignoreSlider.value) > counts.length) {
+        ignoreSlider.value = counts.length;
+        var valEl = document.getElementById("chart-ignore-val");
+        if (valEl) valEl.textContent = counts.length;
+      }
+    }
+
+    var ignoreInput = document.getElementById("chart-ignore");
+    var ignoreN = ignoreInput ? Math.max(0, parseInt(ignoreInput.value) || 0) : 0;
+    if (ignoreN > 0) {
+      var n = Math.min(ignoreN, counts.length);
+      labels.splice(0, n);
+      counts.splice(0, n);
+      bgColors.splice(0, n);
+      labelColors.splice(0, n);
+    }
+    if (counts.length === 0) return;
+
     const cumulativeBtn = document.getElementById("switch-cumulative");
     const isCumulative = cumulativeBtn && cumulativeBtn.checked;
 
@@ -332,5 +353,15 @@ let tierlist = [
       updateTierChart();
       requestAnimationFrame(function() { if (tierChart) tierChart.resize(); });
     }
+  });
+
+  document.getElementById("chart-ignore").addEventListener("input", function() {
+    document.getElementById("chart-ignore-val").textContent = this.value;
+    var container = document.getElementById("chart-container");
+    if (container && container.style.display !== "none") {
+      updateTierChart();
+      requestAnimationFrame(function() { if (tierChart) tierChart.resize(); });
+    }
+    if (typeof notifyParentSwitchState === "function") notifyParentSwitchState();
   });
   
