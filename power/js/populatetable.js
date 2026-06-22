@@ -672,6 +672,8 @@ function applySwitchStates(states) {
         var valEl = document.getElementById("chart-ignore-val");
         if (valEl) valEl.textContent = states["chart-ignore"];
     }
+    var catEl = document.getElementById("chart-category");
+    if (catEl && states["chart-category"] !== undefined) catEl.value = states["chart-category"];
 }
 
 function notifyParentSwitchState() {
@@ -683,6 +685,8 @@ function notifyParentSwitchState() {
     state["chart-toggle"] = _chartToggleState;
     var ignoreEl = document.getElementById("chart-ignore");
     if (ignoreEl) state["chart-ignore"] = ignoreEl.value;
+    var catEl = document.getElementById("chart-category");
+    if (catEl) state["chart-category"] = catEl.value;
     try { parent.postMessage({type: "powerSwitchState", state: state}, '*'); } catch(e) {    }
 }
 window.notifyParentSwitchState = notifyParentSwitchState;
@@ -707,6 +711,7 @@ window.addEventListener('message', (event) => {
     userFinalTierMap = eventuserFinalTierMap;
     fmcPower = gettingFMCPower;
     
+    window.__powerData = powerData;
     if (oldTiers) {
         tiers = eventTiersOld;
         categories = eventCategoriesOld;
@@ -719,6 +724,8 @@ window.addEventListener('message', (event) => {
         categories = eventCategoriesNew;
         }
     }
+    window.__tiers = tiers;
+    window.__categories = categories;
     num_tiers = tiers.length;
     num_categories = categories.length;
 

@@ -115,38 +115,115 @@ let tierlist = [
   function updateTierChart() {
     if (document.body.dataset.columnSort === "1") return;
 
-    const tables = document.querySelectorAll('table[id$="-table"]');
+    var catSelect = document.getElementById("chart-category");
+    if (catSelect && catSelect.options.length <= 1 && window.__categories) {
+      window.__categories.forEach(function(c) {
+        var opt = document.createElement("option");
+        opt.value = c;
+        opt.textContent = c;
+        catSelect.appendChild(opt);
+      });
+    }
 
-    const labels = [];
-    const counts = [];
-    const bgColors = [];
-    const labelColors = [];
+    var selectedCat = catSelect ? catSelect.value : "";
+    var isCategoryMode = selectedCat !== "";
 
-    tables.forEach(table => {
-      const count = table.querySelectorAll('.player-row').length;
+    var tables = document.querySelectorAll('table[id$="-table"]');
 
-      const reqRow = table.querySelector('tr.req-row');
-      let displayName = table.id.replace('-table', '');
-      let tierf = null;
-      if (reqRow) {
-        const tierfEl = reqRow.querySelector('[tierf]');
-        if (tierfEl) tierf = tierfEl.getAttribute('tierf');
-        if (reqRow.children[0]) {
-          displayName = reqRow.children[0].innerText.trim().replace(/\u00A0/g, ' ').replace(/\n/g, ' ');
+    var labels = [];
+    var counts = [];
+    var bgColors = [];
+    var labelColors = [];
+    var reqTimes = [];
+
+    if (isCategoryMode) {
+      var powerData = window.__powerData || [];
+      var tiers = window.__tiers || [];
+      var categories = window.__categories || [];
+      var catIdx = categories.indexOf(selectedCat);
+      if (catIdx === -1) { isCategoryMode = false; }
+    }
+
+    if (isCategoryMode) {
+      var tierCounts = {};
+      var tierNames = {};
+      var tierColors = {};
+      var tierfMap = {};
+
+      tables.forEach(function(table) {
+        var reqRow = table.querySelector('tr.req-row');
+        var id = table.id.replace('-table', '');
+        var displayName = id;
+        var tierf = null;
+        if (reqRow) {
+          var tf = reqRow.querySelector('[tierf]');
+          if (tf) tierf = tf.getAttribute('tierf');
+          if (reqRow.children[0]) {
+            displayName = reqRow.children[0].innerText.trim().replace(/\u00A0/g, ' ').replace(/\n/g, ' ');
+          }
         }
-      }
+        tierNames[id] = displayName;
+        tierfMap[id] = tierf;
+        tierCounts[id] = 0;
+      });
 
-      labels.push(displayName);
-      counts.push(count);
-      const c = tierf ? getTierLabelColor(tierf) : '#666';
-      bgColors.push(c);
-      labelColors.push(c);
-    });
+      powerData.forEach(function(player) {
+        if (!player) return;
+        var score = player[3 + catIdx];
+        if (score === -1) return;
+        var bestTier = -1;
+        for (var t = tiers.length - 1; t >= 0; t--) {
+          if (score <= tiers[t]["times"][catIdx]) {
+            bestTier = t;
+            break;
+          }
+        }
+        if (bestTier === -1) return;
+        var slug = tiers[bestTier]["name"].toLowerCase().replace(" ","-");
+        if (tierCounts[slug] !== undefined) tierCounts[slug]++;
+      });
+
+      tables.forEach(function(table) {
+        var id = table.id.replace('-table', '');
+        if (id === "unranked") return;
+        labels.push(tierNames[id]);
+        counts.push(tierCounts[id] || 0);
+        var c = tierfMap[id] ? getTierLabelColor(tierfMap[id]) : '#666';
+        bgColors.push(c);
+        labelColors.push(c);
+        var reqRow = table.querySelector('tr.req-row');
+        if (reqRow && reqRow.children[3 + catIdx]) {
+          reqTimes.push(reqRow.children[3 + catIdx].textContent.trim());
+        } else {
+          reqTimes.push("");
+        }
+      });
+    } else {
+      tables.forEach(function(table) {
+        var count = table.querySelectorAll('.player-row').length;
+        var reqRow = table.querySelector('tr.req-row');
+        var displayName = table.id.replace('-table', '');
+        var tierf = null;
+        if (reqRow) {
+          var tf = reqRow.querySelector('[tierf]');
+          if (tf) tierf = tf.getAttribute('tierf');
+          if (reqRow.children[0]) {
+            displayName = reqRow.children[0].innerText.trim().replace(/\u00A0/g, ' ').replace(/\n/g, ' ');
+          }
+        }
+        labels.push(displayName);
+        counts.push(count);
+        var c = tierf ? getTierLabelColor(tierf) : '#666';
+        bgColors.push(c);
+        labelColors.push(c);
+      });
+    }
 
     labels.reverse();
     counts.reverse();
     bgColors.reverse();
     labelColors.reverse();
+    reqTimes.reverse();
 
     var ignoreSlider = document.getElementById("chart-ignore");
     if (ignoreSlider) {
@@ -166,11 +243,12 @@ let tierlist = [
       counts.splice(0, n);
       bgColors.splice(0, n);
       labelColors.splice(0, n);
+      reqTimes.splice(0, n);
     }
     if (counts.length === 0) return;
 
-    const cumulativeBtn = document.getElementById("switch-cumulative");
-    const isCumulative = cumulativeBtn && cumulativeBtn.checked;
+    var cumulativeBtn = document.getElementById("switch-cumulative");
+    var isCumulative = cumulativeBtn && cumulativeBtn.checked;
 
     var total = 0;
     for (var i = 0; i < counts.length; i++) total += counts[i];
@@ -187,38 +265,49 @@ let tierlist = [
       chartData = counts;
     }
 
-    const datalabelsPlugin = {
+    var topPad = isCategoryMode ? 70 : 56;
+
+    var datalabelsPlugin = {
       id: 'datalabels',
       afterDraw: function(chart) {
-        const ctx = chart.ctx;
-        const meta = chart.getDatasetMeta(0);
+        var ctx = chart.ctx;
+        var meta = chart.getDatasetMeta(0);
         ctx.save();
         ctx.textAlign = 'center';
 
         meta.data.forEach(function(bar, i) {
           var val = chart.data.datasets[0].data[i];
-          if (val === 0) return;
           var pct = chart.__total > 0 ? val / chart.__total * 100 : 0;
 
-          ctx.font = 'bold 11px monospace';
-          ctx.fillStyle = '#ddd';
-          ctx.shadowColor = 'rgba(0,0,0,0.8)';
-          ctx.shadowBlur = 3;
-          ctx.textBaseline = 'bottom';
-          ctx.fillText(val, bar.x, bar.y - 22);
+          if (val !== 0) {
+            ctx.font = 'bold 11px monospace';
+            ctx.fillStyle = '#ddd';
+            ctx.shadowColor = 'rgba(0,0,0,0.8)';
+            ctx.shadowBlur = 3;
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(val, bar.x, bar.y - 30);
 
-          ctx.font = '9px monospace';
-          ctx.fillStyle = '#999';
-          ctx.shadowBlur = 0;
-          ctx.textBaseline = 'top';
-          ctx.fillText('(' + pct.toFixed(1) + '%)', bar.x, bar.y - 22 + 5);
+            ctx.font = '9px monospace';
+            ctx.fillStyle = '#999';
+            ctx.shadowBlur = 0;
+            ctx.textBaseline = 'top';
+            ctx.fillText('(' + pct.toFixed(1) + '%)', bar.x, bar.y - 30 + 5);
+          }
+
+          if (chart.__reqTimes && chart.__reqTimes[i]) {
+            ctx.font = '11px monospace';
+            ctx.fillStyle = (chart.__reqLabelColors && chart.__reqLabelColors[i]) || '#777';
+            ctx.shadowBlur = 0;
+            ctx.textBaseline = 'top';
+            ctx.fillText("\u2264" + chart.__reqTimes[i], bar.x, bar.y - 30 + 5 + 13);
+          }
         });
         ctx.restore();
       }
     };
 
     if (!tierChart) {
-      const ctx = document.getElementById('tier-chart').getContext('2d');
+      var ctx = document.getElementById('tier-chart').getContext('2d');
       tierChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -240,7 +329,7 @@ let tierlist = [
           animation: { duration: 300 },
           events: [],
           layout: {
-            padding: { top: 56, bottom: 8 }
+            padding: { top: topPad, bottom: 8 }
           },
           plugins: {
             legend: { display: false },
@@ -269,6 +358,8 @@ let tierlist = [
         plugins: [datalabelsPlugin]
       });
       tierChart.__total = total;
+      tierChart.__reqTimes = reqTimes;
+      tierChart.__reqLabelColors = labelColors;
     } else {
       tierChart.data.labels = labels;
       tierChart.data.datasets[0].data = chartData;
@@ -277,7 +368,10 @@ let tierlist = [
       tierChart.data.datasets[0].hoverBackgroundColor = bgColors;
       tierChart.data.datasets[0].hoverBorderColor = bgColors;
       tierChart.options.scales.x.ticks.color = labelColors;
+      tierChart.options.layout.padding.top = topPad;
       tierChart.__total = total;
+      tierChart.__reqTimes = reqTimes;
+      tierChart.__reqLabelColors = labelColors;
       tierChart.update();
     }
   }
@@ -363,5 +457,13 @@ let tierlist = [
       requestAnimationFrame(function() { if (tierChart) tierChart.resize(); });
     }
     if (typeof notifyParentSwitchState === "function") notifyParentSwitchState();
+  });
+
+  document.getElementById("chart-category").addEventListener("change", function() {
+    var container = document.getElementById("chart-container");
+    if (container && container.style.display !== "none") {
+      updateTierChart();
+      requestAnimationFrame(function() { if (tierChart) tierChart.resize(); });
+    }
   });
   
