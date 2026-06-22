@@ -72,7 +72,7 @@ function setupResetHeaderCell(cell) {
     });
     cell.addEventListener("click", () => {
         resetSort();
-        ["switch-true", "switch-simplified", "switch", "switch-reqs"].forEach(id => {
+        ["switch-true", "switch-simplified", "switch", "switch-reqs", "switch-empty"].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.checked = false;
         });
@@ -552,6 +552,12 @@ function populate_table(table){
             next_user++;
         }
 
+        const hideEmpty = document.getElementById("switch-empty")?.checked;
+        if (hideEmpty && tierUsers.length === 0) {
+            results_table.removeChild(tier_table);
+            continue;
+        }
+
         const tierAttrName = (function() {
             if (!trueView && simplifiedView && isSubTierIII(tiers[i]["name"])) {
                 return null; // will be computed per user
@@ -629,8 +635,33 @@ export function show_results_from_date(){
         }
     }
 }
+
+const SWITCH_IDS = ["switch-true", "switch-simplified", "switch", "switch-reqs", "switch-empty"];
+
+function applySwitchStates(states) {
+    if (!states) return;
+    SWITCH_IDS.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el && states[id] !== undefined) el.checked = states[id];
+    });
+    var trueEl = document.getElementById("switch-true");
+    if (trueEl) trueView = trueEl.checked;
+    var simEl = document.getElementById("switch-simplified");
+    if (simEl) simplifiedView = simEl.checked;
+}
+
+function notifyParentSwitchState() {
+    var state = {};
+    SWITCH_IDS.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) state[id] = el.checked;
+    });
+    try { parent.postMessage({type: "powerSwitchState", state: state}, '*'); } catch(e) {}
+}
+
 window.addEventListener('message', (event) => {
-    const [eventPowerData, eventOldTiers, gettingFMCPower, eventuserFinalTierMap, eventTiers, eventFMCtiers, eventTiersOld, eventCategoriesNew, eventCategoriesOld, eventCategoriesFMC] = event.data;
+    const data = event.data;
+    const [eventPowerData, eventOldTiers, gettingFMCPower, eventuserFinalTierMap, eventTiers, eventFMCtiers, eventTiersOld, eventCategoriesNew, eventCategoriesOld, eventCategoriesFMC] = data;
     powerData = eventPowerData;
     oldTiers = eventOldTiers;
     userFinalTierMap = eventuserFinalTierMap;
@@ -652,6 +683,7 @@ window.addEventListener('message', (event) => {
     num_categories = categories.length;
 
     resetSort();
+    applySwitchStates(data[10]);
 
     const simplifiedDiv = document.getElementById("switch-div-simplified");
     if (simplifiedDiv) {
@@ -659,6 +691,12 @@ window.addEventListener('message', (event) => {
     }
 
     show_results_from_date();
+    document.dispatchEvent(new Event("table-repopulated"));
+});
+
+SWITCH_IDS.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener("change", notifyParentSwitchState);
 });
 
 const simplifiedBtn = document.getElementById("switch-simplified");
@@ -674,6 +712,14 @@ const trueBtn = document.getElementById("switch-true");
 if (trueBtn) {
     trueBtn.addEventListener("change", () => {
         trueView = trueBtn.checked;
+        populate_table(powerData);
+        document.dispatchEvent(new Event("table-repopulated"));
+    });
+}
+
+const hideBtn = document.getElementById("switch-empty");
+if (hideBtn) {
+    hideBtn.addEventListener("change", () => {
         populate_table(powerData);
         document.dispatchEvent(new Event("table-repopulated"));
     });

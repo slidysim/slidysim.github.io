@@ -10,6 +10,11 @@
             <button class="menu-btn"><i class="menu-icon"></i></button>
             <button class="date-button" id="date-button">Power Rankings</button>
             <div class="header-right">
+                <div class="switch-div" data-tt="Off: All groups are shown&#10;On: Empty groups are hidden">
+                    <span class="switch-label">Empty</span>
+                    <input type="checkbox" id="switch-empty" style="display:none">
+                    <label for="switch-empty"></label>
+                </div>
                 <div class="switch-div" data-tt="Off: All players are shown&#10;On: Group players by their worst category tier">
                     <span class="switch-label">True</span>
                     <input type="checkbox" id="switch-true" title="Only players with all categories completed" style="display:none">
@@ -65,8 +70,8 @@
         <div id="score-tooltip" class="score-tooltip" style="display:none; position:fixed; z-index:9999; padding:4px 10px; border-radius:4px; font-size:11px; white-space:nowrap; pointer-events:none; background:#1a1a1a; border:1px solid #555; color:#ddd; line-height:1.4;"></div>
         <script src="scripts/countryData.js"></script>
         <script src="power/js/dynamicPower.js?v=1.0.154"></script>
-        <script src="power/js/populatetable.js?v=1.0.248" type="module"></script>
+        <script src="power/js/populatetable.js?v=1.0.256" type="module"></script>
         <script src="power/js/menu.js"></script>
-        <script defer="" src="power/js/switch.js?v=1.0.159"></script>
+        <script defer="" src="power/js/switch.js?v=1.0.160"></script>
         
 </body></html>

@@ -1,4 +1,5 @@
 let userFinalTierMap = {}; // Player name -> Final Tier name
+let powerSwitchStates = {}; // Saved switch states from power iframe
 
 const funTiers = ['Gamma+', 'G++', "Egg"];
 
@@ -164,7 +165,13 @@ function loadPower() {
     contentDiv.insertAdjacentElement('afterend', iframe);
     iframe.onload = () => {
         //console.log(powerData);
-        iframe.contentWindow.postMessage([powerData, gettingOldPower, gettingFMCPower, userFinalTierMap, tiers, FMCtiers, tiersOld, categoriesNew, categoriesOld, categoriesFMC], '*');
+        iframe.contentWindow.postMessage([powerData, gettingOldPower, gettingFMCPower, userFinalTierMap, tiers, FMCtiers, tiersOld, categoriesNew, categoriesOld, categoriesFMC, powerSwitchStates], '*');
     }
     loadingPower = false;
 }
+
+window.addEventListener("message", function(event) {
+    if (event.data && event.data.type === "powerSwitchState") {
+        powerSwitchStates = event.data.state;
+    }
+});
