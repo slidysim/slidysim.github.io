@@ -250,7 +250,7 @@ function populate_table(table){
         var power_div = document.createElement("td");
 
         name_div.innerHTML = appendFlagIconToNickname(user[0], true);
-        place_div.textContent = trueView ? placeCounter++ : user[1];
+        place_div.textContent = trueView ? (sortColumn !== null && user.__place ? user.__place : placeCounter++) : user[1];
         power_div.textContent = user[2];
 
         user_row.className = "player-row";
@@ -374,6 +374,14 @@ function populate_table(table){
             const user = table[u];
             if (user === undefined) break;
             if (!hasScores(user)) continue;
+            if (trueView) {
+                var incomplete = false;
+                for (var c = 0; c < num_categories; c++) {
+                    if (user[c + 3] == -1) { incomplete = true; break; }
+                }
+                if (incomplete) continue;
+                user.__place = placeCounter++;
+            }
             allUsers.push(user);
         }
         allUsers.sort((a, b) => {
