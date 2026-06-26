@@ -75,6 +75,10 @@ function changePuzzleSize(puzzleSize) {
         requestProxy.size = ["History", "History"];
         return;
     }
+    if (puzzleSize === "WRHistory") {
+        requestProxy.size = ["WRHistory", "WRHistory"];
+        return;
+    }
     if (String(puzzleSize).includes("Rankings")) {
         requestProxy.size = [puzzleSize, puzzleSize];
         return;
@@ -296,6 +300,14 @@ function addListenersToElements() {
                     lastLoadWasPower = true;
                     rankingTabs.style.display = "none";
                     getPowerData();
+                    return;
+                }
+                if (radio.value === "WRHistory") {
+                    lastLoadWasPower = false;
+                    rankingTabs.style.display = "none";
+                    request.width = "WRHistory";
+                    request.height = "WRHistory";
+                    directUpdate();
                     return;
                 }
                 changePuzzleSize(radio.value);

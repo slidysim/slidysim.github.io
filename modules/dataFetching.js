@@ -162,6 +162,32 @@ function directUpdate() {
     leaderboardData = removeBannedScores(leaderboardData);
     //console.log("direct update called");
     document.getElementById('power-iframe')?.remove();
+    document.getElementById('wrhistory-iframe')?.remove();
+
+    if (sheetType === "WRHistory") {
+        const header = document.getElementById("leaderboardName");
+        header.innerHTML = '';
+        NxNWRsContainer.innerHTML = "";
+        solveTypeDiv.style.display = "none";
+        usernameInput.style.display = "none";
+        radio_allGameModsLabel.style.display = 'none';
+        radio_allGameModsLabelInteresting.style.display = 'none';
+        radio_allGameModsLabelNMSingles.style.display = 'none';
+        tierLimiterTab.style.display = 'none';
+        tooltip.style.display = 'none';
+        tooltip.classList.remove(...tooltip.classList);
+        rankingTabs.style.display = "none";
+        const contentDiv = document.getElementById('contentDiv');
+        contentDiv.className = "";
+        contentDiv.style.opacity = "1";
+        contentDiv.innerHTML = '';
+        const iframe = document.createElement('iframe');
+        iframe.id = "wrhistory-iframe";
+        iframe.src = 'https://dphdmn.github.io/slidyhistory/';
+        contentDiv.insertAdjacentElement('afterend', iframe);
+        return;
+    }
+
     //if(loadingPower) {
     //    controlType = 'unique';
     //}

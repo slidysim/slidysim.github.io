@@ -416,6 +416,10 @@ table.rankingCells td {
     color: rgb(161, 77, 255);
     transition: background-color 0.3s, color 0.3s;
 }
+#label_recordsWRHistoryRadio {
+    color: rgb(255, 34, 98);
+    transition: background-color 0.3s, color 0.3s;
+}
 
 #radio_allGameModsLabel {
     color: rgb(161, 77, 255);
@@ -449,6 +453,10 @@ table.rankingCells td {
 
 .form_radio_btn input[type=radio]:checked+#label_recordsHistoryRadio {
     background: rgb(161, 77, 255);
+    color: black;
+}
+.form_radio_btn input[type=radio]:checked+#label_recordsWRHistoryRadio {
+    background: rgb(255, 34, 98);
     color: black;
 }
 
@@ -525,6 +533,11 @@ table.rankingCells td {
 }
 #label_rankingsRadioPowerFMC:hover {
     background: #ff00ff;
+    color: #000;
+}
+
+#label_recordsWRHistoryRadio:hover {
+    background: rgb(255, 34, 98);
     color: #000;
 }
 
@@ -1255,8 +1268,8 @@ img {
     text-align: left;
     padding: 5px 10px;
     border-radius: 5px;
-    max-width: 1200px;
-   
+    max-width: 1300px;
+    
 }
 .controls-container {
     display: flex;
@@ -1270,9 +1283,9 @@ img {
     box-shadow: 0 0 10px cyan;
     width: fit-content;
 }
-@media (min-width: 1200px) {
+@media (min-width: 1300px) {
     .controls {
-        min-width: 1200px;
+        min-width: 1300px;
     }
 }
 
