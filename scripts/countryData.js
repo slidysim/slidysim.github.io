@@ -34,7 +34,8 @@ const rename_map = {
     '554': 'yzx',
     'JonasCuber10': 'JonasCuber11',
     'DreamerTheWolfFox': 'Dreamer',
-    'fuenfeck': 'Zip'
+    'fuenfeck': 'Zip',
+    'Emi': 'Dawidluna'
 };
 
 function appendFlagIconToNickname(nickname, minimal = false) {
