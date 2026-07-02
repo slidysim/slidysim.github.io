@@ -30,7 +30,7 @@ function handleScoresResponse(error, res, customScores, customUserList) {
     if (error) {
         console.log("Error:", error);
     } else {
-        leaderboardData = customScores || res.scoresParsed || [];
+        leaderboardData = customScores || deduplicatePlayerScores(res.scoresParsed) || [];
         const userList = customUserList || res.userList || [];
         fullUniqueNames = userList.length ? userList.sort() : [];
 
@@ -71,8 +71,29 @@ function isBetter(web, live, type) {
     return cfg.higherIsBetter ? webVal > liveVal : webVal < liveVal;
 }
 
+function deduplicatePlayerScores(scores) {
+    if (!scores || !scores.length) return scores || [];
+
+    const map = new Map();
+
+    scores.forEach(s => {
+        const key = getCategoryKey(s) + '-' + s.nameFilter;
+        const existing = map.get(key);
+
+        if (!existing || isBetter(s, existing, s.leaderboardType)) {
+            map.set(key, s);
+        }
+    });
+
+    return Array.from(map.values());
+}
+
 function mergeWebPBs(liveData, webData) {
     if (!liveData || !webData) return liveData || webData || [];
+
+    liveData = deduplicatePlayerScores(liveData);
+    webData = deduplicatePlayerScores(webData);
+
     if (!liveData.length) return webData.map(s => ({ ...s, isWeb: true }));
     if (!webData.length) return liveData.map(s => ({ ...s, isWeb: false }));
     
