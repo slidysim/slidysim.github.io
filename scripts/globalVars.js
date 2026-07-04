@@ -71,6 +71,7 @@ let last_pbType = -1;
 let replayStatus = "DEAD"; //replayStatus = "PLAYING"; "DEAD"; "PENDING"; "FINISHED"
 let countryRanksEnabled = false;
 let webLeaderboardEnabled = true;
+let exeLeaderboardEnabled = true;
 let lmLeaderboardEnabled = false;
 let updatedInitial = false;
 let n_m_size_limit = 0;

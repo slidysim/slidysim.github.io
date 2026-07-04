@@ -65,6 +65,20 @@ function createCountrySelect() {
     };
     options.appendChild(worldOpt);
 
+    // Country Leaderboard option
+    const countryLbOpt = document.createElement('div');
+    countryLbOpt.style.cssText = 'padding:2px 5px;cursor:pointer;display:flex;align-items:center;gap:3px;color:white;height:20px;';
+    countryLbOpt.innerHTML = `<img src="images/flags/default.png" style="width:16px;height:12px;margin:2px;"> By Country`;
+    countryLbOpt.onmouseover = () => countryLbOpt.style.background = '#333';
+    countryLbOpt.onmouseout = () => countryLbOpt.style.background = 'none';
+    countryLbOpt.onclick = () => {
+        currentValue = 'country-leaderboard';
+        selected.innerHTML = countryLbOpt.innerHTML;
+        options.style.display = 'none';
+        container.dispatchEvent(new Event('change'));
+    };
+    options.appendChild(countryLbOpt);
+
     // Country options
     countryCounts.forEach(([country, count]) => {
         const opt = document.createElement('div');

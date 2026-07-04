@@ -16,12 +16,9 @@ function reload() {
 }
 
 function toggleCurrentCountry(){
-    currentCountry = countrySelect.value;
-    reload();
-}
-
-function toggleCountryRanks(){
-    countryRanksEnabled = countriesCB.checked;
+    const val = countrySelect.value;
+    countryRanksEnabled = val === 'country-leaderboard';
+    currentCountry = val;
     reload();
 }
 
@@ -34,6 +31,12 @@ function toggleWebLeaderboard(){
 
 function toggleLMLeaderboard(){
     lmLeaderboardEnabled = includeLMCB.checked;
+    forceServerUpdate = true;
+    reload();
+}
+
+function toggleExeLeaderboard(){
+    exeLeaderboardEnabled = includeExeCB.checked;
     forceServerUpdate = true;
     reload();
 }
@@ -159,17 +162,17 @@ function addSuggestions() {
 
 //"Public" function to add major event listeners for html elements
 function addListenersToElements() {
-    enableDebugMode.style.display = webLeaderboardEnabled ? "none" : "inline-block";
-    countriesCB.addEventListener("change", toggleCountryRanks);
+    enableDebugMode.style.display = !exeLeaderboardEnabled || webLeaderboardEnabled || lmLeaderboardEnabled ? "none" : "inline-block";
     includeWebCB?.addEventListener("change", toggleWebLeaderboard);
+    includeExeCB?.addEventListener("change", toggleExeLeaderboard);
     includeLMCB?.addEventListener("change", toggleLMLeaderboard);
     addSuggestions();
     createCustomReplayButton.addEventListener("click", function () {
         makeReplay("", -1, 15000, 4, 4, "Custom");
     });
     enableDebugMode.addEventListener("click", function(){
-        if (webLeaderboardEnabled || lmLeaderboardEnabled) {
-            alert("Video upload not supported for Web or LM scores, sorry for inconvenience. Please disable external data before uploading.");
+        if (!exeLeaderboardEnabled || webLeaderboardEnabled || lmLeaderboardEnabled) {
+            alert("Video upload not supported for Web, LM or disabled Exe scores, sorry for inconvenience. Please enable only Exe data before uploading.");
         } else {
             if (!debugMode){
                 if (logged_in_as !== "vovker" && logged_in_as !== "dphdmn"){

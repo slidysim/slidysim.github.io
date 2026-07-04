@@ -153,67 +153,89 @@ function updateServer(auth_token, displayType, controlType, pbType) {
     loadAnimation(loadingAnimation, contentDiv);
     document.body.style.pointerEvents = 'none';
 
-    const hasExternal = (webLeaderboardEnabled && latestWebArchive) || (lmLeaderboardEnabled && latestLMArchive);
-
-    if (hasExternal && archiveDate === "LIVE") {
-        archiveDate = "LIVE";
-        getScoresWrapper(auth_token, displayType, controlType, pbType, (err, liveRes) => {
-            if (err) {
-                console.log("Error when fetching live scores:", err);
-                return;
-            }
-
-            let mergedScores = deduplicatePlayerScores(liveRes.scoresParsed) || [];
-            let mergedUserList = [...(liveRes.userList || [])];
-            let pending = 0;
-            let hasError = false;
-
-            function finalize() {
-                if (--pending > 0) return;
-                archiveDate = "LIVE";
-                if (hasError) {
-                    console.log("Error when fetching external scores, falling back to live only");
-                    handleScoresResponse(null, liveRes, mergedScores, mergedUserList);
-                    return;
-                }
-                handleScoresResponse(null, liveRes, mergedScores, mergedUserList);
-            }
-
-            if (webLeaderboardEnabled && latestWebArchive) {
-                pending++;
-                archiveDate = latestWebArchive;
-                getScoresWrapper(auth_token, displayType, controlType, pbType, (webErr, webRes) => {
-                    if (!webErr && webRes?.scoresParsed) {
-                        mergedScores = mergeWebPBs(mergedScores, webRes.scoresParsed);
-                        mergedUserList = [...new Set([...mergedUserList, ...(webRes.userList || [])])].sort();
-                    } else {
-                        hasError = true;
-                    }
-                    finalize();
-                });
-            }
-
-            if (lmLeaderboardEnabled && latestLMArchive) {
-                pending++;
-                archiveDate = latestLMArchive;
-                getScoresWrapper(auth_token, displayType, controlType, pbType, (lmErr, lmRes) => {
-                    if (!lmErr && lmRes?.scoresParsed) {
-                        mergedScores = mergeLMPBs(mergedScores, lmRes.scoresParsed);
-                        mergedUserList = [...new Set([...mergedUserList, ...(lmRes.userList || [])])].sort();
-                    } else {
-                        hasError = true;
-                    }
-                    finalize();
-                });
-            }
-
-            if (pending === 0) {
-                archiveDate = "LIVE";
-                handleScoresResponse(null, liveRes, mergedScores, mergedUserList);
-            }
-        });
-    } else {
+    // If not on LIVE (archive page), do a simple archive fetch
+    if (archiveDate !== "LIVE") {
         getScoresWrapper(auth_token, displayType, controlType, pbType, handleScoresResponse);
+        return;
+    }
+
+    const isExeOn = exeLeaderboardEnabled;
+    const isWebOn = webLeaderboardEnabled && latestWebArchive;
+    const isLMOn = lmLeaderboardEnabled && latestLMArchive;
+    const hasAnySource = isExeOn || isWebOn || isLMOn;
+
+    if (!hasAnySource) {
+        handleScoresResponse(null, { scoresParsed: [], userList: [] }, [], []);
+        return;
+    }
+
+    let pending = 0;
+    let liveData = null;
+    let liveUserList = [];
+    let webData = null;
+    let webUserList = [];
+    let lmData = null;
+    let lmUserList = [];
+
+    function finalize() {
+        if (--pending > 0) return;
+
+        let mergedScores = [];
+        let mergedUserList = [];
+
+        if (isExeOn && liveData) {
+            mergedScores = deduplicatePlayerScores(liveData) || [];
+            mergedUserList = [...liveUserList];
+        }
+
+        if (isWebOn && webData) {
+            mergedScores = mergeWebPBs(mergedScores, webData);
+            mergedUserList = [...new Set([...mergedUserList, ...webUserList])].sort();
+        }
+
+        if (isLMOn && lmData) {
+            mergedScores = mergeLMPBs(mergedScores, lmData);
+            mergedUserList = [...new Set([...mergedUserList, ...lmUserList])].sort();
+        }
+
+        archiveDate = "LIVE";
+        handleScoresResponse(null, liveData ? { scoresParsed: liveData, userList: liveUserList } : { scoresParsed: [], userList: [] }, mergedScores, mergedUserList);
+    }
+
+    if (isExeOn) {
+        pending++;
+        archiveDate = "LIVE";
+        getScoresWrapper(auth_token, displayType, controlType, pbType, (err, res) => {
+            if (!err && res?.scoresParsed) {
+                liveData = res.scoresParsed;
+                liveUserList = res.userList || [];
+            }
+            finalize();
+        });
+    }
+
+    if (isWebOn) {
+        pending++;
+        archiveDate = latestWebArchive;
+        getScoresWrapper(auth_token, displayType, controlType, pbType, (webErr, webRes) => {
+            if (!webErr && webRes?.scoresParsed) {
+                webData = webRes.scoresParsed;
+                webUserList = webRes.userList || [];
+            }
+            finalize();
+        });
+    }
+
+    if (isLMOn) {
+        pending++;
+        archiveDate = latestLMArchive;
+        getScoresWrapper(auth_token, displayType, controlType, pbType, (lmErr, lmRes) => {
+            if (!lmErr && lmRes?.scoresParsed) {
+                lmData = lmRes.scoresParsed;
+                lmUserList = lmRes.userList || [];
+            }
+            finalize();
+        });
     }
 }
 

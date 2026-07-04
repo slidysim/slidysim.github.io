@@ -243,9 +243,10 @@ async function callGetScores(auth_token, display_type_text, control_type_text, p
 
 async function getScores(auth_token, display_type, control_type, pb_type) {
     let textData;
+    const currentArchive = archiveDate;
 
     try {
-        if (archiveDate === "LIVE") {
+        if (currentArchive === "LIVE") {
             // Fetch live data from server
             const url = `${dblink}/api/getScores`;
             const response = await fetch(url, {
@@ -271,7 +272,7 @@ async function getScores(auth_token, display_type, control_type, pb_type) {
             textData = await response.text();
         } else {
             // Fetch archive data
-            textData = await getScoresArch(archiveDate, display_type, control_type, pb_type);
+            textData = await getScoresArch(currentArchive, display_type, control_type, pb_type);
         }
         //console.log("Raw text data received:", textData);
         // Process textData (common logic)
@@ -284,7 +285,7 @@ async function getScores(auth_token, display_type, control_type, pb_type) {
             return map;
         }, {});
 
-        if (archiveDate.toLowerCase().startsWith('lm_')) {
+        if (currentArchive.toLowerCase().startsWith('lm_')) {
             Object.keys(usermap).forEach(id => {
                 const name = usermap[id];
                 const lastUnderscore = name.lastIndexOf('_');
@@ -309,7 +310,7 @@ async function getScores(auth_token, display_type, control_type, pb_type) {
             scoreFields.forEach((field, index) => {
                 if (field === "videolink") {
                     scoreObject[field] = values[index];
-                } else if (field === "solution_available" && archiveDate !== "LIVE") {
+                } else if (field === "solution_available" && currentArchive !== "LIVE") {
                     // If archive, always false
                     scoreObject[field] = false;
                 } else {
