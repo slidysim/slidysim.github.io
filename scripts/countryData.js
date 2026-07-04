@@ -44,7 +44,8 @@ const rename_map = {
     'Moka雨晞': 'MOKA',
     'diudiuhamburger': '丢丢hamburger',
     'Islamkit': 'IslamKitiev',
-    
+    'thelegendary': 'thelegendary08'
+
 };
 
 function appendFlagIconToNickname(nickname, minimal = false) {
