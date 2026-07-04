@@ -7,7 +7,7 @@ replayGeneration.js
 */
 
 function reload() {
-    if (lastLoadWasPower){
+    if (lastLoadWasPower) {
         loadingPower = true;
         getPowerData();
     } else {
@@ -15,7 +15,7 @@ function reload() {
     }
 }
 
-function toggleCurrentCountry(){
+function toggleCurrentCountry() {
     const val = countrySelect.value;
     countryRanksEnabled = val === 'country-leaderboard';
     currentCountry = val;
@@ -23,28 +23,28 @@ function toggleCurrentCountry(){
 }
 
 function isAdmin() {
-    return adminsList && adminsList.some(function(u) { return u.toLowerCase() === (logged_in_as || '').toLowerCase(); });
+    return adminsList && adminsList.some(function (u) { return u.toLowerCase() === (logged_in_as || '').toLowerCase(); });
 }
 
 function updateVideoButtonVisibility() {
     enableDebugMode.style.display = isAdmin() && exeLeaderboardEnabled && !webLeaderboardEnabled && !lmLeaderboardEnabled ? "inline-block" : "none";
 }
 
-function toggleWebLeaderboard(){
+function toggleWebLeaderboard() {
     webLeaderboardEnabled = includeWebCB.checked;
     forceServerUpdate = true;
     updateVideoButtonVisibility();
     reload();
 }
 
-function toggleLMLeaderboard(){
+function toggleLMLeaderboard() {
     lmLeaderboardEnabled = includeLMCB.checked;
     forceServerUpdate = true;
     updateVideoButtonVisibility();
     reload();
 }
 
-function toggleExeLeaderboard(){
+function toggleExeLeaderboard() {
     exeLeaderboardEnabled = includeExeCB.checked;
     forceServerUpdate = true;
     updateVideoButtonVisibility();
@@ -54,7 +54,7 @@ function toggleExeLeaderboard(){
 //"Public" function to change control type
 function changeControls(newtype) {
     controlType = newtype;
-    if (!loadingPower){
+    if (!loadingPower) {
         sendMyRequest();
     }
 }
@@ -138,48 +138,48 @@ function addListenersToElements() {
         });
         menuDropdown.addEventListener('click', function (e) { e.stopPropagation(); });
     }
-    enableDebugMode.addEventListener("click", function(){
+    enableDebugMode.addEventListener("click", function () {
         if (!exeLeaderboardEnabled || webLeaderboardEnabled || lmLeaderboardEnabled) {
             alert("Video upload not supported for Web, LM or disabled Exe scores, sorry for inconvenience. Please enable only Exe data before uploading.");
         } else {
-            if (!debugMode){
-                if (logged_in_as !== "vovker" && logged_in_as !== "dphdmn"){
+            if (!debugMode) {
+                if (logged_in_as !== "vovker" && logged_in_as !== "dphdmn") {
                     alert("Please find your score on the leaderboard, click on it, and add video link to submit." +
                         "\nNote: Only YouTube links are accepted.\nYou can only submit your own videos for your own scores.\n" +
                         "Abuse of the system may result in a ban from the leaderboard.");
-                    }
+                }
             }
             debugMode = !debugMode;
             sendMyRequest();
         }
     });
-   // ytOnlyButton.addEventListener("click", function(){
-  //      ytOnlyEnabled = !ytOnlyEnabled;
- //       if (ytOnlyEnabled){
- //           ytOnlyButton.textContent = "Load replays";
- //           hiddenSolveData = solveData;
- //           solveData = [];
- //           sendMyRequest();
- //       }
- //       else {
- //           ytOnlyButton.textContent = "Hide replays";
- //           solveData = hiddenSolveData;
- //           sendMyRequest();
- //       }
-//
- //   });
+    // ytOnlyButton.addEventListener("click", function(){
+    //      ytOnlyEnabled = !ytOnlyEnabled;
+    //       if (ytOnlyEnabled){
+    //           ytOnlyButton.textContent = "Load replays";
+    //           hiddenSolveData = solveData;
+    //           solveData = [];
+    //           sendMyRequest();
+    //       }
+    //       else {
+    //           ytOnlyButton.textContent = "Hide replays";
+    //           solveData = hiddenSolveData;
+    //           sendMyRequest();
+    //       }
+    //
+    //   });
 
- function incrementSize(increase = true, dimension = "both") {
-    const width = request.width, height = request.height;
-    if (typeof width === 'number' && Number.isInteger(width) && typeof height === 'number' && Number.isInteger(height)) {
-        let newWidth = width, newHeight = height;
-        if (dimension !== "height") newWidth = increase ? width + 1 : Math.max(2, width - 1);
-        if (dimension !== "width") newHeight = increase ? height + 1 : Math.max(2, height - 1);
-        if (newWidth !== width || newHeight !== height) {
-            requestProxy.size = [newWidth, newHeight];
+    function incrementSize(increase = true, dimension = "both") {
+        const width = request.width, height = request.height;
+        if (typeof width === 'number' && Number.isInteger(width) && typeof height === 'number' && Number.isInteger(height)) {
+            let newWidth = width, newHeight = height;
+            if (dimension !== "height") newWidth = increase ? width + 1 : Math.max(2, width - 1);
+            if (dimension !== "width") newHeight = increase ? height + 1 : Math.max(2, height - 1);
+            if (newWidth !== width || newHeight !== height) {
+                requestProxy.size = [newWidth, newHeight];
+            }
         }
     }
-}
 
     document.addEventListener("keydown", function (event) {
         if ((event.ctrlKey || event.altKey) && (event.key === "+" || event.key === "-" || event.key === "=")) {
@@ -212,7 +212,7 @@ function addListenersToElements() {
             tierSliderLabel.appendChild(document.createTextNode(showRecordsAtleast + ' '));
             tierSliderLabel.appendChild(greekLetterSpan(tierLimit));
             tierSliderLabel.appendChild(document.createTextNode(' ' + showRecordsAtleastTierWord));
-            
+
         }
         sendMyRequest();
     });
@@ -381,7 +381,7 @@ function setupSearch() {
     function isOnSpecificSizePage() {
         var w = request.width, h = request.height;
         return (typeof w === 'number' && Number.isInteger(w) && w >= 2) ||
-               ['POWER','POWEROLD','POWERFMC','Rankings2','Rankings3','WRHistory'].indexOf(String(w)) >= 0;
+            ['POWER', 'POWEROLD', 'POWERFMC', 'Rankings2', 'Rankings3', 'WRHistory'].indexOf(String(w)) >= 0;
     }
 
     function goSearchResult(r) {
@@ -389,16 +389,24 @@ function setupSearch() {
         if (r.action === 'size') {
             var radio = document.querySelector('input[name="puzzleSize"][value="' + r.value.replace(/"/g, '\\"') + '"]');
             if (r.value === 'POWER' || r.value === 'POWEROLD' || r.value === 'POWERFMC') {
-                if (radio) radio.checked = true;
+                if (radio) {
+                    radio.checked = true;
+                    // Trigger the change event manually
+                    radio.dispatchEvent(new Event('change'));
+                }
                 return;
             }
             if (r.value === 'WRHistory') {
-                if (radio) radio.checked = true;
+                if (radio) {
+                    radio.checked = true;
+                    // Trigger the change event manually
+                    radio.dispatchEvent(new Event('change'));
+                }
                 return;
             }
             changePuzzleSize(r.value);
             if (radio) { radio.checked = true; }
-            else { document.querySelectorAll('input[name="puzzleSize"]').forEach(function(el) { el.checked = false; }); }
+            else { document.querySelectorAll('input[name="puzzleSize"]').forEach(function (el) { el.checked = false; }); }
         } else if (r.action === 'name') {
             if (isOnSpecificSizePage()) {
                 var wrRadio = document.querySelector('input[name="puzzleSize"][value="NxN WRs"]');
@@ -486,22 +494,22 @@ function searchAll(q) {
     }
 
     // Special views
-        var specials = [
-            { label: 'Power Rankings', value: 'POWER', meta: 'Rankings', type: 'power' },
-            { label: 'FMC Rankings', value: 'POWERFMC', meta: 'Rankings', type: 'power' },
-            { label: 'G++ Rankings', value: 'POWEROLD', meta: 'Rankings', type: 'power' },
-            { label: 'Kinch Rankings', value: 'Rankings3', meta: 'Rankings', type: 'kinch' },
-            { label: 'Popular Rankings', value: 'Rankings2', meta: 'Rankings', type: 'kinch' },
-            { label: 'PB History', value: 'History', meta: 'Recently set records', type: 'history' },
-            { label: 'WR History', value: 'WRHistory', meta: 'Historical progression', type: 'history' },
-            { label: 'World Records', value: 'NxN WRs', meta: 'Square sizes only', type: 'wrs' },
-            { label: 'Single WRs matrix', value: 'All Singles', meta: 'All puzzle sizes', type: 'wrs' },
-        ];
-        specials.forEach(function (s) {
-            if (s.label.toLowerCase().indexOf(lowerQ) >= 0 || s.value.toLowerCase().indexOf(lowerQ) >= 0) {
-                results.push({ type: s.type, label: s.label, meta: s.meta, action: 'size', value: s.value });
-            }
-        });
+    var specials = [
+        { label: 'Power Rankings', value: 'POWER', meta: 'Rankings', type: 'power' },
+        { label: 'FMC Rankings', value: 'POWERFMC', meta: 'Rankings', type: 'power' },
+        { label: 'G++ Rankings', value: 'POWEROLD', meta: 'Rankings', type: 'power' },
+        { label: 'Kinch Rankings', value: 'Rankings3', meta: 'Rankings', type: 'kinch' },
+        { label: 'Popular Rankings', value: 'Rankings2', meta: 'Rankings', type: 'kinch' },
+        { label: 'PB History', value: 'History', meta: 'Recently set records', type: 'history' },
+        { label: 'WR History', value: 'WRHistory', meta: 'Historical progression', type: 'history' },
+        { label: 'World Records', value: 'NxN WRs', meta: 'Square sizes only', type: 'wrs' },
+        { label: 'Single WRs matrix', value: 'All Singles', meta: 'All puzzle sizes', type: 'wrs' },
+    ];
+    specials.forEach(function (s) {
+        if (s.label.toLowerCase().indexOf(lowerQ) >= 0 || s.value.toLowerCase().indexOf(lowerQ) >= 0) {
+            results.push({ type: s.type, label: s.label, meta: s.meta, action: 'size', value: s.value });
+        }
+    });
 
     // Players (usernames)
     if (typeof fullUniqueNames !== 'undefined' && fullUniqueNames) {
@@ -532,7 +540,7 @@ var requestProxy = new Proxy(request, {
         } else {
             target[key] = value;
         }
-        if (!loadingPower){
+        if (!loadingPower) {
             sendMyRequest();
         }
         return true;
