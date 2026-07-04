@@ -21,7 +21,7 @@ async function main(bypass = false) {
 
                 // Show admin link for specific users
                 if (logged_in_as === "vovker" || logged_in_as === "dphdmn" || logged_in_as === "daanbe") {
-                    document.getElementById("admin_link").style.display = "inline";
+                    document.getElementById("admin_link").style.display = "block";
                 }
             } else {
                 // Archive mode: skip login
