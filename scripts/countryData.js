@@ -44,7 +44,8 @@ const rename_map = {
     'Moka雨晞': 'MOKA',
     'diudiuhamburger': '丢丢hamburger',
     'Islamkit': 'IslamKitiev',
-    'thelegendary': 'thelegendary08'
+    'thelegendary': 'thelegendary08',
+    '黑暗报': '636'
 
 };
 
