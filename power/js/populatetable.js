@@ -9,6 +9,7 @@ let userFinalTierMap;
 let fmcPower;
 let simplifiedView = false;
 let trueView = false;
+let nerfSlidysim = false;
 let categoryOrder = [];
 let sortedPlayerRow = null;
 let sortColumn = null;
@@ -49,8 +50,85 @@ function resetSort() {
     sortColumn = null;
 }
 
+function getNerfIndices() {
+    var indices = [];
+    if (fmcPower) {
+        var keep = {"6x6 single":1,"7x7 single":1,"8x8 single":1,"9x9 single":1,"10x10 single":1};
+        for (var i = 0; i < categories.length; i++) {
+            if (!keep[categories[i]]) indices.push(i);
+        }
+    } else {
+        var remove = {"4x4 relay":1,"12x12 single":1,"16x16 single":1,"20x20 single":1};
+        for (var i = 0; i < categories.length; i++) {
+            if (remove[categories[i]]) indices.push(i);
+        }
+    }
+    return indices;
+}
+
+var funTiersOld = ['Gamma+', 'G++', "Egg"];
+
+function computeNerfedTier(user) {
+    var power = user[2];
+    var supposedIndex = 0;
+    for (var si = tiers.length - 1; si >= 0; si--) {
+        if (power >= tiers[si].limit) { supposedIndex = si; break; }
+    }
+    for (var si = supposedIndex; si >= 0; si--) {
+        for (var c = 0; c < num_categories; c++) {
+            var time = user[c + 3];
+            if (time === -1) continue;
+            var ti = result_tier(c, time);
+            if (ti >= si) {
+                return tiers[si].name;
+            }
+        }
+    }
+    return tiers[0].name;
+}
+
+function applyNerf(data) {
+    if (!nerfSlidysim) return data;
+    var indices = getNerfIndices();
+    if (indices.length === 0) return data;
+    var result = [];
+    for (var u = 0; u < data.length; u++) {
+        var user = data[u];
+        var copy = user.slice();
+        for (var n = 0; n < indices.length; n++) {
+            copy[indices[n] + 3] = -1;
+        }
+        var newPower = 0;
+        for (var c = 0; c < num_categories; c++) {
+            var time = copy[c + 3];
+            if (time == -1) continue;
+            var ti = result_tier(c, time);
+            if (ti >= 0 && ti < num_tiers) {
+                var ptier = tiers[ti];
+                var added = typeof ptier.power === 'number' ? ptier.power : 0;
+                if (oldTiers && funTiersOld.indexOf(ptier.name) >= 0) added = 10101;
+                if (fmcPower) added *= 2;
+                newPower += added;
+            }
+        }
+        copy[2] = newPower;
+        result.push(copy);
+    }
+    return result;
+}
+
 function hasScores(user) {
+    if (!nerfSlidysim) {
+        for (var c = 0; c < num_categories; c++) {
+            if (user[c + 3] != -1) return true;
+        }
+        return false;
+    }
+    var nerfSet = {};
+    var nIdx = getNerfIndices();
+    for (var ni = 0; ni < nIdx.length; ni++) nerfSet[nIdx[ni]] = 1;
     for (var c = 0; c < num_categories; c++) {
+        if (nerfSet[c]) continue;
         if (user[c + 3] != -1) return true;
     }
     return false;
@@ -147,7 +225,61 @@ function result_tier(category, time){
 
 
 function populate_table(table){
-    if (sortedPlayerRow && !table.includes(sortedPlayerRow)) resetSort();
+    if (nerfSlidysim) table = applyNerf(table);
+    if (sortedPlayerRow && !table.some(function(u){ return u[0] === sortedPlayerRow[0]; })) resetSort();
+
+    var savedTierMap;
+    if (nerfSlidysim) {
+        savedTierMap = {};
+        for (var _name in userFinalTierMap) savedTierMap[_name] = userFinalTierMap[_name];
+        for (var uu = 0; uu < table.length; uu++) {
+            var uuUser = table[uu];
+            if (uuUser) userFinalTierMap[uuUser[0]] = computeNerfedTier(uuUser);
+        }
+        if (oldTiers) {
+            var nerfIdxOld = getNerfIndices();
+            var nerfSetOld = {};
+            for (var ni = 0; ni < nerfIdxOld.length; ni++) nerfSetOld[nerfIdxOld[ni]] = 1;
+            var gammaIdx = 0;
+            for (var gi = 0; gi < tiers.length; gi++) {
+                if (tiers[gi].name === "Gamma") { gammaIdx = gi; break; }
+            }
+            for (var uu = 0; uu < table.length; uu++) {
+                var userPromo = table[uu];
+                if (!userPromo) continue;
+                var allGamma = true;
+                for (var c = 0; c < num_categories; c++) {
+                    if (nerfSetOld[c]) continue;
+                    var time = userPromo[c + 3];
+                    if (time == -1) { allGamma = false; break; }
+                    var ti = result_tier(c, time);
+                    if (ti < gammaIdx) { allGamma = false; break; }
+                }
+                if (allGamma) {
+                    userFinalTierMap[userPromo[0]] = "Gamma+";
+                }
+            }
+            for (var _gu = 0; _gu < table.length; _gu++) {
+                var _gUser = table[_gu];
+                if (_gUser && userFinalTierMap[_gUser[0]] === "Gamma+") {
+                    if (typeof PowerCalc !== "undefined") _gUser[2] = PowerCalc.getDynamicSum(_gUser.slice(3));
+                }
+            }
+        }
+        var tierIdxMap = {};
+        for (var ti = 0; ti < tiers.length; ti++) tierIdxMap[tiers[ti].name] = ti;
+        table.sort(function(a, b) {
+            var ta = userFinalTierMap[a[0]], tb = userFinalTierMap[b[0]];
+            var ia = tierIdxMap[ta] !== undefined ? tierIdxMap[ta] : 0;
+            var ib = tierIdxMap[tb] !== undefined ? tierIdxMap[tb] : 0;
+            if (ib !== ia) return ib - ia;
+            return b[2] - a[2];
+        });
+        for (var si = 0; si < table.length; si++) {
+            if (table[si]) table[si][1] = si + 1;
+        }
+    }
+
     var results_table = document.getElementById("results-table");
 
     // remove previous wrapper if it exists
@@ -202,17 +334,24 @@ function populate_table(table){
         }
         
     if (trueView) {
+        var nerfSetTrue = {};
+        if (nerfSlidysim) {
+            var nIdxT = getNerfIndices();
+            for (var ni = 0; ni < nIdxT.length; ni++) nerfSetTrue[nIdxT[ni]] = 1;
+        }
         var trueTierMap = [];
         for (var u = 0; u < table.length; u++) {
             const user = table[u];
             if (!user) { trueTierMap[u] = -1; continue; }
             var incomplete = false;
             for (var c = 0; c < num_categories; c++) {
+                if (nerfSetTrue[c]) continue;
                 if (user[c + 3] == -1) { incomplete = true; break; }
             }
             if (incomplete) { trueTierMap[u] = -1; continue; }
             var worst = num_tiers;
             for (var c = 0; c < num_categories; c++) {
+                if (nerfSetTrue[c]) continue;
                 const t = result_tier(c, user[c + 3]);
                 if (t < worst) worst = t;
             }
@@ -410,6 +549,10 @@ function populate_table(table){
         if (reqsChk) {
             reqsChk.checked = true;
         }
+        if (savedTierMap) {
+            for (var _n in savedTierMap) userFinalTierMap[_n] = savedTierMap[_n];
+            for (var _n in userFinalTierMap) { if (!(_n in savedTierMap)) delete userFinalTierMap[_n]; }
+        }
         return;
     }
 
@@ -440,6 +583,8 @@ function populate_table(table){
         // table of all results of users in this tier
         var tier_table = document.createElement("table");
         tier_table.id = tier_name + "-table";
+        tier_table.style.contentVisibility = "auto";
+        tier_table.style.containIntrinsicSize = "auto 200px";
         results_table.appendChild(tier_table);
 
         // set up the header rows
@@ -483,7 +628,7 @@ function populate_table(table){
 
         tier_req_row.children[0].innerHTML = displayName.replace(/ /g, '<br>');
         tier_req_row.children[0].style.minWidth = "132px";
-        tier_req_row.children[1].textContent = effectiveTier["power"];
+        tier_req_row.children[1].textContent = (nerfSlidysim && fmcPower && typeof effectiveTier["power"] === "number") ? effectiveTier["power"] * 2 : effectiveTier["power"];
         tier_req_row.children[2].textContent = effectiveTier["limit"];
         if (effectiveTier["limit"] == 9999999) {
             tier_req_row.children[2].textContent = "∞";
@@ -533,8 +678,10 @@ function populate_table(table){
                 }
             } else {
                 // if the user's power is too low, stop adding new rows
-                if(user[2] < effectiveTier["limit"] && effectiveTier["limit"]>1){ 
-                    break;
+                if(user[2] < effectiveTier["limit"] && effectiveTier["limit"]>1){
+                    if (!nerfSlidysim || userFinalTierMap[user[0]] != effectiveTier["name"]) {
+                        break;
+                    }
                 }
                 let tierMatch;
                 if (simplifiedView && isSubTierIII(tiers[i]["name"])) {
@@ -546,6 +693,7 @@ function populate_table(table){
                 if(tierMatch){
                     //don't add users if no scores for valid tier
                     if (effectiveTier["name"] != "Beginner") {
+                        if (nerfSlidysim) { next_user++; continue; }
                         break;
                     }
                     
@@ -592,6 +740,11 @@ function populate_table(table){
     // Collect True Unranked players (complete, not placed in any tier table)
     var trueUnranked = [];
     if (trueView) {
+      var nerfSetTU = {};
+      if (nerfSlidysim) {
+          var nIdxTU = getNerfIndices();
+          for (var ni = 0; ni < nIdxTU.length; ni++) nerfSetTU[nIdxTU[ni]] = 1;
+      }
       for (var u = 0; u < table.length; u++) {
         const user = table[u];
         if (!user) continue;
@@ -599,6 +752,7 @@ function populate_table(table){
         if (trueTierMap[u] >= 1) continue;
         var allScored = true;
         for (var c = 0; c < num_categories; c++) {
+          if (nerfSetTU[c]) continue;
           if (user[c + 3] == -1) { allScored = false; break; }
         }
         if (!allScored) continue;
@@ -703,6 +857,33 @@ function populate_table(table){
         }
         }
     }
+    if (nerfSlidysim) {
+        var nerfSet = {};
+        var nerfIdxs = getNerfIndices();
+        for (var ni = 0; ni < nerfIdxs.length; ni++) nerfSet[nerfIdxs[ni]] = 1;
+        var allTables = [];
+        var stickyWrap = results_table.previousElementSibling;
+        if (stickyWrap && stickyWrap.className === "results-table") {
+            var st = stickyWrap.querySelectorAll('table');
+            for (var si = 0; si < st.length; si++) allTables.push(st[si]);
+        }
+        var rt = results_table.querySelectorAll('table');
+        for (var ri = 0; ri < rt.length; ri++) allTables.push(rt[ri]);
+        for (var ti = 0; ti < allTables.length; ti++) {
+            var allRows = allTables[ti].querySelectorAll('tr');
+            for (var ri = 0; ri < allRows.length; ri++) {
+                var cells = allRows[ri].children;
+                for (var ci = 3; ci < cells.length; ci++) {
+                    var origIdx = catIdx(ci - 3);
+                    if (nerfSet[origIdx]) cells[ci].style.display = 'none';
+                }
+            }
+        }
+    }
+    if (savedTierMap) {
+        for (var _n in savedTierMap) userFinalTierMap[_n] = savedTierMap[_n];
+        for (var _n in userFinalTierMap) { if (!(_n in savedTierMap)) delete userFinalTierMap[_n]; }
+    }
 }
 
 export function show_results_from_date(){
@@ -719,7 +900,7 @@ export function show_results_from_date(){
     }
 }
 
-const SWITCH_IDS = ["switch-true", "switch-simplified", "switch", "switch-reqs", "switch-empty", "switch-cumulative", "switch-percent"];
+const SWITCH_IDS = ["switch-true", "switch-simplified", "switch", "switch-reqs", "switch-empty", "switch-cumulative", "switch-percent", "switch-nerf"];
 let _chartToggleState = false;
 
 function applySwitchStates(states) {
@@ -732,6 +913,8 @@ function applySwitchStates(states) {
     if (trueEl) trueView = trueEl.checked;
     var simEl = document.getElementById("switch-simplified");
     if (simEl) simplifiedView = simEl.checked;
+    var nerfEl = document.getElementById("switch-nerf");
+    if (nerfEl) nerfSlidysim = nerfEl.checked;
     var chartEl = document.getElementById("chart-container");
     if (chartEl && states["chart-toggle"] !== undefined) {
         chartEl.style.display = states["chart-toggle"] ? "block" : "none";
@@ -809,6 +992,10 @@ window.addEventListener('message', (event) => {
     }
     window.__tiers = tiers;
     window.__categories = categories;
+    window.__tiersOld = eventTiersOld;
+    window.__categoriesOld = eventCategoriesOld;
+    window.__tiersModern = eventTiers;
+    window.__categoriesNew = eventCategoriesNew;
     num_tiers = tiers.length;
     num_categories = categories.length;
 
@@ -861,6 +1048,17 @@ if (hideBtn) {
     hideBtn.addEventListener("change", () => {
         populate_table(powerData);
         document.dispatchEvent(new Event("table-repopulated"));
+    });
+}
+
+const nerfBtn = document.getElementById("switch-nerf");
+if (nerfBtn) {
+    nerfBtn.addEventListener("change", () => {
+        var savedCol = sortColumn;
+        var savedAsc = sortAsc;
+        if (savedCol !== null) resetSort();
+        nerfSlidysim = nerfBtn.checked;
+        renderSortedTableWithSavedStateReal(savedCol, savedAsc);
     });
 }
 
