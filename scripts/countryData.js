@@ -37,7 +37,7 @@ const rename_map = {
     'Zip': 'fuenfeck',
     'Dawidluna': 'Emi',
     'JZE_alt': 'JZE',
-    '旧人lzy': 'redaiyu',
+    'pluginl': 'redaiyu',
     'ap_guy': 'ap',
     'isaakquing_': 'quing',
     'TheLie谎言': 'dphdmn',
