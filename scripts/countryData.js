@@ -1129,7 +1129,10 @@ for (const username of Object.keys(userCountryMap)) {
         if (oldName.toLowerCase() === username.toLowerCase()) {
             const country = userCountryMap[username];
             delete userCountryMap[username];
-            userCountryMap[newName] = country;
+            // Only set the new name if it doesn't already exist (preserve original mapping)
+            if (!(newName in userCountryMap)) {
+                userCountryMap[newName] = country;
+            }
             break;
         }
     }

@@ -154,10 +154,16 @@ function getCountryScores() {
     let countryScores = []; // Final list of scores by country.
     let countryBestScores = {}; // Track the best score for each unique combination per country.
 
+    // Build case-insensitive country map once
+    let lowerCountries = {};
+    for (let key of Object.keys(countries)) {
+        lowerCountries[key.toLowerCase()] = countries[key];
+    }
+
     // Step 2: Iterate through each score in leaderboardData.
     for (let score of scores) {
-        // Step 3: Get the country of the player using nameFilter.
-        let country = countries[score.nameFilter];
+        // Step 3: Get the country of the player using nameFilter (case-insensitive).
+        let country = lowerCountries[score.nameFilter.toLowerCase()];
 
         // Step 4: Ignore scores for players that don't have an associated country.
         if (!country) continue;
