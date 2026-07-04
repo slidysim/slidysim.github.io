@@ -37,12 +37,14 @@ function handleScoresResponse(error, res, customScores, customUserList) {
         if (initial) {
             addListenersToElements();
         }
-        updateSuggestions();
         directUpdate();
         if (initial) {
             document.getElementById("controlsDiv").style.opacity = "1";
             customRanksCheck();
             initial = false;
+        }
+        if (typeof countrySelect !== 'undefined' && countrySelect && typeof rebuildCountryOptions === 'function') {
+            rebuildCountryOptions(countrySelect);
         }
     }
 }
@@ -269,7 +271,7 @@ function directUpdate() {
         header.innerHTML = '';
         NxNWRsContainer.innerHTML = "";
         solveTypeDiv.style.display = "none";
-        usernameInput.style.display = "none";
+
         radio_allGameModsLabel.style.display = 'none';
         radio_allGameModsLabelInteresting.style.display = 'none';
         radio_allGameModsLabelNMSingles.style.display = 'none';
@@ -298,7 +300,7 @@ function directUpdate() {
     NxNWRsContainer.innerHTML = "";
     tooltip.style.display = 'none';
     NxMSelected = totalWRsAmount;
-    usernameInput.style.display = 'none';
+
     radio_allGameModsLabel.style.display = 'none';
     radio_allGameModsLabelInteresting.style.display = 'none';
     radio_allGameModsLabelNMSingles.style.display = 'none';

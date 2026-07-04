@@ -18,89 +18,89 @@ function renamePlayerScores(oldNameFilter, newNameFilter) {
     });
 }
 
-function createCountrySelect() {
-    const container = document.createElement('div');
-    container.style.cssText = 'position:relative;display:inline-block;width:150px; padding-left: 5px;';
+function rebuildCountryOptions(container) {
+    const selected = container._selected;
+    const options = container._options;
 
-    const selected = document.createElement('div');
-    selected.style.cssText = 'padding:2px 5px;border:1px solid #444;cursor:pointer;background:#222;color:white;border-radius:3px;display:flex;align-items:center;gap:3px;font-size:12px;height:22px;';
+    options.innerHTML = '';
 
-    const options = document.createElement('div');
-    options.style.cssText = 'display:none;position:absolute;top:100%;left:0;right:0;background:#222;z-index:1000;max-height:150px;overflow-y:auto;border:1px solid #444;margin-top:1px;font-size:12px;scrollbar-width:thin;scrollbar-color:#888 #333;';
-
-    // Webkit scrollbar styles
-    const style = document.createElement('style');
-    style.textContent = `
-        .country-select-options::-webkit-scrollbar {
-            width: 8px;
-        }
-        .country-select-options::-webkit-scrollbar-track {
-            background: #333;
-        }
-        .country-select-options::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
-        }
-        .country-select-options::-webkit-scrollbar-thumb:hover {
-            background: #aaa;
-        }
-    `;
-    document.head.appendChild(style);
-    options.className = 'country-select-options';
-
-    let currentValue = 'worldwide';
     let countryCounts = getCountryPlayerCounts();
 
-    // Worldwide option
-    const worldOpt = document.createElement('div');
-    worldOpt.style.cssText = 'padding:2px 5px;cursor:pointer;display:flex;align-items:center;gap:3px;color:white;height:20px;';
-    worldOpt.innerHTML = `<img src="images/flags/default.png" style="width:16px;height:12px;margin:2px;"> Worldwide (${fullUniqueNames.length})`;
-    worldOpt.onmouseover = () => worldOpt.style.background = '#333';
-    worldOpt.onmouseout = () => worldOpt.style.background = 'none';
-    worldOpt.onclick = () => {
-        currentValue = 'worldwide';
-        selected.innerHTML = worldOpt.innerHTML;
-        options.style.display = 'none';
-        container.dispatchEvent(new Event('change'));
-    };
-    options.appendChild(worldOpt);
-
-    // Country Leaderboard option
-    const countryLbOpt = document.createElement('div');
-    countryLbOpt.style.cssText = 'padding:2px 5px;cursor:pointer;display:flex;align-items:center;gap:3px;color:white;height:20px;';
-    countryLbOpt.innerHTML = `<img src="images/flags/default.png" style="width:16px;height:12px;margin:2px;"> By Country`;
-    countryLbOpt.onmouseover = () => countryLbOpt.style.background = '#333';
-    countryLbOpt.onmouseout = () => countryLbOpt.style.background = 'none';
-    countryLbOpt.onclick = () => {
-        currentValue = 'country-leaderboard';
-        selected.innerHTML = countryLbOpt.innerHTML;
-        options.style.display = 'none';
-        container.dispatchEvent(new Event('change'));
-    };
-    options.appendChild(countryLbOpt);
-
-    // Country options
-    countryCounts.forEach(([country, count]) => {
-        const opt = document.createElement('div');
-        opt.style.cssText = 'padding:2px 5px;cursor:pointer;display:flex;align-items:center;gap:3px;color:white;height:20px;';
-        opt.innerHTML = `<img src="${countryEmojis?.[country] || 'images/flags/default.png'}" style="width:16px;height:12px;margin:2px;"> ${country} (${count})`;
-        opt.onmouseover = () => opt.style.background = '#333';
-        opt.onmouseout = () => opt.style.background = 'none';
-        opt.onclick = () => {
-            currentValue = country;
-            selected.innerHTML = opt.innerHTML;
+    function makeHandler(value, html) {
+        return function () {
+            container._currentValue = value;
+            container._selectedHtml = html;
+            selected.innerHTML = html;
             options.style.display = 'none';
             container.dispatchEvent(new Event('change'));
         };
+    }
+
+    // Worldwide
+    var worldOpt = document.createElement('div');
+    worldOpt.className = 'country-select-option';
+    worldOpt.setAttribute('data-value', 'worldwide');
+    var worldHtml = '<img src="images/flags/default.png" style="width:16px;height:12px;margin:2px;"><span class="country-select-text">Worldwide (' + (fullUniqueNames ? fullUniqueNames.length : 0) + ')</span>';
+    worldOpt.innerHTML = worldHtml;
+    worldOpt.onclick = makeHandler('worldwide', worldHtml);
+    options.appendChild(worldOpt);
+
+    // Country Leaderboard
+    var lbOpt = document.createElement('div');
+    lbOpt.className = 'country-select-option';
+    lbOpt.setAttribute('data-value', 'country-leaderboard');
+    var lbHtml = '<img src="images/flags/default.png" style="width:16px;height:12px;margin:2px;"><span class="country-select-text">By Country</span>';
+    lbOpt.innerHTML = lbHtml;
+    lbOpt.onclick = makeHandler('country-leaderboard', lbHtml);
+    options.appendChild(lbOpt);
+
+    // Country options
+    countryCounts.forEach(function (pair) {
+        var country = pair[0], count = pair[1];
+        var opt = document.createElement('div');
+        opt.className = 'country-select-option';
+        opt.setAttribute('data-value', country);
+        var html = '<img src="' + (countryEmojis?.[country] || 'images/flags/default.png') + '" style="width:16px;height:12px;margin:2px;"><span class="country-select-text">' + country + ' (' + count + ')</span>';
+        opt.innerHTML = html;
+        opt.onclick = makeHandler(country, html);
         options.appendChild(opt);
     });
 
-    selected.innerHTML = worldOpt.innerHTML;
-    selected.onclick = (e) => { e.stopPropagation(); options.style.display = options.style.display === 'none' ? 'block' : 'none'; };
-    options.onclick = (e) => e.stopPropagation();
-    document.addEventListener('click', () => options.style.display = 'none');
+    // Restore previous selection with updated count
+    var prevVal = container._currentValue;
+    var matched = options.querySelector('[data-value="' + prevVal + '"]');
+    if (matched) {
+        selected.innerHTML = matched.innerHTML;
+        container._selectedHtml = matched.innerHTML;
+    } else {
+        selected.innerHTML = worldHtml;
+        container._currentValue = 'worldwide';
+        container._selectedHtml = worldHtml;
+    }
+}
 
-    Object.defineProperty(container, 'value', { get: () => currentValue });
+function createCountrySelect() {
+    var container = document.createElement('div');
+    container.className = 'country-select-container';
+
+    var selected = document.createElement('div');
+    selected.className = 'country-select-selected';
+
+    var options = document.createElement('div');
+    options.className = 'country-select-options';
+
+    container._selected = selected;
+    container._options = options;
+    container._currentValue = 'worldwide';
+    container._selectedHtml = '';
+
+    rebuildCountryOptions(container);
+
+    selected.onclick = function (e) { e.stopPropagation(); options.style.display = options.style.display === 'none' ? 'block' : 'none'; var md = document.getElementById('menuDropdown'); if (md) md.hidden = true; };
+    options.onclick = function (e) { e.stopPropagation(); };
+    document.addEventListener('click', function () { options.style.display = 'none'; });
+
+    Object.defineProperty(container, 'value', { get: function () { return container._currentValue; } });
 
     container.appendChild(selected);
     container.appendChild(options);
@@ -135,15 +135,15 @@ function filterScoresByCountry(countryParam) {
 }
 
 function getCountryPlayerCounts() {
-    // Step 1: Create an object to store country counts.
-    let countryCounts = {};
+    var countryCounts = {};
+    var activeUsers = fullUniqueNames ? new Set(fullUniqueNames) : new Set();
 
-    // Step 2: Iterate through each entry in userCountryMap.
-    for (let [key, country] of Object.entries(userCountryMap)) {
-        // Step 3: Skip entries where the key equals the value (like "Norway": "Norway").
+    for (var key in userCountryMap) {
+        if (!Object.prototype.hasOwnProperty.call(userCountryMap, key)) continue;
+        var country = userCountryMap[key];
         if (key === country) continue;
+        if (!activeUsers.has(key)) continue;
 
-        // Step 4: Increment the count for this country.
         if (countryCounts[country]) {
             countryCounts[country]++;
         } else {
@@ -151,13 +151,14 @@ function getCountryPlayerCounts() {
         }
     }
 
-    // Step 5: Convert the object to an array of [country, count] pairs.
-    let countryArray = Object.entries(countryCounts);
+    var countryArray = [];
+    for (var c in countryCounts) {
+        if (Object.prototype.hasOwnProperty.call(countryCounts, c)) {
+            countryArray.push([c, countryCounts[c]]);
+        }
+    }
 
-    // Step 6: Sort the array by count in descending order (highest to lowest).
-    countryArray.sort((a, b) => b[1] - a[1]);
-
-    // Step 8: Return the sorted array.
+    countryArray.sort(function (a, b) { return b[1] - a[1]; });
     return countryArray;
 }
 
@@ -237,7 +238,7 @@ function processSquareRecordsData(cleanedData) {
     let sortedLists;
     let controlsFilteredLists;
     rankingTabs.style.display = "none";
-    usernameInput.style.display = "block";
+
     if (isAllMarathons) {
         organizedLists = organizeDataMarathons(cleanedData);
     } else {
@@ -279,7 +280,7 @@ function processNxMRecordsData(cleanedData) {
     let sortedLists;
     let controlsFilteredLists;
     rankingTabs.style.display = "none";
-    usernameInput.style.display = "block";
+
     
     // Analyze available avglens from the data
     const availableAvglens = analyzeAvailableAvglens(cleanedData);
@@ -409,7 +410,7 @@ function customRanksCheck() {
 function processHistoryData(cleanedData) {
     let organizedLists;
     let sortedLists;
-    usernameInput.style.display = "block";
+
     tierLimiterTab.style.display = "block";
     radio_allGameModsLabel.style.display = "block";
     radio_allGameModsLabelInteresting.style.display = "block";

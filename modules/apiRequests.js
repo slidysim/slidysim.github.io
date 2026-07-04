@@ -372,7 +372,7 @@ async function verifyLogin() {
 
                 userlinkel.addEventListener("click", function () {
                     try {
-                        usernameInput.value = logged_in_as;
+                        changeNameFilter(logged_in_as);
                         radioNxNWRs.checked = true;
                         changePuzzleSize("NxN WRs");
                         changeNameFilter(logged_in_as);

@@ -180,9 +180,6 @@ function createSheet(sortedLists, sheetType) {
             cell.classList.add("clickable");
             cell.addEventListener("click", function () {
                 let newSize = uniqueSizes[i];
-                customSizeInput.value = newSize;
-                radioCustomSize.value = newSize;
-                radioCustomSize.checked = true;
                 changePuzzleSize(newSize);
             });
         }
@@ -466,9 +463,6 @@ function createSheet(sortedLists, sheetType) {
             if (sheetType === squaresSheetType) {
                 headerElement.classList.add('clickable');
                 headerElement.addEventListener('click', function () {
-                    customSizeInput.value = itemKey;
-                    radioCustomSize.value = itemKey;
-                    radioCustomSize.checked = true;
                     changePuzzleSize(itemKey);
                 });
             }
@@ -1055,9 +1049,7 @@ function createSheetRankings(playerScores) {
                     let newSize = fakeScoreInfo.width + "x" + fakeScoreInfo.height;
                     let newGameMode = fakeScoreInfo.gameMode;
                     th.addEventListener("click", function () {
-                        customSizeInput.value = newSize;
-                        radioCustomSize.value = newSize;
-                        radioCustomSize.checked = true;
+                        changePuzzleSize(newSize);
                         for (const radio of gamemodeRadios) {
                             if (radio.value === newGameMode) {
                                 radio.checked = true;
@@ -2076,7 +2068,7 @@ function buildPageContent(config, request, wrTexts) {
         if (hasNameFilter) {
             return `PBs by <span id="nameSpanHeader" class="pinktext" style="font-weight: 900;"></span> on NxM sliding puzzles`;
         }
-        const parts = [`<span class="alpha" style="font-weight: 900;">${wrTexts.worldRecordsOnNMtext}</span> sliding puzzles`];
+        const parts = [`<span class="epsilon" style="font-weight: 900;">${wrTexts.worldRecordsOnNMtext}</span> sliding puzzles`];
         if (NxMSelected !== totalWRsAmount) {
             parts.push(`by <span class="pinktext">${NxMSelected}</span>`);
         }
@@ -2264,7 +2256,6 @@ function addNameFilterButton(container, name) {
     btn.textContent = name;
     btn.style.fontSize = "16px";
     btn.addEventListener('click', () => {
-        usernameInput.value = "";
         changeNameFilter("");
     });
     container.appendChild(btn);
@@ -2697,10 +2688,6 @@ function populateTableHistory(records, recordsListWR, scoreType, table, reverse)
             categoryCell.classList.add("clickable");
 
             categoryCell.addEventListener("click", function () {
-                customSizeInput.value = sizePart;
-                radioCustomSize.value = sizePart;
-                radioCustomSize.checked = true;
-
                 for (const radio of gamemodeRadios) {
                     if (radio.value === mode) {
                         radio.checked = true;
