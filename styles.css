@@ -1541,7 +1541,7 @@ iframe {
 }
 
 .historyRecordsTable td:first-child {
-min-width: 220px;
+    min-width: 150px;
     max-width: 150px;
 }
 
