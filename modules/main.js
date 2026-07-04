@@ -14,6 +14,7 @@ async function main(bypass = false) {
         try {
             await initArchive(archivePage);
             console.log(latestWebArchive);
+            console.log(latestLMArchive);
             if (archiveDate === "LIVE") {
                 // Normal live login check
                 await verifyLogin();

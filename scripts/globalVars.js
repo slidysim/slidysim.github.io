@@ -21,6 +21,7 @@ var debugMode = false;
 const youtubeLogoLink="images/youtube.ico";
 const youtubeElement = `<img class="emoji" src="${youtubeLogoLink}" alt="YouTube video available"></img>`
 const webElement = `<img class="emoji" src="images/web4.png" alt="Score from play.slidysim.com"></img>`
+const lmElement = `<img class="emoji" src="images/lm.webp?v=1" alt="Score from LM archive"></img>`
 const eggIcon = "images/eggIcon.ico";
 const eggElement = `<img class="emoji" src="${eggIcon}" alt="Repaly available"></img>`
 const redEggIcon = "images/redEgg.ico";
@@ -70,6 +71,7 @@ let last_pbType = -1;
 let replayStatus = "DEAD"; //replayStatus = "PLAYING"; "DEAD"; "PENDING"; "FINISHED"
 let countryRanksEnabled = false;
 let webLeaderboardEnabled = true;
+let lmLeaderboardEnabled = false;
 let updatedInitial = false;
 let n_m_size_limit = 0;
 let savedPlayerScores;
@@ -84,5 +86,6 @@ let currentCountry = "worldwide";
 let countrySelect;
 let lastLoadWasPower = true;
 let latestWebArchive;
+let latestLMArchive;
 let filteredSuggestions = [];
 let forceServerUpdate = false;

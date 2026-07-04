@@ -144,6 +144,8 @@ async function initArchive(isArchPage = true) {
         if (!isArchPage) {
             latestWebArchive = availableArchives.find(archive => archive.includes('web'));
             console.log('Latest web archive:', latestWebArchive);
+            latestLMArchive = availableArchives.find(archive => /^lm_/i.test(archive));
+            console.log('Latest LM archive:', latestLMArchive);
         } else {
             archiveDate = availableArchives[0];
             console.log('Latest archiveDate:', archiveDate);

@@ -42,3 +42,4 @@ const ytOnlyButton = document.getElementById("ytOnlyButton");
 const createCustomReplayButtonLink = document.getElementById("createCustomReplayButtonLink");
 const countriesCB = document.getElementById("countriesLeaderboard");
 const includeWebCB = document.getElementById("includeWeb");
+const includeLMCB = document.getElementById("includeLM");

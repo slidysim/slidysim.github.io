@@ -370,6 +370,9 @@ function createSheet(sortedLists, sheetType) {
             if (item.isWeb) {
                 scoreCellElement.firstChild.innerHTML = webElement + scoreCellElement.firstChild.textContent;
             }
+            if (item.isLM) {
+                scoreCellElement.firstChild.innerHTML = lmElement + scoreCellElement.firstChild.textContent;
+            }
             if (videolink) {
                 scoreCellElement.classList.add("clickable");
                 scoreCellElement.firstChild.innerHTML = youtubeElement + scoreCellElement.firstChild.textContent;
@@ -895,6 +898,9 @@ function createSheetNxM(WRList) {
                         if (result.isWeb) {
                             cell.firstChild.innerHTML = webElement + cell.firstChild.textContent;
                         }
+                        if (result.isLM) {
+                            cell.firstChild.innerHTML = lmElement + cell.firstChild.textContent;
+                        }
                         let makeyoutubelink = false;
                         if (videolink) {
                             cell.classList.add("clickable");
@@ -1145,6 +1151,9 @@ function createSheetRankings(playerScores) {
                                     let makeyoutubelink = false;
                                     if (item.isWeb) {
                                         scoreCell.firstChild.innerHTML = webElement + scoreCell.firstChild.textContent;
+                                    }
+                                    if (item.isLM) {
+                                        scoreCell.firstChild.innerHTML = lmElement + scoreCell.firstChild.textContent;
                                     }
                                     if (videolink) {
                                         scoreCell.classList.add("clickable");
@@ -2098,9 +2107,13 @@ function buildTimestampSection() {
     }
 
     const timeAgo = getTimeAgo(latestRecordTime);
-    const archiveSuffix = webLeaderboardEnabled && latestWebArchive
-        ? formatWebArchiveSuffix(latestWebArchive)
-        : '';
+    let archiveSuffix = '';
+    if (webLeaderboardEnabled && latestWebArchive) {
+        archiveSuffix += formatWebArchiveSuffix(latestWebArchive);
+    }
+    if (lmLeaderboardEnabled && latestLMArchive) {
+        archiveSuffix += formatLMArchiveSuffix(latestLMArchive);
+    }
 
     setupLiveUpdateTimer(archiveSuffix);
 
@@ -2167,6 +2180,11 @@ function buildRefreshButton() {
 function formatWebArchiveSuffix(archive) {
     const d = archive.replace('web_', '');
     return ` (including web data backup: ${d.substring(6, 8)}.${d.substring(4, 6)}.${d.substring(0, 4)})`;
+}
+
+function formatLMArchiveSuffix(archive) {
+    const d = archive.replace(/^LM_/i, '');
+    return ` (including LM data backup: ${d.substring(6, 8)}.${d.substring(4, 6)}.${d.substring(0, 4)})`;
 }
 
 function setupLiveUpdateTimer(suffix) {
@@ -2291,12 +2309,12 @@ function initArchiveDropdown(selector, usePower) {
 }
 
 function formatArchiveDisplay(archive) {
-    const match = archive.match(/(leaderboard_|exe_|web_)(\d{8})/);
+    const match = archive.match(/(leaderboard_|exe_|web_|LM_|lm_)(\d{8})/);
     if (!match) return archive;
 
-    const type = match[1].replace('_', '');
+    const type = match[1].replace('_', '').toLowerCase();
     const d = match[2];
-    const label = (type === 'leaderboard' || type === 'exe') ? '[exe]' : '[web]';
+    const label = (type === 'leaderboard' || type === 'exe') ? '[exe]' : (type === 'lm') ? '[LM]' : '[web]';
 
     return `${label} ${d.slice(6, 8)}.${d.slice(4, 6)}.${d.slice(0, 4)}`;
 }
@@ -2599,6 +2617,9 @@ function populateTableHistory(records, recordsListWR, scoreType, table, reverse)
                 let makeyoutubelink = false;
                 if (item.isWeb) {
                     scoreCell.firstChild.innerHTML = webElement + scoreCell.firstChild.textContent;
+                }
+                if (item.isLM) {
+                    scoreCell.firstChild.innerHTML = lmElement + scoreCell.firstChild.textContent;
                 }
                 const videolink = videoLinkCheck(item.videolink);
                 if (videolink) {

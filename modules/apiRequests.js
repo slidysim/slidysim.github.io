@@ -215,8 +215,8 @@ async function callGetScores(auth_token, display_type_text, control_type_text, p
             displayType: display_type_text,
             nameFilter: (() => {
                 const name = usermap[entry["userid"]] || entry["userid"] || 'Unknown';
-                for (const [newName, oldName] of Object.entries(rename_map)) {
-                    if (oldName === name) {
+                for (const [oldName, newName] of Object.entries(rename_map)) {
+                    if (oldName.toLowerCase() === name.toLowerCase()) {
                         return newName;
                     }
                 }
@@ -283,6 +283,17 @@ async function getScores(auth_token, display_type, control_type, pb_type) {
             }
             return map;
         }, {});
+
+        if (archiveDate.toLowerCase().startsWith('lm_')) {
+            Object.keys(usermap).forEach(id => {
+                const name = usermap[id];
+                const lastUnderscore = name.lastIndexOf('_');
+                if (lastUnderscore !== -1) {
+                    usermap[id] = name.substring(0, lastUnderscore);
+                }
+            });
+        }
+
         const userList = Object.values(usermap);
 
         const scoreFields = [

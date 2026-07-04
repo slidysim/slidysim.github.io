@@ -119,6 +119,33 @@ function mergeWebPBs(liveData, webData) {
     return Array.from(map.values());
 }
 
+function mergeLMPBs(existingData, lmData) {
+    if (!existingData || !lmData) return existingData || lmData || [];
+
+    existingData = deduplicatePlayerScores(existingData);
+    lmData = deduplicatePlayerScores(lmData);
+
+    if (!existingData.length) return lmData.map(s => ({ ...s, isLM: true }));
+    if (!lmData.length) return existingData;
+
+    const map = new Map();
+
+    existingData.forEach(s => {
+        map.set(getCategoryKey(s), { ...s });
+    });
+
+    lmData.forEach(lm => {
+        const key = getCategoryKey(lm);
+        const existing = map.get(key);
+
+        if (!existing || isBetter(lm, existing, lm.leaderboardType)) {
+            map.set(key, { ...lm, isLM: true });
+        }
+    });
+
+    return Array.from(map.values());
+}
+
 function updateServer(auth_token, displayType, controlType, pbType) {
     const loadingAnimation = document.getElementById("loadingAnimation");
     const contentDiv = document.getElementById("contentDiv");
@@ -126,34 +153,64 @@ function updateServer(auth_token, displayType, controlType, pbType) {
     loadAnimation(loadingAnimation, contentDiv);
     document.body.style.pointerEvents = 'none';
 
-    if (webLeaderboardEnabled && archiveDate === "LIVE") {
+    const hasExternal = (webLeaderboardEnabled && latestWebArchive) || (lmLeaderboardEnabled && latestLMArchive);
+
+    if (hasExternal && archiveDate === "LIVE") {
         archiveDate = "LIVE";
         getScoresWrapper(auth_token, displayType, controlType, pbType, (err, liveRes) => {
             if (err) {
                 console.log("Error when fetching live scores:", err);
                 return;
             }
-            archiveDate = latestWebArchive;
-            getScoresWrapper(auth_token, displayType, controlType, pbType, (webErr, webRes) => {
-                if (!webErr && webRes?.scoresParsed && liveRes?.scoresParsed) {
-                    const merged = mergeWebPBs(liveRes.scoresParsed, webRes.scoresParsed);
-                    const liveUsers = liveRes.userList || [];
-                    const webUsers = webRes.userList || [];
-                    const mergedUserList = [...new Set([...liveUsers, ...webUsers])].sort();
-                    archiveDate = "LIVE";
-                    handleScoresResponse(null, liveRes, merged, mergedUserList);
-                } else {
-                    console.log("Error when fetching or merging web scores:", {
-                        webErr: webErr,
-                        hasWebScores: !!webRes?.scoresParsed,
-                        hasLiveScores: !!liveRes?.scoresParsed
-                    });
-                    // Fall back to live only
-                    archiveDate = "LIVE";
-                    handleScoresResponse(null, liveRes);
+
+            let mergedScores = deduplicatePlayerScores(liveRes.scoresParsed) || [];
+            let mergedUserList = [...(liveRes.userList || [])];
+            let pending = 0;
+            let hasError = false;
+
+            function finalize() {
+                if (--pending > 0) return;
+                archiveDate = "LIVE";
+                if (hasError) {
+                    console.log("Error when fetching external scores, falling back to live only");
+                    handleScoresResponse(null, liveRes, mergedScores, mergedUserList);
                     return;
                 }
-            });
+                handleScoresResponse(null, liveRes, mergedScores, mergedUserList);
+            }
+
+            if (webLeaderboardEnabled && latestWebArchive) {
+                pending++;
+                archiveDate = latestWebArchive;
+                getScoresWrapper(auth_token, displayType, controlType, pbType, (webErr, webRes) => {
+                    if (!webErr && webRes?.scoresParsed) {
+                        mergedScores = mergeWebPBs(mergedScores, webRes.scoresParsed);
+                        mergedUserList = [...new Set([...mergedUserList, ...(webRes.userList || [])])].sort();
+                    } else {
+                        hasError = true;
+                    }
+                    finalize();
+                });
+            }
+
+            if (lmLeaderboardEnabled && latestLMArchive) {
+                pending++;
+                archiveDate = latestLMArchive;
+                getScoresWrapper(auth_token, displayType, controlType, pbType, (lmErr, lmRes) => {
+                    if (!lmErr && lmRes?.scoresParsed) {
+                        mergedScores = mergeLMPBs(mergedScores, lmRes.scoresParsed);
+                        mergedUserList = [...new Set([...mergedUserList, ...(lmRes.userList || [])])].sort();
+                    } else {
+                        hasError = true;
+                    }
+                    finalize();
+                });
+            }
+
+            if (pending === 0) {
+                archiveDate = "LIVE";
+                handleScoresResponse(null, liveRes, mergedScores, mergedUserList);
+            }
         });
     } else {
         getScoresWrapper(auth_token, displayType, controlType, pbType, handleScoresResponse);

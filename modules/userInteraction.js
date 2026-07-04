@@ -32,6 +32,12 @@ function toggleWebLeaderboard(){
     reload();
 }
 
+function toggleLMLeaderboard(){
+    lmLeaderboardEnabled = includeLMCB.checked;
+    forceServerUpdate = true;
+    reload();
+}
+
 //"Public" function to change control type
 function changeControls(newtype) {
     controlType = newtype;
@@ -156,13 +162,14 @@ function addListenersToElements() {
     enableDebugMode.style.display = webLeaderboardEnabled ? "none" : "inline-block";
     countriesCB.addEventListener("change", toggleCountryRanks);
     includeWebCB?.addEventListener("change", toggleWebLeaderboard);
+    includeLMCB?.addEventListener("change", toggleLMLeaderboard);
     addSuggestions();
     createCustomReplayButton.addEventListener("click", function () {
         makeReplay("", -1, 15000, 4, 4, "Custom");
     });
     enableDebugMode.addEventListener("click", function(){
-        if (webLeaderboardEnabled) {
-            alert("Video upload not supported for Web scores, sorry for inconvenience. Please disable web before uploading.");
+        if (webLeaderboardEnabled || lmLeaderboardEnabled) {
+            alert("Video upload not supported for Web or LM scores, sorry for inconvenience. Please disable external data before uploading.");
         } else {
             if (!debugMode){
                 if (logged_in_as !== "vovker" && logged_in_as !== "dphdmn"){
