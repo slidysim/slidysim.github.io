@@ -1069,10 +1069,8 @@ if (resultsTable) {
     });
 }
 
-document.querySelectorAll(".switch-div").forEach(sd => {
-    const label = sd.querySelector("label");
-    if (!label) return;
-    const tt = sd.getAttribute("data-tt");
+document.querySelectorAll(".custom-checkbox-countries[data-tt]").forEach(el => {
+    const tt = el.getAttribute("data-tt");
     if (!tt) return;
     const lines = tt.split("\n");
     const html = lines.map(l => {
@@ -1080,7 +1078,7 @@ document.querySelectorAll(".switch-div").forEach(sd => {
         if (idx === -1) return l;
         return "<span>" + l.substring(0, idx) + "</span>" + l.substring(idx);
     }).join("<br>");
-    label.addEventListener("mouseenter", function () {
+    el.addEventListener("mouseenter", function () {
         const tip = getTooltip();
         const rect = this.getBoundingClientRect();
         tip.innerHTML = html;
@@ -1096,7 +1094,7 @@ document.querySelectorAll(".switch-div").forEach(sd => {
         tip.style.left = left + "px";
         tip.style.top = top + "px";
     });
-    label.addEventListener("mouseleave", function () {
+    el.addEventListener("mouseleave", function () {
         getTooltip().style.display = "none";
     });
 });

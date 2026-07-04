@@ -823,4 +823,19 @@ let tierlist = [
     var panel = document.getElementById("chart-category-panel");
     panel.style.display = panel.style.display === "none" ? "block" : "none";
   });
+
+  var mobileSwitchBtn = document.getElementById("mobile-switch-btn");
+  var switchDropdown = document.getElementById("switch-dropdown");
+  if (mobileSwitchBtn && switchDropdown) {
+    mobileSwitchBtn.addEventListener("click", function(e) {
+      e.stopPropagation();
+      switchDropdown.classList.toggle("open");
+    });
+    document.addEventListener("click", function() {
+      switchDropdown.classList.remove("open");
+    });
+    switchDropdown.addEventListener("click", function(e) {
+      e.stopPropagation();
+    });
+  }
   

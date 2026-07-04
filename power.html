@@ -2,43 +2,38 @@
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <title>Slidysim Tier Ranks</title>
         <link rel="icon" type="image/png" href="images/egg.png">
-        <link rel="stylesheet" href="power/css/style.css?v=1.0.159">
+        <link rel="stylesheet" href="power/css/style.css?v=1.0.162">
     </head>
 
     <body>
         <div class="page-header">
             <button class="date-button" id="date-button">Power Rankings</button>
-            <div class="header-right">
-                <div class="switch-div" data-tt="Off: All players are shown&#10;On: Group players by their worst category tier">
-                    <span class="switch-label">True Tiers</span>
-                    <input type="checkbox" id="switch-true" title="Only players with all categories completed" style="display:none">
-                    <label for="switch-true"></label>
-                </div>
-                <div class="switch-div" data-tt="Off: All groups are shown&#10;On: Empty groups are hidden&#10;Do not use with category-specific graphs">
-                    <span class="switch-label">Hide Empty</span>
-                    <input type="checkbox" id="switch-empty" style="display:none">
-                    <label for="switch-empty"></label>
-                </div>
-                <div class="switch-div" data-tt="Off: All Requirements are shown&#10;On: Only Leaderboard is shown">
-                    <span class="switch-label">Hide Reqs</span>
-                    <input type="checkbox" id="switch-reqs" title="Only Leaderboard is shown" style="display:none">
-                    <label for="switch-reqs"></label>
-                </div>
-                <div class="switch-div" id="switch-div-simplified" style="display:none" data-tt="Off: All sub-tiers are shown separately&#10;On: Sub-tiers are grouped into a single tier">
-                    <span class="switch-label">Group Tiers</span>
-                    <input type="checkbox" id="switch-simplified" style="display:none" title="Simplified view - Grouping sub-tiers into a single one">
-                    <label for="switch-simplified"></label>
-                </div>
-                <div class="switch-div" data-tt="Off: All categories are included&#10;On: Categories that are impossible in LM are removed,&#10;excluded from true rank calculations,&#10;and FMC receives a 2x power bonus">
-                    <span class="switch-label">Nerf Slidysim</span>
-                    <input type="checkbox" id="switch-nerf" style="display:none">
-                    <label for="switch-nerf"></label>
-                </div>
-                <div class="switch-div" data-tt="Off: All colors are shown&#10;On: Only tier's color and above are shown">
-                    <span class="switch-label">Color Best</span>
-                    <input type="checkbox" id="switch" title="Only tier's color and above are shown" style="display:none">
-                    <label for="switch"></label>
-                </div>
+            <button id="mobile-switch-btn" class="mobile-switch-btn">☰</button>
+            <div id="switch-dropdown" class="header-right">
+                <label class="custom-checkbox-countries" data-tt="Off: All players are shown&#10;On: Group players by their worst category tier">
+                    <input type="checkbox" id="switch-true">
+                    <span class="checkbox-text">True Tiers</span>
+                </label>
+                <label class="custom-checkbox-countries" data-tt="Off: All groups are shown&#10;On: Empty groups are hidden&#10;Do not use with category-specific graphs">
+                    <input type="checkbox" id="switch-empty">
+                    <span class="checkbox-text">Hide Empty</span>
+                </label>
+                <label class="custom-checkbox-countries" data-tt="Off: All Requirements are shown&#10;On: Only Leaderboard is shown">
+                    <input type="checkbox" id="switch-reqs">
+                    <span class="checkbox-text">Hide Reqs</span>
+                </label>
+                <label class="custom-checkbox-countries" id="switch-div-simplified" style="display:none" data-tt="Off: All sub-tiers are shown separately&#10;On: Sub-tiers are grouped into a single tier">
+                    <input type="checkbox" id="switch-simplified">
+                    <span class="checkbox-text">Group Tiers</span>
+                </label>
+                <label class="custom-checkbox-countries" data-tt="Off: All categories are included&#10;On: Categories that are impossible in LM are removed,&#10;excluded from true rank calculations,&#10;and FMC receives a 2x power bonus">
+                    <input type="checkbox" id="switch-nerf">
+                    <span class="checkbox-text">Nerf Slidysim</span>
+                </label>
+                <label class="custom-checkbox-countries" data-tt="Off: All colors are shown&#10;On: Only tier's color and above are shown">
+                    <input type="checkbox" id="switch">
+                    <span class="checkbox-text">Color Best</span>
+                </label>
             </div>
         </div>
 
@@ -72,7 +67,7 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
         <script src="scripts/countryData.js"></script>
         <script src="power/js/dynamicPower.js?v=1.0.154"></script>
-        <script src="power/js/populatetable.js?v=1.0.299" type="module"></script>
-        <script defer="" src="power/js/switch.js?v=1.0.1006"></script>
+        <script src="power/js/populatetable.js?v=1.0.300" type="module"></script>
+        <script defer="" src="power/js/switch.js?v=1.0.1007"></script>
         
 </body></html>
