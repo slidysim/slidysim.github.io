@@ -159,6 +159,7 @@ function loadPower() {
     }
     const contentDiv = document.getElementById('contentDiv');
     contentDiv.innerHTML = '';
+    resetContentDivLayout(contentDiv);
     const iframe = document.createElement('iframe');
     iframe.id = "power-iframe";
     iframe.src = 'power.html';

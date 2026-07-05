@@ -7,6 +7,15 @@ replayGeneration.js
 userInteractions.js
 */
 
+function resetContentDivLayout(contentDiv) {
+    contentDiv.style.position = '';
+    contentDiv.style.paddingLeft = '';
+    contentDiv.style.paddingRight = '';
+    contentDiv.style.paddingTop = '';
+    contentDiv.style.minHeight = '0px';
+    contentDiv.style.overflowX = '';
+}
+
 function greekLetterSpan(tierName) {
     if (tierName === "Any" || tierName === "WRs only") {
         return tierName;
@@ -59,11 +68,7 @@ function createSheet(sortedLists, sheetType) {
     const contentDiv = document.getElementById("contentDiv");
     contentDiv.classList.remove("content");
     contentDiv.innerHTML = "";
-    contentDiv.style.position = '';
-    contentDiv.style.paddingLeft = '';
-    contentDiv.style.paddingRight = '';
-    contentDiv.style.paddingTop = '';
-    contentDiv.style.minHeight = '';
+    resetContentDivLayout(contentDiv);
     NxNWRsContainer.innerHTML = "";
     let tiersData;
     let tiersMap;
@@ -782,11 +787,7 @@ function createSheetNxM(WRList) {
     const contentDiv = document.getElementById("contentDiv");
     contentDiv.classList = "NxMContent";
     contentDiv.innerHTML = "";
-    contentDiv.style.position = '';
-    contentDiv.style.paddingLeft = '';
-    contentDiv.style.paddingRight = '';
-    contentDiv.style.paddingTop = '';
-    contentDiv.style.minHeight = '';
+    resetContentDivLayout(contentDiv);
     generateFormattedString(request);
     if (copyOfWRList.length === 0) {
         contentDiv.innerHTML = notFoundError;
@@ -1045,6 +1046,7 @@ function createSheetRankings(playerScores) {
     const contentDiv = document.getElementById("contentDiv");
     contentDiv.classList = "NxMContent";
     contentDiv.innerHTML = "";
+    resetContentDivLayout(contentDiv);
     contentDiv.style.overflowX = "auto"
     generateFormattedString(request);
     createHideEmptyCheckbox();

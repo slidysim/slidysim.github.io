@@ -285,6 +285,7 @@ function directUpdate() {
         contentDiv.className = "";
         contentDiv.style.opacity = "1";
         contentDiv.innerHTML = '';
+        resetContentDivLayout(contentDiv);
         const iframe = document.createElement('iframe');
         iframe.id = "wrhistory-iframe";
         iframe.src = 'https://dphdmn.github.io/slidyhistory/';
