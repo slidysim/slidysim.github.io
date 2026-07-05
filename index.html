@@ -29,6 +29,14 @@
     <link rel="icon" href="images/egg.png" type="image/png">
     <title>Open Slidysim</title>
     <style>
+        html,
+        body {
+            height: auto;
+            min-height: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
         body {
             background-color: black;
             color: #ffffffe6;
@@ -36,18 +44,19 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             user-select: none;
         }
 
         .container {
             max-width: 800px;
-            margin-top: 50px;
-            width: 100%;
+            margin: 50px auto;
+            width: calc(100% - 24px);
             background: rgba(0, 0, 0, 0.8);
             padding: 20px;
             border: 2px solid cyan;
             box-shadow: 0px 0px 20px cyan;
+            box-sizing: border-box;
         }
 
         h1,
@@ -97,6 +106,7 @@
             padding: 10px;
             font-family: 'Courier New', Courier, monospace;
             margin: 10px 0;
+            box-sizing: border-box;
         }
 
         .button {
@@ -157,15 +167,20 @@
         <p>Welcome to the the <strong>alternative</strong> Slidysim leaderboard for competitive 15-puzzle speedsliding!
         </p>
 
-        <p>Already registered? <a href="lb">Check the Leaderboard</a> to see your rank.</p>
-        <p>Don't want to register? <a href="archive">Check the Archived</a> leaderboard (no solve replays).</p>
+        <p><a href="lb">Live Leaderboard</a> and <a href="archive">Archive Leaderboard</a> can be viewed without
+            registration.</p>
 
         <p>New to Slidysim? It’s a 15-puzzle simulator.</p>
+        <p>Web players can make an account at <a href="https://play.slidysim.com/">official web Slidysim</a>. Your
+            web scores will be available through the web archive on both the live and archive pages.</p>
         <p><a href="https://www.mediafire.com/file/j2xj89gs3ghiojp/slidysim_v29.1-1.zip/file">Windows version Slidysim download</a></p>
         <p><a href="https://www.mediafire.com/file/1i4r6f6o0ll8ayc/slidysim_v29.1.zip/file">Linux version Slidysim download</a></p>
         <p><a href="https://github.com/dphdmn/openslidy/blob/main/SLIDYSIM_README.md">Slidysim README 2025 (!)</a></p>
 
-        <p>To submit records:<br>
+        <p>Token registration on this page is only needed for exe players who want to upload records with PBs
+            Manager.</p>
+
+        <p>To submit exe records:<br>
             1. Request a token by contacting <strong>dphdmn</strong> or <strong>vovker</strong> on Discord<br>
             2. Register here — your token will be linked to your username<br>
             3. Download the <a
@@ -185,39 +200,11 @@
             <div class="faq-item">
                 <h3>How do I see records?</h3>
                 <div class="faq-content">
-                    <div class="image-container">
-                        <img src="images/faq/better.png" alt="FAQ Image">
-                    </div>
-                    <p>Access the leaderboard by visiting <a href="lb">Open Leaderboard</a> and entering your username
-                        and password. Your login credentials will be saved locally in your browser for easier future
-                        access.</p>
+                    <p>Use the <a href="lb">Live Leaderboard</a> for current records and the <a href="archive">Archive
+                        Leaderboard</a> for archived records. Both pages are available without registration.</p>
 
-                    <p>Don't have an account? Create one! It's completely free.<br>
-                        - Now the <a href="archive">Archived</a> leaderboard is available without an account (but no solve replays).</p>
-                        Other alternative sources:<br>
-                        - Join <a href="https://discord.gg/7vXrWAS3yZ"><strong>Speedsliding Discord Server</strong></a>
-                        and use bot commands such as !getwr or !rank<br>
-                        - <a
-                            href="https://docs.google.com/spreadsheets/d/18bPh1NatNamQAHRtp05zXBVkjjo5_yTtPyPZ8uR7mYg/edit?gid=1070674467#gid=1070674467">Main
-                            Slidysim Sheet</a> (note: more old archives in "Useful Links" page)<br>
-                        - <a
-                            href="https://docs.google.com/spreadsheets/d/1miFV_yV1f1Ik1VZY-Aa-HDfwT0fuRSLON_5eAh34eoo/edit#gid=877040199">6x6
-                            - 10x10 Top 10 Leaderboard</a> (combined rankings with mobile)<br>
-                        - <a
-                            href="https://docs.google.com/spreadsheets/d/1hfKhUu10fQWMUaayHfJxNuQg5PfUJTWiddOlluqjqrg/edit?gid=1209149659#gid=1209149659">Slidysim
-                            Cool Solves</a> 4x4 - 10x10 best solves collection by 5 top players<br>
-                        - <a href="https://slidy-lb.neocities.org/">Older Power Website</a> (still auto-updating as of
-                        2025)<br>
-                        - <a href="https://dphdmn.github.io/slidyranksfork/">Power Website Mirror</a> (updated at least
-                        28.07.2025)<br>
-                        - <a
-                            href="https://docs.google.com/spreadsheets/d/1rLoXMkhsMpFkSICEEaRK07D8xwjC-f41tPEqHT4TN8c/edit?gid=1209638339#gid=1209638339">WR
-                            History Sheet for many categories</a> (actively updated as of 2025)<br>
-                        - <a href="https://drive.google.com/file/d/14c4i48S-ndPhgk7mRZrWALRiAOzFuBII/view">Power
-                            Rankings backup</a> (Screenshot as of 24.06.2025)<br>
-                        - <a href="https://dphdmn.github.io/betterLeaderboard/">Leaderboard archive as of 2024.10.01</a>
-                        (outdated version of this website)<br></p>
-                    </p>
+                    <p>Web Slidysim scores from <a href="https://play.slidysim.com/">play.slidysim.com</a> are
+                        available through the web archive views on both pages.</p>
                 </div>
             </div>
             <div class="faq-item">
@@ -226,15 +213,21 @@
                     <p>Optional extras to enhance your Slidysim experience:</p>
 
                     - <a href="https://github.com/dphdmn/slidysimSessionTracker/releases/download/v2.0.0/SSTv2.0.0.7z"><strong>Slidysim Session Tracker</strong></a><br>
-                    Track your Slidysim session in real time, search for older solves, and share movetime-accurate
-                    replays of pretty much everything you want.
+                    For exe users: track your Slidysim session in real time, search for older solves, and share
+                    movetime-accurate replays of pretty much everything you want.
                     It also can export and analyze your stats.<br>
                     More info: <a href="https://github.com/dphdmn/slidysimSessionTracker/blob/main/README.md">SST
                         README</a><br><br>
 
                     - <a href="https://github.com/dphdmn/dphbot"><strong>DPH bot</strong></a><br>
-                    A Discord bot for working with your SlidySim database as an alternative to SST.
-                    It can be a bit difficult to set up, but once configured, you can fetch your replays with a single slash command, along with other features like playtime stats, PBs, and more. <br><br>                        
+                    For exe users, this can work with your SlidySim database as an alternative to SST. Anyone in our
+                    Discord server can also use the bot commands available there.<br><br>
+
+                    - <a href="https://github.com/dphdmn/slidyreplay"><strong>SlidyReplay video generator</strong></a><br>
+                    Generate replay videos from Slidysim replay data.<br><br>
+
+                    - <a href="https://greasyfork.org/en/scripts/575619-slidysim-ui-customization"><strong>Slidysim UI Customization</strong></a><br>
+                    Especially useful for web Slidysim users. Adds customization options for the official web client.<br><br>
 
                     - <a href="https://github.com/dphdmn/dphbot/releases/tag/1.0.0"><strong>Slidysim Links Fix</strong></a><br>
                     Chrome Extension to fix the issue with replay links.
@@ -262,22 +255,27 @@
             <div class="faq-item">
                 <h3>What is this?</h3>
                 <div class="faq-content">
-                    <p>This is a fully independent sliding puzzle leaderboard based on Slidysim version 29.1, the
-                        sliding puzzle simulator. It operates separately from the original Slidysim leaderboard, which
-                        is no longer active.</p>
+                    <p>This is a fully independent sliding puzzle leaderboard for competitive Slidysim players. It
+                        supports exe uploads through PBs Manager and web Slidysim scores through the web archive views.</p>
                 </div>
             </div>
             <div class="faq-item">
                 <h3>How do I get access?</h3>
                 <div class="faq-content">
-                    <p>Request a registration token by contacting <strong>dphdmn</strong> or <strong>vovker</strong> via
-                        Discord, or <strong>dphdmn</strong> through Telegram. (You can also use <a
+                    <p>You do not need an account to view the live or archive leaderboard pages.</p>
+
+                    <p>Web players should make an account at <a href="https://play.slidysim.com/">official web
+                        Slidysim</a>. Web scores are available through the web archive on this site.</p>
+
+                    <p>Exe players who want to upload records with PBs Manager need a registration token. Request one
+                        by contacting <strong>dphdmn</strong> or <strong>vovker</strong> via Discord, or
+                        <strong>dphdmn</strong> through Telegram. (You can also use <a
                             href="https://forms.gle/B1FFwCovtt3B3mmf7">Google Form</a>).</p>
 
                     <p>Token registration helps prevent impersonation, multi-accounting, and duplicated results.</p>
 
-                    <p>Register your account using the form on this page with your unique token. The token is linked to
-                        your username.</p>
+                    <p>Exe players can register with the form on this page using a unique token. The token is linked to
+                        your username for PBs Manager uploads.</p>
 
                     <p>Still confused? Join our <a href="https://discord.gg/7vXrWAS3yZ">Discord Server</a>.</p>
                 </div>
@@ -318,6 +316,9 @@
                         the player he had conflict with, but we believe it is unjustified. Our goal is to keep the
                         Slidysim rankings open for everyone, providing a reliable and independent alternative to the
                         original leaderboard.</p>
+
+                    <p>This section stays here for historical context. Despite those old issues, the website now fully
+                        supports both exe and web Slidysim platforms.</p>
                 </div>
             </div>
             <div class="faq-item">
@@ -349,7 +350,9 @@
         </div>
 
         <div class="section">
-            <h2>Registration Form</h2>
+            <h2>Exe Registration Form</h2>
+            <p>This form is only for exe players using PBs Manager. Web players should use an account from
+                <a href="https://play.slidysim.com/">official web Slidysim</a>.</p>
             <form id="registration-form">
                 <div class="details">
                     <label for="token">Registration Token</label>
