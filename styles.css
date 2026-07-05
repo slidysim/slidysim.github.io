@@ -338,20 +338,6 @@ table.rankingCells td {
     box-sizing: content-box;
 }
 
-.WRstable {
-    border-collapse: collapse;
-    margin: 0 auto;
-    background-color: #222;
-    color: #fff;
-}
-/* Responsive table for mobile */
-@media (max-width: 1200px) {
-    .WRstable {
-        display: block;
-        overflow-x: auto;
-    }
-}
-
 .WRPB,
 .WRPB td {
     background-color: #00f1ff17;
@@ -363,13 +349,6 @@ table.rankingCells td {
 
 #pbTypeSelect {
     color: #ff2262;
-}
-
-.WRstable th,
-.WRstable td {
-    min-width: 90px !important;
-    padding: 10px !important;
-    border: 1px solid #555;
 }
 
 .shadowFun {

@@ -59,6 +59,11 @@ function createSheet(sortedLists, sheetType) {
     const contentDiv = document.getElementById("contentDiv");
     contentDiv.classList.remove("content");
     contentDiv.innerHTML = "";
+    contentDiv.style.position = '';
+    contentDiv.style.paddingLeft = '';
+    contentDiv.style.paddingRight = '';
+    contentDiv.style.paddingTop = '';
+    contentDiv.style.minHeight = '';
     NxNWRsContainer.innerHTML = "";
     let tiersData;
     let tiersMap;
@@ -73,7 +78,25 @@ function createSheet(sortedLists, sheetType) {
     if (sheetType === squaresSheetType) {
         tiersData = calculateNxMTiers(combinedList);
         if (noNameFilter) {
-            createScoresAmountTable(NxNWRsContainer, tiersData);
+            const totalCount = tiersData.scoresCount.length > 0 ? tiersData.scoresCount[0][1] : 0;
+            if (totalCount > 0) {
+                contentDiv.style.position = 'relative';
+                createScoresAmountTable(contentDiv, tiersData);
+                const wrs = contentDiv.lastChild;
+                const wrsWidth = wrs.offsetWidth;
+                if (wrsWidth > 0) {
+                    wrs.style.position = 'absolute';
+                    wrs.style.left = '0';
+                    wrs.style.top = '0';
+                    wrs.style.width = wrsWidth + 'px';
+                    const wrsTop = wrs.offsetTop;
+                    const wrsHeight = wrs.offsetHeight;
+                    const pad = (wrsWidth + 15) + 'px';
+                    contentDiv.style.paddingLeft = pad;
+                    contentDiv.style.paddingRight = pad;
+                    contentDiv.style.minHeight = (wrsTop + wrsHeight + 15) + 'px';
+                }
+            }
         }
         tiersMap = tiersData.tiersMap;
     }
@@ -759,24 +782,46 @@ function createSheetNxM(WRList) {
     const contentDiv = document.getElementById("contentDiv");
     contentDiv.classList = "NxMContent";
     contentDiv.innerHTML = "";
+    contentDiv.style.position = '';
+    contentDiv.style.paddingLeft = '';
+    contentDiv.style.paddingRight = '';
+    contentDiv.style.paddingTop = '';
+    contentDiv.style.minHeight = '';
     generateFormattedString(request);
     if (copyOfWRList.length === 0) {
         contentDiv.innerHTML = notFoundError;
         return;
     }
     tiersData = calculateNxMTiers(NxMRecords, true);
-    if (request.nameFilter === "") {
-        createScoresAmountTable(contentDiv, tiersData);
-    }
     tiersMap = tiersData.tiersMap;
-    const tableContainer = document.createElement('div');
-    tableContainer.classList.add('table-container');
-    tableContainer.classList.add("bigContainer");
     contentDiv.appendChild(createNMSlider());
-    // Add avglen selector if there are multiple avglen options
     if (NxMAvglenOptions.length > 1) {
         contentDiv.appendChild(createNxMAvglenSelector());
     }
+    if (request.nameFilter === "") {
+        const totalCount = tiersData.scoresCount.length > 0 ? tiersData.scoresCount[0][1] : 0;
+        if (totalCount > 0) {
+            contentDiv.style.position = 'relative';
+            createScoresAmountTable(contentDiv, tiersData);
+            const wrs = contentDiv.lastChild;
+            const wrsWidth = wrs.offsetWidth;
+            if (wrsWidth > 0) {
+                wrs.style.position = 'absolute';
+                wrs.style.left = '0';
+                wrs.style.marginTop = '20px';
+                wrs.style.width = wrsWidth + 'px';
+                const wrsTop = wrs.offsetTop;
+                const wrsHeight = wrs.offsetHeight;
+                const pad = (wrsWidth + 15) + 'px';
+                contentDiv.style.paddingLeft = pad;
+                contentDiv.style.paddingRight = pad;
+                contentDiv.style.minHeight = (wrsTop + wrsHeight + 15) + 'px';
+            }
+        }
+    }
+    const tableContainer = document.createElement('div');
+    tableContainer.classList.add('table-container');
+    tableContainer.classList.add("bigContainer");
     contentDiv.appendChild(tableContainer);
     const table = document.createElement('table');
     tableContainer.appendChild(table);
@@ -1696,62 +1741,48 @@ function createScoresAmountTable(tableContainer, amountTiersInfo) {
         }
         updateSelectSizes();
     }
-    function transposeData(data) {
-        return data[0].map((_, colIndex) => data.map(row => row[colIndex]));
-    }
     const container = document.createElement('div');
-    container.style.width = '100%';
-    container.style.margin = '10px auto';
-    const transposedData = transposeData(amountTiersInfo.scoresCount);
+    container.style.display = 'inline-block';
     const table = document.createElement('table');
-    table.classList.add("WRstable");
-    table.classList.add("rankingCells");
-    const headerRow = table.insertRow(0);
-    headerRow.style.backgroundColor = "#f2f2f2";
-    headerRow.classList.add("clickable");
-    for (let i = 0; i < transposedData[0].length; i++) {
-        const headerCell = headerRow.insertCell(i);
-        headerCell.innerHTML = transposedData[0][i];
-        headerCell.style.fontSize = "13px";
-        headerCell.style.fontWeight = "bold";
+    table.style.borderCollapse = 'collapse';
+    table.style.color = '#ccc';
+    table.style.fontSize = '13px';
+    table.style.fontFamily = 'Arial';
+    for (let i = 0; i < amountTiersInfo.scoresCount.length; i++) {
+        const [name, count] = amountTiersInfo.scoresCount[i];
+        const row = table.insertRow(-1);
+        row.style.cursor = 'pointer';
+        const nameCell = row.insertCell(0);
+        nameCell.textContent = name;
+        nameCell.style.borderBottom = '1px solid #333';
+        nameCell.style.padding = '3px 10px';
+        nameCell.style.whiteSpace = 'nowrap';
+        const countCell = row.insertCell(1);
+        countCell.textContent = count;
+        countCell.style.borderBottom = '1px solid #333';
+        countCell.style.padding = '3px 10px';
+        countCell.style.whiteSpace = 'nowrap';
+        if (name !== totalWRsAmount) {
+            const tier = amountTiersInfo.tiersMap[name] || 'kappa';
+            nameCell.classList.add(tier);
+        }
+        if (NxMSelected === name) {
+            row.style.backgroundColor = "#222";
+        }
+        row.addEventListener('click', () => {
+            selectRecordsFilter(name);
+        });
+        row.addEventListener('mouseenter', () => {
+            row.style.backgroundColor = 'rgba(255,255,255,0.05)';
+        });
+        row.addEventListener('mouseleave', () => {
+            row.style.backgroundColor = NxMSelected === name ? '#222' : '';
+        });
     }
-    for (let i = 1; i < transposedData.length; i++) {
-        const row = table.insertRow(i);
-        row.classList.add("clickable");
-        for (let j = 0; j < transposedData[i].length; j++) {
-            const cell = row.insertCell(j);
-            cell.style.fontSize = "20px";
-            const columnName = transposedData[0][j];
-            const cellValue = transposedData[i][j];
-            cell.innerHTML = cellValue;
-            cell.classList.add(amountTiersInfo.tiersMap[columnName]);
-            headerRow.cells[j].classList.add(amountTiersInfo.tiersMap[columnName]);
-            if (NxMSelected === columnName) {
-                cell.style.backgroundColor = "#222";
-                headerRow.cells[j].style.backgroundColor = "#222";
-            }
-            cell.addEventListener('click', () => {
-                selectRecordsFilter(columnName);
-            });
-            headerRow.cells[j].addEventListener('click', () => {
-                selectRecordsFilter(columnName);
-            });
-            cell.addEventListener('mouseover', () => {
-                cell.classList.add("highlightedCell");
-                headerRow.cells[j].classList.add("highlightedCell");
-            });
-            headerRow.cells[j].addEventListener('mouseover', () => {
-                cell.classList.add("highlightedCell");
-                headerRow.cells[j].classList.add("highlightedCell");
-            });
-            cell.addEventListener('mouseout', () => {
-                cell.classList.remove("highlightedCell");
-                headerRow.cells[j].classList.remove("highlightedCell");
-            });
-            headerRow.addEventListener('mouseout', () => {
-                cell.classList.remove("highlightedCell");
-                headerRow.cells[j].classList.remove("highlightedCell");
-            });
+    if (table.rows.length > 0) {
+        const lastCells = table.rows[table.rows.length - 1].cells;
+        for (let i = 0; i < lastCells.length; i++) {
+            lastCells[i].style.borderBottom = 'none';
         }
     }
     container.appendChild(table);
