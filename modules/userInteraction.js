@@ -531,29 +531,20 @@ function setupSearch() {
         closeSearch();
         if (r.action === 'size') {
             var radio = document.querySelector('input[name="puzzleSize"][value="' + r.value.replace(/"/g, '\\"') + '"]');
-            if (r.value === 'POWER' || r.value === 'POWEROLD' || r.value === 'POWERFMC') {
-                if (radio) {
-                    radio.checked = true;
-                    // Trigger the change event manually
-                    radio.dispatchEvent(new Event('change'));
-                }
-                return;
+            if (radio) {
+                radio.checked = true;
+                radio.dispatchEvent(new Event('change'));
+            } else {
+                document.querySelectorAll('input[name="puzzleSize"]').forEach(function (el) { el.checked = false; });
+                changePuzzleSize(r.value);
             }
-            if (r.value === 'WRHistory') {
-                if (radio) {
-                    radio.checked = true;
-                    // Trigger the change event manually
-                    radio.dispatchEvent(new Event('change'));
-                }
-                return;
-            }
-            changePuzzleSize(r.value);
-            if (radio) { radio.checked = true; }
-            else { document.querySelectorAll('input[name="puzzleSize"]').forEach(function (el) { el.checked = false; }); }
         } else if (r.action === 'name') {
             if (isOnSpecificSizePage()) {
                 var wrRadio = document.querySelector('input[name="puzzleSize"][value="NxN WRs"]');
-                if (wrRadio) wrRadio.checked = true;
+                if (wrRadio) {
+                    wrRadio.checked = true;
+                    wrRadio.dispatchEvent(new Event('change'));
+                }
             }
             changeNameFilter(r.value);
         } else if (r.action === 'gameMode') {
