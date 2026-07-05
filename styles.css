@@ -334,7 +334,7 @@ table.rankingCells td {
     border-radius: 6px;
     padding: 5px;
     font-size: 13px;
-    box-shadow: 0 0 3px currentColor;
+    box-shadow: 0 0 1px #fff;
     box-sizing: content-box;
 }
 
@@ -358,7 +358,7 @@ table.rankingCells td {
 }
 
 .WRPB td {
-    box-shadow:  0 2px cyan !important;
+    box-shadow: 0 1px 0 cyan;
 }
 
 #pbTypeSelect {
@@ -369,11 +369,11 @@ table.rankingCells td {
 .WRstable td {
     min-width: 90px !important;
     padding: 10px !important;
-    border: 2px solid #555;
+    border: 1px solid #555;
 }
 
 .shadowFun {
-    box-shadow: 0 0 2px currentColor;
+    box-shadow: 0 0 1px #fff;
     height: 50px;
 }
 
@@ -1061,8 +1061,7 @@ img {
 }
 
 .normalCardTable {
-    border-collapse: separate;
-    border-spacing: 0 7px;
+    border-collapse: collapse;
     max-width: 320px;
 }
 
@@ -1101,8 +1100,7 @@ img {
 
 .left-column-table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 7px;
+    border-collapse: collapse;
     vertical-align: top;
 }
 
@@ -1121,9 +1119,9 @@ img {
     display: table-cell;
     width: 55px;
     word-wrap: break-word;
-    border: 1px solid #333;
     line-height: 1;
     box-sizing: border-box;
+    border-bottom: 1px solid #555;
 }
 
 .left-header-row {
@@ -1142,10 +1140,10 @@ img {
     padding: 8px;
     height: 50px;
     display: table-cell;
-    border: 1px solid #333;
     line-height: 1;
     font-weight: normal;
     box-sizing: border-box;
+    border-bottom: 1px solid #555;
 }
 
 #tierSlider {
