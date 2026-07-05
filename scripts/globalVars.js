@@ -90,3 +90,34 @@ let latestWebArchive;
 let latestLMArchive;
 let filteredSuggestions = [];
 let forceServerUpdate = false;
+
+// ---------- Archive date slider state ----------
+// The slider replaces the old standalone archive page. It lives inside lb.html
+// and lets the user time-travel through any Exe / Web / LM archive.
+//
+//   archiveSliderVisible  — whether the slider bar is currently shown.
+//   archiveMode           — "live" (main Exe data fetched from server) or
+//                           "archive" (main Exe data fetched from an Exe archive
+//                           whose date is the closest-older match to the slider).
+//   selectedSliderDate    — unix-ms timestamp picked by the user, or null = live.
+//   selectedArchiveDates  — per-type archive name actually used for the last
+//                           fetch (e.g. { exe:"leaderboard_20200702",
+//                           web:"web_20200701", lm:null }). null/missing = N/A.
+//   availableExeArchives / availableWebArchives / availableLMArchives
+//                         — `availableArchives` split by type (sorted desc by date).
+//   sliderDates           — sorted (asc) list of unique unix-ms timestamps that
+//                           exist in any currently-enabled archive type. This is
+//                           what the slider snaps to.
+let archiveSliderVisible = false;
+let archiveMode = "live"; // "live" | "archive"
+let selectedSliderDate = null; // null = live
+let selectedArchiveDates = { exe: null, web: null, lm: null };
+let availableExeArchives = [];
+let availableWebArchives = [];
+let availableLMArchives = [];
+let sliderDates = []; // [{ts: ms, archives: {exe?, web?, lm?}}, ...] ascending
+let sliderReady = false; // whether archiveSlider.js has been initialised
+// Per-type "did we actually get data for the last fetch?" flags. Used by the
+// status line so it can show "exe N/A" when a live fetch failed (server down)
+// or when an archive couldn't be loaded, rather than falsely showing "exe live".
+let lastFetchOk = { exe: false, web: false, lm: false };

@@ -157,70 +157,161 @@ function updateServer(auth_token, displayType, controlType, pbType) {
     loadAnimation(loadingAnimation, contentDiv);
     document.body.style.pointerEvents = 'none';
 
-    // If not on LIVE (archive page), do a simple archive fetch
-    if (archiveDate !== "LIVE") {
-        getScoresWrapper(auth_token, displayType, controlType, pbType, handleScoresResponse);
-        return;
+    // ---- Decide which source(s) to fetch, per current slider state ----
+    //
+    // Two top-level modes:
+    //   archiveMode === "live"
+    //     Exe: fetched live from the server (archiveDate = "LIVE").
+    //     Web: closest-older web archive to "now" (= latest web archive).
+    //     LM:  closest-older lm archive to "now" (= latest lm archive).
+    //   archiveMode === "archive"
+    //     Exe: closest-older exe archive to selectedSliderDate (or skip if none).
+    //     Web: closest-older web archive to selectedSliderDate (or skip if none).
+    //     LM:  closest-older lm archive to selectedSliderDate (or skip if none).
+    //
+    // For each enabled type, if no archive ≤ the target date exists, that
+    // type is dropped from the merge and the source-status line shows "N/A".
+
+    const isExeToggleOn = exeLeaderboardEnabled;
+    const isWebToggleOn = webLeaderboardEnabled;
+    const isLMToggleOn = lmLeaderboardEnabled;
+
+    // The target timestamp for the "closest-older" lookup. In live mode we use
+    // +Infinity so the closest-older archive is simply the newest available
+    // (matches the old latestWebArchive / latestLMArchive behaviour).
+    const targetTs = (archiveMode === 'archive' && selectedSliderDate != null)
+        ? selectedSliderDate
+        : Number.POSITIVE_INFINITY;
+
+    let exeArchive = null; // null means "use live server" (only valid in live mode)
+    let webArchive = null; // null means "not fetched"
+    let lmArchive  = null;
+
+    if (isExeToggleOn) {
+        if (archiveMode === 'live') {
+            exeArchive = null; // live server
+        } else {
+            exeArchive = findClosestOlderArchive(availableExeArchives, targetTs);
+        }
+    }
+    if (isWebToggleOn) {
+        webArchive = findClosestOlderArchive(availableWebArchives, targetTs);
+    }
+    if (isLMToggleOn) {
+        lmArchive = findClosestOlderArchive(availableLMArchives, targetTs);
     }
 
-    const isExeOn = exeLeaderboardEnabled;
-    const isWebOn = webLeaderboardEnabled && latestWebArchive;
-    const isLMOn = lmLeaderboardEnabled && latestLMArchive;
-    const hasAnySource = isExeOn || isWebOn || isLMOn;
+    // Record what we're going to fetch (for the source-status line + messages).
+    selectedArchiveDates = {
+        exe: exeArchive,
+        web: webArchive,
+        lm:  lmArchive,
+    };
+
+    const hasAnySource =
+        (isExeToggleOn && (archiveMode === 'live' || exeArchive)) ||
+        (isWebToggleOn && webArchive) ||
+        (isLMToggleOn && lmArchive);
 
     if (!hasAnySource) {
+        // Nothing to fetch — show empty leaderboard.
+        lastFetchOk = { exe: false, web: false, lm: false };
+        if (typeof refreshSourceStatus === 'function') {
+            refreshSourceStatus({
+                exe: isExeToggleOn ? { live: archiveMode === 'live', archive: exeArchive, ok: false } : null,
+                web: isWebToggleOn ? { archive: webArchive, ok: false } : null,
+                lm:  isLMToggleOn  ? { archive: lmArchive,  ok: false } : null,
+            });
+        }
         handleScoresResponse(null, { scoresParsed: [], userList: [] }, [], []);
         return;
     }
 
     let pending = 0;
-    let liveData = null;
-    let liveUserList = [];
-    let webData = null;
-    let webUserList = [];
-    let lmData = null;
-    let lmUserList = [];
+    let exeData = null;     let exeUserList = [];
+    let webData = null;     let webUserList = [];
+    let lmData = null;      let lmUserList = [];
 
     function finalize() {
         if (--pending > 0) return;
 
+        // Track which types actually yielded data, for the status line.
+        lastFetchOk = {
+            exe: !!(isExeToggleOn && (archiveMode === 'live' || exeArchive) && exeData),
+            web: !!(isWebToggleOn && webArchive && webData),
+            lm:  !!(isLMToggleOn && lmArchive && lmData),
+        };
+
         let mergedScores = [];
         let mergedUserList = [];
 
-        if (isExeOn && liveData) {
-            mergedScores = deduplicatePlayerScores(liveData) || [];
-            mergedUserList = [...liveUserList];
+        // Merge order: exe first (it's the "main" source), then web, then lm.
+        // The merge* helpers already dedupe + pick the better score per
+        // (category + player), and tag entries with isWeb / isLM so the
+        // leaderboard can show the source icon next to each score.
+        if (lastFetchOk.exe) {
+            mergedScores = deduplicatePlayerScores(exeData) || [];
+            mergedUserList = [...exeUserList];
         }
 
-        if (isWebOn && webData) {
+        if (lastFetchOk.web) {
             mergedScores = mergeWebPBs(mergedScores, webData);
             mergedUserList = [...new Set([...mergedUserList, ...webUserList])].sort();
         }
 
-        if (isLMOn && lmData) {
+        if (lastFetchOk.lm) {
             mergedScores = mergeLMPBs(mergedScores, lmData);
             mergedUserList = [...new Set([...mergedUserList, ...lmUserList])].sort();
         }
 
-        archiveDate = "LIVE";
-        handleScoresResponse(null, liveData ? { scoresParsed: liveData, userList: liveUserList } : { scoresParsed: [], userList: [] }, mergedScores, mergedUserList);
+        // Restore archiveDate to a sensible global value. The per-fetch value
+        // was captured inside getScores() at call time, so mutating it here is
+        // safe. In live mode we set "LIVE" so buildTimestampSection renders the
+        // "Last leaderboard update: X ago" timer; in archive mode we set the
+        // exe archive name (or the web/lm fallback) so the legacy
+        // buildTimestampSection branch can still format something.
+        if (archiveMode === 'live') {
+            archiveDate = "LIVE";
+        } else {
+            archiveDate = exeArchive || webArchive || lmArchive || "LIVE";
+        }
+
+        // Update the slider's source-status line.
+        if (typeof refreshSourceStatus === 'function') {
+            refreshSourceStatus({
+                exe: isExeToggleOn ? { live: archiveMode === 'live' && !exeArchive, archive: exeArchive, ok: lastFetchOk.exe } : null,
+                web: isWebToggleOn ? { archive: webArchive, ok: lastFetchOk.web } : null,
+                lm:  isLMToggleOn  ? { archive: lmArchive,  ok: lastFetchOk.lm }  : null,
+            });
+        }
+
+        // handleScoresResponse expects the "primary" res (used for userList
+        // fallback). We pass the exe data as primary when available, else an
+        // empty stub. The merged scores are passed via customScores.
+        const primaryRes = exeData
+            ? { scoresParsed: exeData, userList: exeUserList }
+            : { scoresParsed: [], userList: [] };
+        handleScoresResponse(null, primaryRes, mergedScores, mergedUserList);
     }
 
-    if (isExeOn) {
+    // Exe fetch (live server OR exe archive).
+    if (isExeToggleOn && (archiveMode === 'live' || exeArchive)) {
         pending++;
-        archiveDate = "LIVE";
+        const savedArchiveDate = archiveMode === 'live' ? "LIVE" : exeArchive;
+        archiveDate = savedArchiveDate;
         getScoresWrapper(auth_token, displayType, controlType, pbType, (err, res) => {
             if (!err && res?.scoresParsed) {
-                liveData = res.scoresParsed;
-                liveUserList = res.userList || [];
+                exeData = res.scoresParsed;
+                exeUserList = res.userList || [];
             }
             finalize();
         });
     }
 
-    if (isWebOn) {
+    // Web fetch (always an archive — there's no live web source).
+    if (isWebToggleOn && webArchive) {
         pending++;
-        archiveDate = latestWebArchive;
+        archiveDate = webArchive;
         getScoresWrapper(auth_token, displayType, controlType, pbType, (webErr, webRes) => {
             if (!webErr && webRes?.scoresParsed) {
                 webData = webRes.scoresParsed;
@@ -230,9 +321,10 @@ function updateServer(auth_token, displayType, controlType, pbType) {
         });
     }
 
-    if (isLMOn) {
+    // LM fetch (always an archive).
+    if (isLMToggleOn && lmArchive) {
         pending++;
-        archiveDate = latestLMArchive;
+        archiveDate = lmArchive;
         getScoresWrapper(auth_token, displayType, controlType, pbType, (lmErr, lmRes) => {
             if (!lmErr && lmRes?.scoresParsed) {
                 lmData = lmRes.scoresParsed;

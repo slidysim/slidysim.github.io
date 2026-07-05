@@ -46,3 +46,17 @@ const createCustomReplayButtonLink = document.getElementById("createCustomReplay
 const includeWebCB = document.getElementById("includeWeb");
 const includeExeCB = document.getElementById("includeExe");
 const includeLMCB = document.getElementById("includeLM");
+
+// Archive date slider elements
+const archiveDateBtn = document.getElementById("archiveDateBtn");
+const archiveSliderBar = document.getElementById("archiveSliderBar");
+const archiveSlider = document.getElementById("archiveSlider");
+const archiveSliderLabelBlock = document.getElementById("asLabelBlock");
+const archiveSliderDateSelect = document.getElementById("archiveDateSelect");
+const archiveSliderTicks = document.getElementById("asTicks");
+const archiveSliderLiveBtn = document.getElementById("asLiveBtn");
+const archiveSliderStatusExe = document.getElementById("asStatusExe");
+const archiveSliderStatusWeb = document.getElementById("asStatusWeb");
+const archiveSliderStatusLm = document.getElementById("asStatusLm");
+const archiveSliderSourceStatus = document.getElementById("asSourceStatus");
+const archivePreloadBtn = document.getElementById("asPreloadBtn");

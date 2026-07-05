@@ -15,20 +15,27 @@ async function main(bypass = false) {
             await initArchive(archivePage);
             console.log(latestWebArchive);
             console.log(latestLMArchive);
-            if (archiveDate === "LIVE") {
-                // Normal live login check
-                await verifyLogin();
 
-                // Show admin link for specific users
-                if (logged_in_as === "vovker" || logged_in_as === "dphdmn" || logged_in_as === "daanbe") {
-                    document.getElementById("admin_link").style.display = "block";
-                }
-            } else {
-                // Archive mode: skip login
-                user_token = "notoken";
-                logged_in_as = "Archive Enjoyer";
-                document.getElementById("user_logged_in").textContent = "Archive";
-                console.log("Running in archive mode as", logged_in_as);
+            // The standalone archive page is gone; we always run in "live" LB
+            // mode and let the user opt into archive time-travel via the date
+            // slider. archiveDate starts at "LIVE".
+            archiveDate = "LIVE";
+            archiveMode = "live";
+
+            // Wire up the archive date slider (nav button + slider bar). This
+            // also rebuilds the slider's date list from the freshly-loaded
+            // archive lists. Safe to call even if DOM isn't ready yet because
+            // archiveSlider.js checks element existence.
+            if (typeof ensureArchiveSliderReady === 'function') {
+                ensureArchiveSliderReady();
+            }
+
+            // Normal live login check
+            await verifyLogin();
+
+            // Show admin link for specific users
+            if (logged_in_as === "vovker" || logged_in_as === "dphdmn" || logged_in_as === "daanbe") {
+                document.getElementById("admin_link").style.display = "block";
             }
 
             console.log("Updating server (initial)");

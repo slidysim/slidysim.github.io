@@ -431,18 +431,17 @@ function updateSizeTabs() {
     }
     available -= (fixedWidth - (fixedCount - 1));
 
-    var TAB_W = 54;
     var tabData = [];
     tabs.forEach(function (t) {
         tabData.push({
             el: t,
             value: t.querySelector('input').value,
             label: t.querySelector('label').textContent.trim(),
-            width: TAB_W
+            width: Math.ceil(t.getBoundingClientRect().width || 48)
         });
     });
 
-    var totalW = tabData.length * TAB_W;
+    var totalW = tabData.reduce(function (sum, item) { return sum + item.width; }, 0);
     var numTabs = tabData.length;
     if (totalW <= available + 4) {
         // All fit — show everything
