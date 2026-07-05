@@ -1045,6 +1045,7 @@ img {
 
 .normalCardTable {
     border-collapse: collapse;
+    min-width: 200px;
     max-width: 320px;
 }
 
@@ -1625,6 +1626,7 @@ img {
 
 @media (max-width: 1000px) {
     #views-wrapper, .header-right { display: none; }
+    .left-column-container { position: static; }
     .search-overlay { padding: 0; align-items: stretch; }
     .search-panel { width: 100%; max-width: none; border-radius: 0; border: none; display: flex; flex-direction: column; }
     .search-input-wrap { padding: 16px; }
