@@ -40,6 +40,8 @@ function handleScoresResponse(error, res, customScores, customUserList) {
         directUpdate();
         if (initial) {
             document.getElementById("controlsDiv").style.opacity = "1";
+            document.querySelector('.page-header').style.opacity = '1';
+            document.querySelector('.page-footer').style.opacity = '1';
             customRanksCheck();
             initial = false;
         }

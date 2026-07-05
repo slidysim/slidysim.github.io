@@ -16,6 +16,7 @@ body {
     min-height: 0;
 }
 
+
 .header {
     background-color: #333;
     color: #fff;
@@ -1473,6 +1474,7 @@ img {
   width: 100%;
   flex-shrink: 0;
   z-index: 1000;
+  transition: opacity 0.3s;
 }
 .page-header-inner {
   display: flex;
@@ -1482,6 +1484,31 @@ img {
   padding: 0 10px;
   box-sizing: border-box;
   flex-wrap: wrap;
+}
+.page-footer {
+  background: #1a1a1a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px 0;
+  width: 100%;
+  flex-shrink: 0;
+  min-height: 44px;
+  box-sizing: border-box;
+  transition: opacity 0.3s;
+}
+.page-footer-inner {
+  text-align: center;
+  font-size: 12px;
+  color: #aaa;
+  padding: 0 10px;
+}
+.page-footer-inner a {
+  color: #fff;
+  text-decoration: none;
+}
+.page-footer-inner a:hover {
+  text-decoration: underline;
 }
 .header-right {
   display: inline-flex;
