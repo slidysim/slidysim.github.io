@@ -392,20 +392,14 @@ async function verifyLogin() {
                 return;
             } else {
                 console.log("Unexpected server response.");
-                if (confirm("Server might be temporarily unavailable. Open the archive page instead? If not, page will simply reload. Check our Discord for updates.")) {
-                    window.location.href = '/archive';
-                    return;
-                } else {
+                if (confirm("Server might be temporarily unavailable. Reload the page, or click Cancel and use the date slider (the 'Live' button in the nav) to browse archived leaderboards without the live server. Check our Discord for updates.")) {
                     window.location.reload();
                     return;
                 }
             }
         } catch (error) {
             console.log("Server unreachable:", error);
-            if (confirm("Server might be temporarily unavailable. Open the archive page instead? If not, page will simply reload. Check our Discord for updates.")) {
-                window.location.href = '/archive';
-                return;
-            } else {
+            if (confirm("Server might be temporarily unavailable. Reload the page, or click Cancel and use the date slider (the 'Live' button in the nav) to browse archived leaderboards without the live server. Check our Discord for updates.")) {
                 window.location.reload();
                 return;
             }
@@ -451,10 +445,24 @@ async function loginAsGuest() {
             alert("Too many requests. Please wait 5 seconds before trying again.");
             await new Promise(resolve => setTimeout(resolve, 5000));
             window.location.reload();
+        } else {
+            // Server responded but not OK — don't reload loop. Let the page
+            // load so the user can use the archive date slider to browse
+            // archived leaderboards without the live server.
+            console.log("Guest login failed (status " + response.status + "), continuing without live auth.");
+            user_token = "";
+            logged_in_as = "Offline";
+            const userlinkel = document.getElementById("user_logged_in");
+            if (userlinkel) userlinkel.textContent = "Offline";
         }
     } catch (error) {
-        console.log("Guest login failed:", error);
-        window.location.reload();
+        // Server unreachable — don't reload loop. Let the page load so the
+        // user can use the archive date slider.
+        console.log("Guest login failed (server unreachable):", error);
+        user_token = "";
+        logged_in_as = "Offline";
+        const userlinkel = document.getElementById("user_logged_in");
+        if (userlinkel) userlinkel.textContent = "Offline";
     }
 }
 

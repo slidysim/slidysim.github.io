@@ -2145,24 +2145,69 @@ function buildControlsRow(displaySelect, controlSelect) {
 }
 
 function buildTimestampSection() {
-    if (archiveDate !== "LIVE") {
-        const lp = loadingPower;
-        setTimeout(() => initArchiveDropdown(".leaderboardUpdateSpan", lp), 0);
-        return '<span class="leaderboardUpdateSpan">Archive from </span>';
+    // The standalone archive page is gone. The date slider (toggled by the
+    // nav date button) now handles archive selection. This function renders
+    // a SHORT combined status line that summarises which sources are merged
+    // for the current view — much shorter than the old
+    // "(including web data backup: DD.MM.YYYY) (including LM data backup: DD.MM.YYYY)".
+    //
+    //   Live mode:    "Last update: X ago · exe live · web DD.MM.YYYY · lm DD.MM.YYYY"
+    //   Archive mode: "Archives: exe DD.MM.YYYY · web DD.MM.YYYY · lm DD.MM.YYYY"
+    // (each type only shown if its toggle is on; "N/A" shown if no archive
+    //  exists for that type at the selected date.)
+
+    if (archiveMode === 'archive' || (archiveMode !== 'live' && archiveDate !== 'LIVE')) {
+        const parts = buildArchiveStatusParts();
+        setupLiveUpdateTimer('');
+        return `<span class="leaderboardUpdateSpan">Archives: ${parts.join(' · ')}</span>`;
     }
 
     const timeAgo = getTimeAgo(latestRecordTime);
-    let archiveSuffix = '';
-    if (webLeaderboardEnabled && latestWebArchive) {
-        archiveSuffix += formatWebArchiveSuffix(latestWebArchive);
-    }
-    if (lmLeaderboardEnabled && latestLMArchive) {
-        archiveSuffix += formatLMArchiveSuffix(latestLMArchive);
-    }
+    const parts = buildArchiveStatusParts();
+    const suffix = parts.length ? ' · ' + parts.join(' · ') : '';
+    setupLiveUpdateTimer(suffix);
 
-    setupLiveUpdateTimer(archiveSuffix);
+    return `<span class="leaderboardUpdateSpan">Last leaderboard update: <span style="color: #ffffff">${timeAgo}</span>${suffix}</span>`;
+}
 
-    return `<span class="leaderboardUpdateSpan">Last leaderboard update: <span style="color: #ffffff">${timeAgo}</span>${archiveSuffix}</span>`;
+// Build the per-type status segments used by both buildTimestampSection and
+// the slider's source-status line. Returns an array of HTML strings, one per
+// enabled type, in exe → web → lm order. Types whose toggle is off are
+// omitted entirely (cleaner than showing "off"). Types whose toggle is on but
+// have no available archive at the selected date (or whose live fetch failed)
+// show "N/A".
+function buildArchiveStatusParts() {
+    const parts = [];
+    if (exeLeaderboardEnabled) {
+        if (archiveMode === 'live' && (!selectedArchiveDates || !selectedArchiveDates.exe)) {
+            // Live exe mode. Only show "live" if the fetch actually succeeded;
+            // if the server was down, show N/A instead.
+            if (lastFetchOk && lastFetchOk.exe) {
+                parts.push('<span style="color:#44dd44">exe live</span>');
+            } else {
+                parts.push('<span style="color:#ff6666">exe N/A</span>');
+            }
+        } else if (selectedArchiveDates && selectedArchiveDates.exe) {
+            parts.push('<span style="color:#00ffff">exe ' + archiveNameToDotted(selectedArchiveDates.exe) + '</span>');
+        } else {
+            parts.push('<span style="color:#ff6666">exe N/A</span>');
+        }
+    }
+    if (webLeaderboardEnabled) {
+        if (selectedArchiveDates && selectedArchiveDates.web && lastFetchOk && lastFetchOk.web) {
+            parts.push('<span style="color:#00ffff">web ' + archiveNameToDotted(selectedArchiveDates.web) + '</span>');
+        } else {
+            parts.push('<span style="color:#ff6666">web N/A</span>');
+        }
+    }
+    if (lmLeaderboardEnabled) {
+        if (selectedArchiveDates && selectedArchiveDates.lm && lastFetchOk && lastFetchOk.lm) {
+            parts.push('<span style="color:#00ffff">lm ' + archiveNameToDotted(selectedArchiveDates.lm) + '</span>');
+        } else {
+            parts.push('<span style="color:#ff6666">lm N/A</span>');
+        }
+    }
+    return parts;
 }
 
 function generateAllSelects(width) {
@@ -2234,6 +2279,13 @@ function formatLMArchiveSuffix(archive) {
 
 function setupLiveUpdateTimer(suffix) {
     clearInterval(window.leaderboardInterval);
+    // In archive mode there's no live "last update" to track — the snapshot
+    // date is fixed. Don't start the interval so we don't overwrite the
+    // "Archives: ..." message after 10 seconds.
+    if (archiveMode === 'archive') {
+        window.leaderboardInterval = null;
+        return;
+    }
     window.leaderboardInterval = setInterval(() => {
         const span = document.querySelector(".leaderboardUpdateSpan");
         if (span) {

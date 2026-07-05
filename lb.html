@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="images/egg.png" type="image/png">
-  <title>Open Slidysim Leaderboard v6.7.5</title>
+  <title>Open Slidysim Leaderboard v6.8.0</title>
   
 </head>
 
@@ -21,7 +21,6 @@
         <button id="menuButton" class="menu-btn">☰</button>
         <div id="menuDropdown" class="menu-dropdown" hidden>
           <a class="menu-cyan" href="/">Registration Page</a>
-          <a class="menu-cyan" href="/archive">Archive Page</a>
           <a class="menu-cyan" href="/replay">Replay Page</a>
           <a class="menu-cyan" href="admin" id="admin_link" style="display:none">Admin Page</a>
           <a class="menu-cyan" href="#" id="video_menu_link" style="display:none">Video Upload</a>
@@ -43,6 +42,7 @@
         <label class="custom-checkbox-countries"><input type="checkbox" id="includeWeb" checked/><span class="checkbox-text">Web</span></label>
         <label class="custom-checkbox-countries"><input type="checkbox" id="includeLM" /><span class="checkbox-text">LM</span></label>
       </div>
+      <button id="archiveDateBtn" class="archive-date-btn" type="button" title="Toggle archive slider visibility (click again to hide)" aria-pressed="false">Live</button>
     </div>
       <button id="searchTrigger" class="search-nav-btn" title="Search (Ctrl+K)" aria-label="Search">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -177,6 +177,36 @@
       </div>
     </div>
   </div>
+  </div>
+
+  <!-- Archive date slider: full-width bar below the header. Hidden by default,
+       toggled by the "Live" / date button in the nav. Lets the user time-travel
+       through any Exe / Web / LM archive. Dragging snaps to dates that actually
+       exist in any of the currently-enabled archive types. -->
+  <div class="archive-slider-bar" id="archiveSliderBar" hidden>
+    <div class="archive-slider-inner">
+      <button id="asPreloadBtn" class="as-preload-btn" title="Preload all archives (except today/yesterday)" type="button">Preload</button>
+      <div class="as-status-column" id="asStatusColumn">
+        <div class="as-status-item" id="asStatusExe"></div>
+        <div class="as-status-item" id="asStatusWeb"></div>
+        <div class="as-status-item" id="asStatusLm"></div>
+      </div>
+      <div class="as-label-block" id="asLabelBlock">
+        <svg class="as-clock-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 7v5l3 3" />
+        </svg>
+        <span class="as-date-select-wrap">
+          <select id="archiveDateSelect" class="as-date-select" aria-label="Select archive date"></select>
+        </span>
+      </div>
+      <div class="as-slider-wrap">
+        <input type="range" id="archiveSlider" class="as-slider" min="0" max="1" step="1" value="1" aria-label="Archive date slider">
+        <div class="as-ticks" id="asTicks" aria-hidden="true"></div>
+      </div>
+      <button class="as-live-btn" id="asLiveBtn" title="Return to live (current Exe data)" type="button">Live</button>
+      <div class="as-source-status" id="asSourceStatus" aria-live="polite"></div>
+    </div>
   </div>
   <div id="siteContent">
   <div id="mainContent">
@@ -327,6 +357,7 @@
   <script src="scripts/globalVars.js"></script>
   <script src="scripts/dropreplay.js"></script>
   <script src="scripts/archiveloader.js"></script>
+  <script src="scripts/archiveSlider.js"></script>
   <script src="modules/apiRequests.js"></script>
 
   <script src="modules/gridsAnalysis.js"></script>

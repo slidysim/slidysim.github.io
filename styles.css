@@ -803,7 +803,7 @@ body::-webkit-scrollbar-corner,
 input[type="range"] {
     -webkit-appearance: none;
     appearance: none;
-    width: 70%;
+    width: 100%;
     height: 10px;
     background-color: #555;
     border: none;
@@ -811,6 +811,9 @@ input[type="range"] {
     outline: none;
     opacity: 0.7;
     transition: opacity 0.2s;
+}
+.as-slider {
+    width: 100%;
 }
 
 input[type="range"]::-webkit-slider-thumb {
@@ -1407,7 +1410,11 @@ img {
     justify-content: center;
 }
 #nav-group > * {
-    display: flex; align-items: center; box-sizing: border-box; height: 34px;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    min-height: 34px;
+    height: auto;
 }
 #nav-group #logged_in_container { font-size: 12px; color: #ccc; padding: 0 8px; background: none; border: 1px solid transparent; box-shadow: none; gap: 3px; }
 #nav-group #logged_in_container a { text-shadow: none !important; }
@@ -1420,7 +1427,7 @@ img {
 #nav-group .custom-checkbox-countries input[type="checkbox"]:checked + .checkbox-text { background: #00ffff; color: #000; }
 #nav-group .custom-checkbox-countries input[type="checkbox"]:not(:checked) + .checkbox-text:hover { background: rgba(0,255,255,0.15); color: #00ffff; }
 .search-nav-btn {
-    background: none; border: none; color: #ccc; cursor: pointer; padding: 0 8px; margin: 0; font-family: inherit; font-size: inherit; height: 100%; display: flex; align-items: center; gap: 3px; transition: background-color 0.3s, color 0.3s; white-space: nowrap;
+    background: none; border: none; color: #ccc; cursor: pointer; padding: 0 8px; margin: 0; font-family: inherit; font-size: inherit; min-height: 34px; display: flex; align-items: center; gap: 3px; transition: background-color 0.3s, color 0.3s; white-space: nowrap;
 }
 .nav-left .search-nav-btn { margin-left: 6px; }
 .search-nav-btn:hover { background: white; color: black; }
@@ -1472,7 +1479,7 @@ img {
 .page-header-inner {
   display: flex;
   justify-content: space-between;
-  align-items: stretch;
+  align-items: center;
   width: 100%;
   padding: 0 10px;
   box-sizing: border-box;
@@ -1524,8 +1531,8 @@ img {
   transition: background-color 0.3s, color 0.3s;
   display: inline-block;
   cursor: pointer;
-  padding: 0 10px;
-  line-height: 32px;
+  padding: 0 8px;
+  line-height: 30px;
   border: 1px solid #007385;
   user-select: none;
   border-radius: 0;
@@ -1539,19 +1546,35 @@ img {
 }
 /* Size inline tabs */
 .size-tabs-wrapper {
-  display: none;
+  display: inline-flex;
+  align-items: stretch;
+  font-size: 0;
 }
 .size-tabs-wrapper .form_radio_btn input[type=radio]:checked + label {
   background: #00ffff;
   color: black;
 }
 .size-tabs-wrapper .form_radio_btn {
-  width: 54px;
+  display: inline-flex;
+  margin: 0;
+  font-size: 11px;
 }
 .size-tabs-wrapper .form_radio_btn label {
-  width: 100%;
+  width: auto;
   box-sizing: border-box;
   text-align: center;
+  font-size: 11px;
+  padding: 0 8px;
+  line-height: 30px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.size-tabs-wrapper .form_radio_btn + .form_radio_btn {
+  margin-left: -1px;
+}
+.size-tabs-wrapper .form_radio_btn + .form_radio_btn label {
+  border-left: none;
 }
 /* Sizes overflow select */
 .sizes-overflow .tab-select {
@@ -1742,3 +1765,437 @@ iframe {
 .score-secondary {
     font-size: 11px;
 }
+
+/* ============================================================
+ * Archive date slider ("time travel" through Exe/Web/LM archives)
+ * Full-width bar directly under the page header. Hidden by default;
+ * toggled by the "Live" / date button in the nav group. Lets the
+ * user scrub the leaderboard to any past date that exists in any
+ * archive. Neon-on-dark styling matching the rest of openslidy.
+ * ============================================================ */
+
+/* Date button in the nav (next to Exe/Web/LM toggles).
+ * Styled to match the cyan checkbox-toggles, but as a single button
+ * whose label changes between "Live" and the currently-selected date. */
+#nav-group .archive-date-btn {
+    background: none;
+    border: 1px solid #007385;
+    color: #00ffff;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: normal;
+    padding: 0 10px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    transition: background-color 0.15s, color 0.15s, box-shadow 0.15s;
+    border-radius: 0;
+    min-height: 34px;
+    box-sizing: border-box;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
+}
+#nav-group .archive-date-btn::after {
+    content: '▼';
+    font-size: 10px;
+    display: inline-block;
+    transform: translateY(1px);
+}
+#nav-group .archive-date-btn.slider-visible::after {
+    content: '▲';
+}
+#nav-group .archive-date-btn:hover {
+    background: rgba(0, 255, 255, 0.15);
+    color: #00ffff;
+}
+#nav-group .archive-date-btn.is-active {
+    /* When an archive date is selected (not live) */
+    background: #00ffff;
+    color: #000;
+    box-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
+}
+#nav-group .archive-date-btn.is-active:hover {
+    background: #00ffff;
+    color: #000;
+}
+#nav-group .archive-date-btn.slider-visible {
+    /* When the slider bar is shown (regardless of live/archive mode) */
+    border-color: #00ffff;
+    box-shadow: 0 0 6px rgba(0, 255, 255, 0.3);
+}
+
+/* Full-width slider bar — sits below the header. */
+.archive-slider-bar {
+    position: relative;
+    background: #1a1a1a;
+    border-top: 1px solid #007385;
+    border-bottom: 1px solid #007385;
+    padding: 8px 16px 6px;
+    width: 100%;
+    box-sizing: border-box;
+    background: linear-gradient(180deg, rgba(0, 255, 255, 0.04), transparent 60%), #1a1a1a;
+}
+.archive-slider-bar.is-travelling {
+    background: linear-gradient(180deg, rgba(0, 255, 255, 0.10), rgba(0, 255, 255, 0.02) 60%), #1a1a1a;
+    border-top-color: #00ffff;
+    box-shadow: inset 0 1px 0 rgba(0, 255, 255, 0.15);
+}
+.archive-slider-bar[hidden] { display: none; }
+
+.archive-slider-inner {
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.as-status-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 130px;
+    max-width: 150px;
+    padding: 4px 6px;
+    border: 1px solid #333;
+    border-radius: 3px;
+    background: #0e0e0e;
+    color: #888;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.25px;
+    box-sizing: border-box;
+    min-height: 42px;
+}
+.as-status-item {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: inherit;
+    font-size: 10px;
+    line-height: 1.1;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+.as-status-item.as-status-ok {
+    color: #00ffff;
+    background: rgba(0, 255, 255, 0.08);
+}
+.as-status-item.as-status-na {
+    color: #ff6666;
+    background: rgba(255, 102, 102, 0.08);
+}
+.as-status-item.as-status-live {
+    color: #44dd44;
+    background: rgba(68, 221, 68, 0.08);
+}
+
+/* Left: clock icon + date label */
+.as-label-block {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    min-width: 110px;
+    padding: 4px 10px;
+    border: 1px solid #333;
+    border-radius: 3px;
+    background: #0e0e0e;
+    color: #888;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    transition: color 0.15s, border-color 0.15s, box-shadow 0.15s;
+    box-sizing: border-box;
+}
+.as-date-select-wrap {
+    display: inline-flex;
+    align-items: center;
+}
+.as-date-select {
+    margin-left: 8px;
+    background: none;
+    color: #00ffff;
+    border: 1px solid #007385;
+    border-radius: 0;
+    padding: 0 10px;
+    font-size: 11px;
+    min-width: 140px;
+    max-width: 240px;
+    line-height: 32px;
+    height: 34px;
+    outline: none;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+    box-sizing: border-box;
+}
+.as-date-select:hover,
+.as-date-select:focus {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+}
+.as-date-select option {
+    background: #111;
+    color: #fff;
+    font-size: 11px;
+}
+.as-date-select::-webkit-scrollbar,
+.game-mode-select::-webkit-scrollbar,
+.sizes-overflow .tab-select::-webkit-scrollbar,
+#pbTypeSelect::-webkit-scrollbar,
+#displayType::-webkit-scrollbar,
+#controlTypeSelect::-webkit-scrollbar {
+    width: 8px;
+}
+.as-date-select::-webkit-scrollbar-track,
+.game-mode-select::-webkit-scrollbar-track,
+.sizes-overflow .tab-select::-webkit-scrollbar-track,
+#pbTypeSelect::-webkit-scrollbar-track,
+#displayType::-webkit-scrollbar-track,
+#controlTypeSelect::-webkit-scrollbar-track {
+    background: #333;
+}
+.as-date-select::-webkit-scrollbar-thumb,
+.game-mode-select::-webkit-scrollbar-thumb,
+.sizes-overflow .tab-select::-webkit-scrollbar-thumb,
+#pbTypeSelect::-webkit-scrollbar-thumb,
+#displayType::-webkit-scrollbar-thumb,
+#controlTypeSelect::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+.as-date-select::-webkit-scrollbar-thumb:hover,
+.game-mode-select::-webkit-scrollbar-thumb:hover,
+.sizes-overflow .tab-select::-webkit-scrollbar-thumb:hover,
+#pbTypeSelect::-webkit-scrollbar-thumb:hover,
+#displayType::-webkit-scrollbar-thumb:hover,
+#controlTypeSelect::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+}
+.as-date-select {
+    scrollbar-width: thin;
+    scrollbar-color: #888 #333;
+}
+.game-mode-select,
+.sizes-overflow .tab-select,
+#pbTypeSelect,
+#displayType,
+#controlTypeSelect {
+    scrollbar-width: thin;
+    scrollbar-color: #888 #333;
+}
+
+.as-label-block.is-travelling {
+    color: #00ffff;
+    border-color: #00ffff;
+    box-shadow: 0 0 8px rgba(0, 255, 255, 0.25);
+    text-shadow: 0 0 6px rgba(0, 255, 255, 0.4);
+}
+.as-clock-icon { flex-shrink: 0; opacity: 0.85; }
+.as-date-text { white-space: nowrap; }
+
+/* Center: the long slider */
+.as-slider-wrap {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 0;
+}
+.as-slider-wrap, .as-ticks {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.as-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0;
+    height: 22px;
+    background: transparent;
+    cursor: pointer;
+    margin: 0;
+    outline: none;
+}
+.as-slider:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.35), 0 0 12px rgba(0, 255, 255, 0.4);
+}
+.as-slider:focus-visible::-moz-range-thumb {
+    box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.35), 0 0 12px rgba(0, 255, 255, 0.4);
+}
+.as-slider::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, rgba(255, 34, 98, 0.35) 0%, #3a3a3a 35%, #00ffff 100%);
+    border: 1px solid #333;
+}
+.as-slider::-moz-range-track {
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, rgba(255, 34, 98, 0.35) 0%, #3a3a3a 35%, #00ffff 100%);
+    border: 1px solid #333;
+}
+.as-slider::-moz-range-progress {
+    height: 4px;
+    border-radius: 2px;
+    background: #00ffff;
+}
+.as-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #00ffff;
+    border: 2px solid #0a1a1d;
+    margin-top: -7px;
+    cursor: grab;
+    box-shadow: 0 0 8px rgba(0, 255, 255, 0.4), 0 0 2px rgba(0, 0, 0, 0.6);
+    transition: transform 0.1s, box-shadow 0.15s;
+}
+.as-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.18);
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.4);
+}
+.as-slider:active::-webkit-slider-thumb {
+    cursor: grabbing;
+    transform: scale(1.25);
+    box-shadow: 0 0 14px #00ffff, 0 0 24px rgba(0, 255, 255, 0.5);
+}
+.as-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #00ffff;
+    border: 2px solid #0a1a1d;
+    cursor: grab;
+    box-shadow: 0 0 8px rgba(0, 255, 255, 0.4), 0 0 2px rgba(0, 0, 0, 0.6);
+    transition: transform 0.1s, box-shadow 0.15s;
+}
+.as-slider::-moz-range-thumb:hover {
+    transform: scale(1.18);
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.4);
+}
+.as-slider:active::-moz-range-thumb {
+    cursor: grabbing;
+    transform: scale(1.25);
+}
+
+/* Year tick marks under the slider */
+.as-ticks {
+    position: relative;
+    height: 14px;
+    margin-top: 2px;
+    pointer-events: none;
+}
+.as-tick {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.as-tick-line {
+    width: 1px;
+    height: 4px;
+    background: #3a3a3a;
+}
+.as-tick-label {
+    font-size: 9px;
+    color: #555;
+    margin-top: 1px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+/* Right: Live button */
+.as-live-btn {
+    flex-shrink: 0;
+    background: transparent;
+    border: 1px solid #333;
+    color: #888;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+.as-live-btn:hover {
+    color: #00ffff;
+    border-color: #00ffff;
+    box-shadow: 0 0 8px rgba(0, 255, 255, 0.3);
+}
+.as-live-btn.is-active {
+    color: #00ffff;
+    border-color: #00ffff;
+}
+
+/* Small preload button placed left of the source-status line */
+.as-preload-btn {
+    background: transparent;
+    border: 1px solid #333;
+    color: #888;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.12s;
+    margin-right: 8px;
+}
+.as-preload-btn:hover {
+    color: #00ffff;
+    border-color: #00ffff;
+    box-shadow: 0 0 6px rgba(0,255,255,0.18);
+}
+.as-preload-btn[disabled] {
+    opacity: 0.6;
+    cursor: default;
+}
+
+/* Right-side container holding preload button and source status */
+/* removed .as-right-controls; preload button moved to left of the status column */
+
+/* Source status line — shows which archives are merged and which are unavailable. */
+.as-source-status {
+    display: none;
+}
+.as-source-status .as-status-ok { color: #00ffff; }
+.as-source-status .as-status-na { color: #ff6666; }
+.as-source-status .as-status-live { color: #44dd44; }
+.as-source-status .as-sep { color: #555; margin: 0 6px; }
+
+/* Mobile: stack slider vertically */
+@media (max-width: 700px) {
+    .archive-slider-bar { padding: 7px 12px 5px; }
+    .archive-slider-inner { flex-wrap: wrap; justify-content: center; }
+    .as-label-block { min-width: 0; flex: 0 0 auto; padding: 3px 8px; font-size: 11px; }
+    .as-slider-wrap { flex: 1 1 100%; order: 3; }
+    .as-live-btn { order: 4; padding: 5px 10px; }
+    .as-tick-label { font-size: 8px; }
+}
+@media (max-width: 480px) {
+    .archive-slider-bar { padding: 6px 10px 4px; }
+    .as-label-block { padding: 3px 7px; font-size: 10px; min-width: 0; }
+    .as-live-btn { padding: 5px 9px; font-size: 10px; }
+    .as-slider { height: 20px; }
+    .as-ticks { height: 12px; }
+    .as-tick-label { font-size: 8px; }
+    .as-source-status { font-size: 10px; }
+}
+
