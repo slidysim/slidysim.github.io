@@ -289,8 +289,7 @@ table th {
 }
 
 table.rankingCells {
-    border-collapse: separate;
-    border-spacing: 5px;
+    border-collapse: collapse;
     width: auto;
     background-color: transparent !important;
 }
@@ -331,7 +330,6 @@ table.rankingCells td {
 }
 
 table.rankingCells td {
-    border-radius: 6px;
     padding: 5px;
     font-size: 13px;
     box-shadow: 0 0 1px #fff;
@@ -1399,6 +1397,7 @@ img {
     background: #1a1a1a;
     font-size: 12px;
     box-sizing: border-box;
+    justify-content: center;
 }
 #nav-group > * {
     display: flex; align-items: center; box-sizing: border-box; height: 34px;
