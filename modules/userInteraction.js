@@ -69,9 +69,28 @@ function changeDisplayType(displayType) {
     requestProxy.displayType = displayType;
 }
 
+function updateMobileMarathon() {
+    var wrap = document.getElementById('mobileMarathonWrap');
+    if (!wrap) return;
+    var rc = document.getElementById('radio-custom');
+    wrap.style.display = (rc && rc.checked) ? 'inline-flex' : 'none';
+}
+
 //"Public" function to change gameMode ("solveType" - Standard, 2-N Relay etc.)
 function changeGameMode(gameMode) {
     requestProxy.gameMode = gameMode;
+    updateMobileMarathon();
+    var sel = document.getElementById('gameModeSelect');
+    if (sel) {
+        var rc = document.getElementById('radio-custom');
+        if (rc && rc.checked) {
+            sel.value = '';
+        } else if (sel.querySelector('option[value="' + gameMode.replace(/"/g, '\\"') + '"]')) {
+            sel.value = gameMode;
+        } else {
+            sel.selectedIndex = -1;
+        }
+    }
 }
 
 //"Public" function to change leaderboardType (time, move, tps)
@@ -230,11 +249,25 @@ function addListenersToElements() {
             radioCustom.value = "Marathon " + parseInt(inputValueNew);
             radioCustom.checked = true;
             changeGameMode(radioCustom.value);
+            if (customMarathonInputMobile) customMarathonInputMobile.value = inputValueNew;
         }
     });
     radioCustom.addEventListener("click", () => {
         customMarathonInput.focus();
     });
+    var customMarathonInputMobile = document.getElementById('customInputMarathonMobile');
+    if (customMarathonInputMobile) {
+        customMarathonInputMobile.addEventListener("input", function () {
+            var val = this.value.replace(/[^0-9]/g, '');
+            this.value = val;
+            if (val) {
+                radioCustom.value = "Marathon " + parseInt(val);
+                radioCustom.checked = true;
+                changeGameMode(radioCustom.value);
+                customMarathonInput.value = val;
+            }
+        });
+    }
     puzzleSizeRadios.forEach((radio) => {
         radio.addEventListener("change", () => {
             if (radio.checked) {
@@ -242,6 +275,7 @@ function addListenersToElements() {
                 if (radio.value === "History") {
                     radio_allGameModsInteresting.checked = true;
                     request.gameMode = "Interesting";
+                    updateMobileMarathon();
                 }
                 if (radio.value === "POWER") {
                     gettingOldPower = false;
@@ -272,6 +306,7 @@ function addListenersToElements() {
                     rankingTabs.style.display = "none";
                     request.width = "WRHistory";
                     request.height = "WRHistory";
+                    contentDiv.style.minHeight = "0px";
                     directUpdate();
                     return;
                 }
@@ -314,6 +349,30 @@ function addListenersToElements() {
             }
         });
     }
+    // Game mode select for mobile
+    var gameModeSelect = document.getElementById('gameModeSelect');
+    if (gameModeSelect) {
+        gameModeSelect.addEventListener('change', function () {
+            if (this.value === '') {
+                var rc = document.getElementById('radio-custom');
+                if (rc) {
+                    rc.checked = true;
+                    rc.dispatchEvent(new Event('change'));
+                }
+                var mi = document.getElementById('customInputMarathonMobile');
+                if (mi) mi.focus();
+            } else {
+                var wrap = document.getElementById('mobileMarathonWrap');
+                if (wrap) wrap.style.display = 'none';
+                var radio = document.querySelector('input[name="gamemode"][value="' + this.value.replace(/"/g, '\\"') + '"]');
+                if (radio) {
+                    radio.checked = true;
+                    radio.dispatchEvent(new Event('change'));
+                }
+            }
+        });
+    }
+    updateMobileMarathon();
     updateSizeTabs();
     var resizeTimer;
     window.addEventListener('resize', function () {
@@ -548,9 +607,13 @@ function setupSearch() {
             }
             changeNameFilter(r.value);
         } else if (r.action === 'gameMode') {
-            changeGameMode(r.value);
             var gmRadio = document.querySelector('input[name="gamemode"][value="' + r.value.replace(/"/g, '\\"') + '"]');
-            if (gmRadio) gmRadio.checked = true;
+            if (gmRadio) {
+                gmRadio.checked = true;
+                gmRadio.dispatchEvent(new Event('change'));
+            } else {
+                changeGameMode(r.value);
+            }
         }
     }
 }

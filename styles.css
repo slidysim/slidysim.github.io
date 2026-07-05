@@ -1575,6 +1575,50 @@ img {
 }
 
 .tabs { position: relative; }
+
+/* Mobile game mode controls - hidden by default */
+.mobile-gm-controls {
+    display: none;
+    align-items: center;
+    gap: 4px;
+}
+.mobile-marathon {
+    display: none;
+    align-items: center;
+    gap: 2px;
+}
+.mobile-marathon .inputText {
+    max-width: 40px;
+    padding: 0 6px;
+    line-height: 28px;
+    font-size: 12px;
+}
+.game-mode-select {
+    background: none;
+    border: 1px solid #ff2262;
+    color: #ff2262;
+    cursor: pointer;
+    padding: 0 10px;
+    line-height: 32px;
+    font-size: 11px !important;
+    font-weight: normal !important;
+    border-radius: 0;
+    font-family: inherit;
+    height: 34px;
+    box-sizing: border-box;
+    vertical-align: top;
+}
+.game-mode-select:hover {
+    background: #ff2262;
+    color: black;
+}
+.game-mode-select option {
+    background: #1a1a1a;
+    color: white;
+    font-size: 11px;
+    font-weight: normal;
+}
+
 @media (max-width: 1000px) {
     #views-wrapper, .header-right { display: none; }
     .search-overlay { padding: 0; align-items: stretch; }
@@ -1586,6 +1630,9 @@ img {
     .search-result .sr-type { font-size: 11px; min-width: 56px; }
     .search-result .sr-label { font-size: 15px; }
     .search-result .sr-meta { font-size: 13px; }
+    .gm-radio { display: none !important; }
+    .mobile-gm-controls { display: inline-flex !important; justify-content: center; }
+    #solveTypeDiv { text-align: center; }
 }
 .custom-checkbox-countries {
     display: inline-flex;

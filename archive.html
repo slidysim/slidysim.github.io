@@ -179,48 +179,47 @@
     <input type="hidden" id="username" />
     <div id="solveTypeDiv">
       <div class="tabs">
-        <div class="form_radio_btn">
+        <div class="form_radio_btn gm-radio">
           <input id="radio-standard-gamemode" type="radio" name="gamemode" value="Standard" checked />
           <label for="radio-standard-gamemode">Standard</label>
         </div>
-        <div class="form_radio_btn">
+        <div class="form_radio_btn gm-radio">
           <input id="radio-relay" type="radio" name="gamemode" value="2-N relay" />
           <label class="gameModeLabel" for="radio-relay">Relay</label>
         </div>
-        <div class="form_radio_btn">
+        <div class="form_radio_btn gm-radio">
           <input id="radio-height-relay" type="radio" name="gamemode" value="Height relay" />
           <label class="gameModeLabel" for="radio-height-relay">H-Relay</label>
         </div>
-        <div class="form_radio_btn">
+        <div class="form_radio_btn gm-radio">
           <input id="radio-width-relay" type="radio" name="gamemode" value="Width relay" />
           <label class="gameModeLabel" for="radio-width-relay">W-Relay</label>
         </div>
-        <div class="form_radio_btn">
+        <div class="form_radio_btn gm-radio">
           <input id="radio-up-to-relay" type="radio" name="gamemode" value="Everything-up-to relay" />
           <label class="gameModeLabel" for="radio-up-to-relay">EUT-Relay</label>
         </div>
-        <div class="form_radio_btn">
+        <div class="form_radio_btn gm-radio">
           <input id="radio-bld" type="radio" name="gamemode" value="BLD" />
           <label class="gameModeLabel" for="radio-bld">BLD</label>
         </div>
-        <div class="form_radio_btn">
+        <div class="form_radio_btn gm-radio">
           <input id="radio-marathon10" type="radio" name="gamemode" value="Marathon 10" />
           <label class="gameModeLabel" for="radio-marathon10">x10</label>
         </div>
-        <div class="form_radio_btn">
+        <div class="form_radio_btn gm-radio">
           <input id="radio-marathon42" type="radio" name="gamemode" value="Marathon 42" />
           <label class="gameModeLabel" for="radio-marathon42">x42</label>
         </div>
-        <div class="form_radio_btn">
+        <div class="form_radio_btn gm-radio">
           <input id="radio-marathonall" type="radio" name="gamemode" value="All Marathons of" />
           <label class="gameModeLabel" for="radio-marathonall">xN</label>
         </div>              
-        <div class="form_radio_btn">
+        <div class="form_radio_btn gm-radio">
           <input id="radio-custom" type="radio" name="gamemode" value="Marathon 100" />
           <label class="gameModeLabel" for="radio-custom">Marathon:</label>
           <input class="inputText" type="text" id="customInputMarathon" placeholder="N" value="100" />
         </div>
-        
         <div class="form_radio_btn">
           <input id="radio_allGameMods" type="radio" name="gamemode" value="All Solve Types" />
           <label id="radio_allGameModsLabel" for="radio_allGameMods" style="display:none">All</label>
@@ -234,6 +233,24 @@
           <input id="radio_allGameModsNMSingles" type="radio" name="gamemode" value="Standard Singles" />
           <label id="radio_allGameModsLabelNMSingles" for="radio_allGameModsNMSingles" style="display:none">Singles</label>
         </div>
+      </div>
+      <div id="mobileGameModeControls" class="mobile-gm-controls">
+        <select id="gameModeSelect" class="tab-select game-mode-select">
+          <option value="Standard">Standard</option>
+          <option value="2-N relay">Relay</option>
+          <option value="Height relay">H-Relay</option>
+          <option value="Width relay">W-Relay</option>
+          <option value="Everything-up-to relay">EUT-Relay</option>
+          <option value="BLD">BLD</option>
+          <option value="Marathon 10">x10</option>
+          <option value="Marathon 42">x42</option>
+          <option value="All Marathons of">xN</option>
+          <option value="">Marathon</option>
+        </select>
+        <span class="mobile-marathon" id="mobileMarathonWrap">
+          <label class="gameModeLabel" for="customInputMarathonMobile">Marathon:</label>
+          <input class="inputText" type="text" id="customInputMarathonMobile" placeholder="N" value="100" />
+        </span>
       </div>
     </div>
     <div id="RankingTabs" class="tabs" style="display:none">

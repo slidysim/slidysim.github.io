@@ -312,6 +312,9 @@ function directUpdate() {
     if ((request.gameMode === "All Solve Types" || request.gameMode === "Interesting" || request.gameMode === "Standard Singles") && (sheetType !== "History")) {
         radiostandardgamemode.checked = true;
         request.gameMode = "Standard";
+        updateMobileMarathon();
+        var sel = document.getElementById('gameModeSelect');
+        if (sel) sel.value = 'Standard';
     }
     let cleanedData;
     if (countryRanksEnabled) {
