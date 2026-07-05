@@ -40,7 +40,7 @@ const customRankingsRadioPower = document.getElementById('rankingsRadioPower');
 const loadingPlaceHolder = document.getElementById('loadingPlaceHolder');
 const createCustomReplayButton = document.getElementById("createCustomReplayButton");
 
-const enableDebugMode = document.getElementById("enableDebugMode");
+const enableDebugMode = document.getElementById("video_menu_link");
 const ytOnlyButton = document.getElementById("ytOnlyButton");
 const createCustomReplayButtonLink = document.getElementById("createCustomReplayButtonLink");
 const includeWebCB = document.getElementById("includeWeb");

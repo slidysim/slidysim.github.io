@@ -66,7 +66,7 @@
 }
 
 .header-right .custom-checkbox-countries {
-    display: flex; align-items: center; cursor: pointer; padding: 0 4px;
+    display: flex; align-items: center; cursor: pointer;
 }
 .header-right .custom-checkbox-countries input[type="checkbox"] { display: none; }
 .header-right .custom-checkbox-countries .checkbox-text {
@@ -74,6 +74,7 @@
     cursor: pointer; border: 1px solid #007385; display: block; border-radius: 0;
     white-space: nowrap;
 }
+.header-right .custom-checkbox-countries + .custom-checkbox-countries .checkbox-text { border-left: none; }
 .header-right .custom-checkbox-countries input[type="checkbox"]:checked + .checkbox-text {
     background: #00ffff; color: #000;
 }

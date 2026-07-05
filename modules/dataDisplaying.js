@@ -1477,65 +1477,85 @@ function addTooltip(element, text) {
 
 //"Public" function to create example buttons for custom rankings
 function makeExampleButtons(customRankButtonsExamples) {
-    const buttonShare = document.createElement("button");
-    buttonShare.textContent = shareCustomRanksText;
-    buttonShare.classList.add("pause-button");
-    buttonShare.addEventListener("click", function () {
-        navigator.clipboard.writeText(shareCustomRanks())
-            .then(() => {
-                const copiedMessage = document.createElement("div");
-                copiedMessage.textContent = linkCopiedSuccsess;
-                copiedMessage.style.position = "fixed";
-                copiedMessage.style.background = "rgba(0, 0, 0, 0.7)";
-                copiedMessage.style.color = "white";
-                copiedMessage.style.padding = "10px";
-                copiedMessage.style.borderRadius = "5px";
-                copiedMessage.style.textAlign = "center";
-                copiedMessage.style.top = "50%";
-                copiedMessage.style.left = "50%";
-                copiedMessage.style.transform = "translate(-50%, -50%)";
-                copiedMessage.style.zIndex = "999";
-                document.body.appendChild(copiedMessage);
-                setTimeout(() => {
-                    copiedMessage.style.transition = "opacity 0.5s";
-                    copiedMessage.style.opacity = "0";
-                    setTimeout(() => {
-                        document.body.removeChild(copiedMessage);
-                    }, 500);
-                }, 1000);
-            })
-            .catch((error) => {
-                console.error("Copy failed: ", error);
-            });
-    });
-    const h1Container = document.createElement("h1");
-    h1Container.style.margin = "0";
-    rankingTabs.appendChild(h1Container);
-    function createCustomRankButtons(customRankObj, container) {
-        function setCustomRanks(string) {
-            customRankingsArea.value = string;
-            if (!loadingPower) {
-                changeCustomRanks();
-            }
-        }
-        for (const key in customRankObj) {
-            if (customRankObj.hasOwnProperty(key)) {
-                const buttonText = key;
-                const ranksText = customRankObj[key];
-                const button = document.createElement("button");
-                button.textContent = buttonText;
-                button.addEventListener("click", () => setCustomRanks(ranksText));
-                container.appendChild(button);
-                if (buttonText === "MAIN 30") {
-                    button.click();
+    var row = document.createElement('div');
+    row.className = 'kinch-row';
+
+    var textContainer = document.getElementById('containerCustomRanksText');
+    if (textContainer) row.appendChild(textContainer);
+
+    var actions = document.createElement('div');
+    actions.className = 'kinch-actions';
+
+    var select = document.createElement('select');
+    select.id = 'presetsDropdown';
+    var placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.disabled = true;
+    placeholder.selected = true;
+    placeholder.textContent = 'Presets';
+    select.appendChild(placeholder);
+
+    var defaultSet = false;
+    for (var i = 0; i < customRankButtonsExamples.length; i++) {
+        var obj = customRankButtonsExamples[i];
+        for (var key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                var opt = document.createElement('option');
+                opt.value = obj[key];
+                opt.textContent = key;
+                select.appendChild(opt);
+                if (!defaultSet && key === 'MAIN 30') {
+                    defaultSet = true;
+                    customRankingsArea.value = obj[key];
                 }
             }
         }
     }
-    for (const customRankObj of customRankButtonsExamples) {
-        createCustomRankButtons(customRankObj, rankingTabs);
-    }
-    rankingTabs.appendChild(buttonShare);
+
+    select.addEventListener('change', function () {
+        if (this.value) {
+            customRankingsArea.value = this.value;
+            if (!loadingPower) changeCustomRanks();
+        }
+    });
+
+    actions.appendChild(select);
+
+    var buttonShare = document.createElement('button');
+    buttonShare.textContent = shareCustomRanksText;
+    buttonShare.className = 'pause-button';
+    buttonShare.addEventListener('click', function () {
+        navigator.clipboard.writeText(shareCustomRanks())
+            .then(function () {
+                var msg = document.createElement('div');
+                msg.textContent = linkCopiedSuccsess;
+                msg.style.position = 'fixed';
+                msg.style.background = 'rgba(0, 0, 0, 0.7)';
+                msg.style.color = 'white';
+                msg.style.padding = '10px';
+                msg.style.borderRadius = '5px';
+                msg.style.textAlign = 'center';
+                msg.style.top = '50%';
+                msg.style.left = '50%';
+                msg.style.transform = 'translate(-50%, -50%)';
+                msg.style.zIndex = '999';
+                document.body.appendChild(msg);
+                setTimeout(function () {
+                    msg.style.transition = 'opacity 0.5s';
+                    msg.style.opacity = '0';
+                    setTimeout(function () { document.body.removeChild(msg); }, 500);
+                }, 1000);
+            })
+            .catch(function (err) { console.error('Copy failed: ', err); });
+    });
+
+    actions.appendChild(buttonShare);
+    row.appendChild(actions);
+
+    rankingTabs.innerHTML = '';
+    rankingTabs.appendChild(row);
+
+    if (defaultSet && !loadingPower) changeCustomRanks();
 }
 
 //"Public" function to calculate percentage of the score based on best value

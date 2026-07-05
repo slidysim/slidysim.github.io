@@ -27,7 +27,7 @@ function isAdmin() {
 }
 
 function updateVideoButtonVisibility() {
-    enableDebugMode.style.display = isAdmin() && exeLeaderboardEnabled && !webLeaderboardEnabled && !lmLeaderboardEnabled ? "inline-block" : "none";
+    enableDebugMode.style.display = isAdmin() && exeLeaderboardEnabled && !webLeaderboardEnabled && !lmLeaderboardEnabled ? "block" : "none";
 }
 
 function toggleWebLeaderboard() {
@@ -106,6 +106,8 @@ function changePuzzleSize(puzzleSize) {
         const [N, M] = match.slice(1).map(Number);
         if (N >= 2 && M >= 2) {
             requestProxy.size = [N, M];
+            var sizesSelect = document.getElementById('sizesSelect');
+            if (sizesSelect) sizesSelect.value = puzzleSize;
         }
     }
 }
@@ -138,7 +140,8 @@ function addListenersToElements() {
         });
         menuDropdown.addEventListener('click', function (e) { e.stopPropagation(); });
     }
-    enableDebugMode.addEventListener("click", function () {
+    enableDebugMode.addEventListener("click", function (e) {
+        e.preventDefault();
         if (!exeLeaderboardEnabled || webLeaderboardEnabled || lmLeaderboardEnabled) {
             alert("Video upload not supported for Web, LM or disabled Exe scores, sorry for inconvenience. Please enable only Exe data before uploading.");
         } else {
@@ -297,6 +300,146 @@ function addListenersToElements() {
         navGroup.appendChild(countrySelect);
     }
     countrySelect.addEventListener("change", toggleCurrentCountry);
+
+    // Dynamic size tabs - show as many smallest sizes as fit, rest in overflow select
+    var sizesSelect = document.getElementById('sizesSelect');
+    if (sizesSelect) {
+        sizesSelect.addEventListener('change', function () {
+            if (this.value) {
+                var radio = document.querySelector('input[name="puzzleSize"][value="' + this.value.replace(/"/g, '\\"') + '"]');
+                if (radio) {
+                    radio.checked = true;
+                    radio.dispatchEvent(new Event('change'));
+                }
+            }
+        });
+    }
+    updateSizeTabs();
+    var resizeTimer;
+    window.addEventListener('resize', function () {
+        if (window.innerWidth <= 1000) return;
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () { requestAnimationFrame(updateSizeTabs); }, 100);
+    });
+}
+
+var _sizeTabElems = null;
+function _getSizeTabElems() {
+    if (!_sizeTabElems) {
+        _sizeTabElems = {
+            wrapper: document.getElementById('sizeTabsWrapper'),
+            overflow: document.getElementById('sizesOverflow'),
+            select: document.getElementById('sizesSelect'),
+            headerInner: document.querySelector('.page-header-inner'),
+            navGroup: document.querySelector('.nav-left') || document.getElementById('nav-group'),
+            viewsWrapper: document.getElementById('views-wrapper'),
+            fixedGroups: null
+        };
+    }
+    return _sizeTabElems;
+}
+
+function updateSizeTabs() {
+    if (window.innerWidth <= 1000) return;
+
+    var e = _getSizeTabElems();
+    if (!e.wrapper || !e.overflow || !e.select) return;
+
+    var tabs = e.wrapper.querySelectorAll('.size-tab');
+    if (!tabs.length) return;
+
+    e.wrapper.style.display = 'none';
+    e.overflow.style.display = 'none';
+
+    if (!e.headerInner || !e.navGroup || !e.viewsWrapper) return;
+
+    var available = e.headerInner.clientWidth - e.navGroup.offsetWidth - 20;
+
+    if (!e.fixedGroups) {
+        e.fixedGroups = [];
+        var groups = e.viewsWrapper.children;
+        for (var i = 0; i < groups.length; i++) {
+            var g = groups[i];
+            if (g.id !== 'sizeTabsWrapper' && g.id !== 'sizesOverflow') {
+                e.fixedGroups.push(g);
+            }
+        }
+    }
+    var fixedWidth = 0;
+    var fixedCount = e.fixedGroups.length;
+    for (var i = 0; i < fixedCount; i++) {
+        fixedWidth += e.fixedGroups[i].offsetWidth;
+    }
+    available -= (fixedWidth - (fixedCount - 1));
+
+    var TAB_W = 54;
+    var tabData = [];
+    tabs.forEach(function (t) {
+        tabData.push({
+            el: t,
+            value: t.querySelector('input').value,
+            label: t.querySelector('label').textContent.trim(),
+            width: TAB_W
+        });
+    });
+
+    var totalW = tabData.length * TAB_W;
+    var numTabs = tabData.length;
+    if (totalW <= available + 4) {
+        // All fit — show everything
+        for (var k = 0; k < numTabs; k++) tabData[k].el.style.display = '';
+        e.select.innerHTML = '<option value="" disabled selected>Sizes</option>';
+        e.overflow.style.display = 'none';
+        e.wrapper.style.display = 'inline-flex';
+        return;
+    }
+
+    // Assign priority levels: 0=highest (3-10), 1=medium (12,16,20), 2=lowest (11,13-15,17-19)
+    var prio = {};
+    for (var n = 3; n <= 10; n++) prio[n + 'x' + n] = 0;
+    prio['12x12'] = 1; prio['16x16'] = 1; prio['20x20'] = 1;
+    for (var n = 11; n <= 19; n++) {
+        if (n === 12 || n === 16) continue;
+        prio[n + 'x' + n] = 2;
+    }
+
+    // Mark all visible, then hide lowest-priority tabs starting from the right
+    var visible = new Array(numTabs).fill(true);
+    var curTotal = totalW;
+    var overflowW = 70;
+
+    // Sort indices by priority (descending) then by position (descending = rightmost first)
+    // so we always hide the rightmost lowest-priority tab first
+    var indices = tabData.map(function (_, idx) { return idx; });
+    indices.sort(function (a, b) {
+        var pa = prio[tabData[a].value] || 0;
+        var pb = prio[tabData[b].value] || 0;
+        if (pa !== pb) return pb - pa; // higher priority number = hidden first
+        return b - a; // rightmost first
+    });
+
+    var hiddenCount = 0;
+    for (var s = 0; s < indices.length; s++) {
+        var adj = hiddenCount > 0 ? overflowW : 0;
+        if (curTotal + adj <= available + 4) break;
+        var idx = indices[s];
+        curTotal -= tabData[idx].width;
+        visible[idx] = false;
+        hiddenCount++;
+    }
+
+    // Build overflow options from hidden tabs
+    var optsHtml = '<option value="" disabled selected>Sizes</option>';
+    for (var m = 0; m < numTabs; m++) {
+        tabData[m].el.style.display = visible[m] ? '' : 'none';
+        if (!visible[m]) {
+            optsHtml += '<option value="' + tabData[m].value + '">' + tabData[m].label + '</option>';
+        }
+    }
+
+    e.select.innerHTML = optsHtml;
+    e.overflow.style.display = hiddenCount > 0 ? '' : 'none';
+    e.wrapper.style.display = (numTabs - hiddenCount) > 0 ? 'inline-flex' : 'none';
 }
 
 //_________________End of "Public" functions of this module_________________//
