@@ -2335,12 +2335,32 @@ iframe {
     vertical-align: middle;
 }
 #kinch-chart-container .chart-controls input[type="range"] {
+    -webkit-appearance: auto;
+    appearance: auto;
     width: 100px;
     height: 14px;
     vertical-align: middle;
     accent-color: #666;
     margin: 0;
     cursor: pointer;
+    background: initial;
+    border: none;
+    border-radius: 0;
+    opacity: 1;
+}
+#kinch-chart-container .chart-controls input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: auto;
+    appearance: auto;
+    width: auto;
+    height: auto;
+    background: initial;
+    border: none;
+}
+#kinch-chart-container .chart-controls input[type="range"]::-moz-range-thumb {
+    width: auto;
+    height: auto;
+    background: initial;
+    border: none;
 }
 #kinch-chart-category-trigger {
     cursor: pointer;
@@ -2361,6 +2381,7 @@ iframe {
     padding: 4px 0;
     min-width: 150px;
     white-space: nowrap;
+    text-align: left;
     scrollbar-width: thin;
     scrollbar-color: #888 #333;
 }
@@ -2411,7 +2432,7 @@ iframe {
     font-weight: 400;
     font-size: 12px;
     width: 58px;
-    height: 40px;
+    height: 35px;
     overflow: hidden;
     box-sizing: content-box;
     text-align: center;
@@ -2472,11 +2493,11 @@ iframe {
 /* req-row — dark GRAY bg (distinct from player rows), tier-colored text */
 .kinch-view .req-row td {
     white-space: nowrap;
-    height: 40px;
+    height: 35px;
     font-size: 12px;
     font-weight: 600;
     letter-spacing: .3px;
-    background-color: #1a1a1a;
+    background-color: #2c2c2c;
     line-height: 1.4;
     box-shadow: 0 0 1px #fff;
 }
@@ -2506,7 +2527,7 @@ iframe {
 
 /* player rows */
 .kinch-view .player-row {
-    height: 40px;
+    height: 35px;
 }
 .kinch-view .player-row td.kinch-clickable {
     cursor: pointer;

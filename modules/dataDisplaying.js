@@ -1087,6 +1087,19 @@ function createSheetRankings(playerScores) {
     if (request.width === "Rankings2") { createCustomSlider(toolbar); }
     kinchBuildSwitches(toolbar);
 
+    function kinchSyncToolbarHeight() {
+        if (!toolbar) return;
+        var height = toolbar.offsetHeight;
+        var viewEl = toolbar.closest(".kinch-view");
+        if (viewEl) viewEl.style.setProperty("--kinch-toolbar-h", height + "px");
+    }
+    kinchSyncToolbarHeight();
+    if (window.ResizeObserver) {
+        new ResizeObserver(function () { kinchSyncToolbarHeight(); }).observe(toolbar);
+    } else {
+        window.addEventListener("resize", kinchSyncToolbarHeight);
+    }
+
     const chartBtn = document.createElement("button");
     chartBtn.className = "kinch-chart-btn";
     chartBtn.textContent = "Chart";
@@ -1944,7 +1957,10 @@ function kinchUpdateChart() {
     var ignoreN = ignoreInput ? parseInt(ignoreInput.value) || 0 : 0;
 
     var datasets = [];
-    var labels = displayTiers.map(function (t) { return t.charAt(0).toUpperCase() + t.slice(1); });
+    var labels = displayTiers.map(function (t) {
+        var tierLabel = t.charAt(0).toUpperCase() + t.slice(1);
+        return kinchTrueTiers ? 'True ' + tierLabel : tierLabel;
+    });
     var labelColors = displayTiers.map(function (t) { return kinchGetTierColor(t); });
     var barColors = displayTiers.map(function (t) { return kinchGetTierColor(t); });
 
@@ -2101,7 +2117,7 @@ function kinchUpdateChart() {
                         // pct = displayVal / rawTotal (the FULL total, pre-skip)
                         var pct = rawTotal > 0 ? displayVal / rawTotal * 100 : 0;
                         // count (bold, light) — always an integer
-                        var labelStr = isTrueTiers ? 'True ' + displayVal : '' + displayVal;
+                        var labelStr = '' + displayVal;
                         ctx.font = 'bold 11px monospace';
                         ctx.fillStyle = '#ddd';
                         ctx.shadowColor = 'rgba(0,0,0,0.8)';
