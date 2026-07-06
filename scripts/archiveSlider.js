@@ -249,13 +249,15 @@ function rebuildSliderForCurrentTypes() {
             // handler's reload will use it as-is.
         } else {
             // Previously-selected date no longer exists in the new type set.
-            // Fall back to the newest available date. Update selectedSliderDate
+            // Fall back to the closest available date (older or equal) so we
+            // don't jump to the latest archive point. Update selectedSliderDate
             // in-place so the toggle handler's reload uses the new value. We
             // do NOT call applySliderIndex here (that would double-reload).
-            const newestIdx = sliderDates.length - 1;
-            selectedSliderDate = sliderDates[newestIdx].ts;
+            const closestIdx = findClosestOlderEntryIndex(selectedSliderDate);
+            const fallbackIdx = closestIdx >= 0 ? closestIdx : sliderDates.length - 1;
+            selectedSliderDate = sliderDates[fallbackIdx].ts;
             archiveSlider.value = String(selectedSliderDate);
-            updateSliderLabelOnly(newestIdx);
+            updateSliderLabelOnly(fallbackIdx);
             refreshDateButton();
         }
     } else {
