@@ -45,7 +45,8 @@ const rename_map = {
     'diudiuhamburger': '丢丢hamburger',
     'Islamkit': 'IslamKitiev',
     'thelegendary': 'thelegendary08',
-    '黑暗报': '636'
+    '黑暗报': '636',
+    'sqmasep': 'eskiu'
 
 };
 
