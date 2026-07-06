@@ -2179,7 +2179,7 @@ iframe {
     border-bottom: 1px solid #333;
     position: sticky;
     top: 0;
-    z-index: 50;
+    z-index: 5;
     min-height: var(--kinch-toolbar-h);
     box-sizing: border-box;
 }
@@ -2322,6 +2322,9 @@ iframe {
     align-items: center;
     gap: 4px;
 }
+#kinch-chart-container .chart-controls label:has(#kinch-switch-percent) {
+    display: none;
+}
 #kinch-chart-container .chart-controls input[type="checkbox"] {
     display: inline-block;
     width: 12px;
@@ -2358,16 +2361,22 @@ iframe {
     padding: 4px 0;
     min-width: 150px;
     white-space: nowrap;
+    scrollbar-width: thin;
+    scrollbar-color: #888 #333;
 }
-#kinch-chart-category-panel label {
+#kinch-chart-category-panel::-webkit-scrollbar-track { background: #333; }
+#kinch-chart-category-panel::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+#kinch-chart-category-panel::-webkit-scrollbar-thumb:hover { background: #aaa; }
+#kinch-chart-container #kinch-chart-category-panel label {
     display: block;
     padding: 2px 12px;
     color: #ccc;
     font-size: 11px;
     cursor: pointer;
+    white-space: nowrap;
 }
-#kinch-chart-category-panel label:hover { background: #333; }
-#kinch-chart-category-panel input[type="checkbox"] {
+#kinch-chart-container #kinch-chart-category-panel label:hover { background: #333; }
+#kinch-chart-container #kinch-chart-category-panel input[type="checkbox"] {
     margin-right: 4px;
     accent-color: #555;
 }
@@ -2387,7 +2396,7 @@ iframe {
 .kinch-view .kinch-sticky-wrapper {
     position: sticky;
     top: var(--kinch-toolbar-h);
-    z-index: 40;
+    z-index: 4;
     background: #000;
 }
 .kinch-view .kinch-sticky-wrapper > table {
@@ -2415,6 +2424,13 @@ iframe {
 }
 .kinch-view .results-table td:nth-child(-n+3) {
     overflow: visible;
+}
+
+/* Edge outlines — visible white line on left/right edges of each table */
+.kinch-view .results-table table {
+    border-left: 1px solid rgba(255,255,255,0.25);
+    border-right: 1px solid rgba(255,255,255,0.25);
+    border-radius: 0;
 }
 
 /* Name column — centered, black bg, tier-colored text */
@@ -2460,7 +2476,7 @@ iframe {
     font-size: 12px;
     font-weight: 600;
     letter-spacing: .3px;
-    background-color: #2a2a2a;
+    background-color: #1a1a1a;
     line-height: 1.4;
     box-shadow: 0 0 1px #fff;
 }
@@ -2494,14 +2510,17 @@ iframe {
 }
 .kinch-view .player-row td.kinch-clickable {
     cursor: pointer;
-    transition: .2s;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
 }
 .kinch-view .player-row td.kinch-clickable:hover {
-    filter: brightness(1.3);
+    filter: brightness(1.4);
+    outline: none;
 }
 .kinch-view .player-row:hover td {
-    background-color: #ffffff15;
+    background-color: rgba(255,255,255,0.08);
 }
+
 .kinch-view .sortable-player { cursor: pointer; }
 .kinch-view .sortable-player:hover { filter: brightness(0.85); }
 
@@ -2586,6 +2605,16 @@ iframe {
     font-family: monospace;
 }
 #kinch-score-tooltip .tip-tier { font-weight: 700; }
+#kinch-score-tooltip [tierf="alpha"]   { color: #00ffff; text-shadow: 0 0 10px #00ffff; }
+#kinch-score-tooltip [tierf="beta"]    { color: #00ff00; text-shadow: 0 0 10px #00ff00; }
+#kinch-score-tooltip [tierf="gamma"]   { color: #ff2262; text-shadow: 0 0 10px #ff2262; }
+#kinch-score-tooltip [tierf="delta"]   { color: #a14dff; text-shadow: 0 0 10px #a14dff; }
+#kinch-score-tooltip [tierf="epsilon"] { color: #ffff00; text-shadow: 0 0 10px #ffff00; }
+#kinch-score-tooltip [tierf="zeta"]    { color: #ffaaf4; text-shadow: 0 0 10px #ffaaf4; }
+#kinch-score-tooltip [tierf="eta"]     { color: #85fa85; text-shadow: 0 0 10px #85fa85; }
+#kinch-score-tooltip [tierf="theta"]   { color: #b9f2ff; text-shadow: 0 0 10px #b9f2ff; }
+#kinch-score-tooltip [tierf="iota"]    { color: #23958b; text-shadow: 0 0 10px #23958b; }
+#kinch-score-tooltip [tierf="kappa"]   { color: #afafaf; }
 
 /* --- Popular controls — slider takes ALL available space --- */
 .kinch-view .kinch-popular-controls {

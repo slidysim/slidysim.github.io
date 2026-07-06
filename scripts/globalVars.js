@@ -17,6 +17,7 @@ var kinchColorBest = false;    // #switch        — grey out cells below the ta
 var kinchTrueTiers = false;    // #switch-true   — group players by worst category tier
 var kinchNerf = false;         // #switch-nerf   — remove categories impossible in LM
 var kinchChartVisible = false; // chart toggle state
+var kinchDontFormat = false;  // hide all extra icons (eggs, flags, web/lm, youtube)
 let tierLimit = "Any"; //default value for "show X tier scores only" (must be one of tierLabels)
 let autoDetectGridsCheckbox_last = false; //default value for "Force fringe" in replays (false = don't force fringe)
 let constantTPSCheckbox_last = false; //default value for "Constant TPS" in replays

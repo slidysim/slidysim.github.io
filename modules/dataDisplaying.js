@@ -1062,6 +1062,14 @@ function createSheetRankings(playerScores) {
     if (playerScores.length === 0) { contentDiv.innerHTML = notFoundError; return; }
     if (loadingPower) { loadPower(); return; }
 
+    // Destroy old chart instance if it exists (canvas was removed on page switch)
+    if (kinchTierChart) {
+        try { kinchTierChart.destroy(); } catch (e) {}
+        kinchTierChart = null;
+    }
+    // Reset chart categories on page switch
+    kinchChartCategories = [];
+
     // Store for re-renders triggered by switch toggles
     kinchPlayerScores = playerScores;
     kinchScoreType = scoreType;
@@ -1146,6 +1154,10 @@ function createSheetRankings(playerScores) {
     // --- apply initial switch states ---
     kinchApplyHideReqs();
     if (kinchColorBest) kinchApplyColorBest();
+    if (kinchDontFormat) kinchApplyDontFormat();
+    // Percent toggle is always active for kinch; hide it from view
+    var kinchPctCb = document.getElementById("kinch-switch-percent");
+    if (kinchPctCb) { kinchPctCb.checked = true; kinchPctCb.disabled = true; }
 
     // --- restore chart if it was visible ---
     if (kinchChartVisible) {
@@ -1246,7 +1258,8 @@ function kinchBuildSwitches(toolbar) {
     var switches = [
         { id: "kinch-switch-true",  label: "True Tiers",    state: kinchTrueTiers,  tt: "Off: All players are shown\nOn: Group players by their worst category tier" },
         { id: "kinch-switch-empty", label: "Hide Empty",    state: kinchHideEmpty,  tt: "Off: All tiers are shown\nOn: Empty tiers are hidden" },
-        { id: "kinch-switch-reqs",  label: "Hide Reqs",     state: kinchHideReqs,   tt: "Off: All requirements are shown\nOn: Only the leaderboard rows are shown" }
+        { id: "kinch-switch-reqs",  label: "Hide Reqs",     state: kinchHideReqs,   tt: "Off: All requirements are shown\nOn: Only the leaderboard rows are shown" },
+        { id: "kinch-switch-noformat", label: "Dont Format", state: kinchDontFormat, tt: "Off: Normal icons and formatting\nOn: Hide all icons (eggs, flags, web/lm dots, youtube), plain time format" }
     ];
 
     for (var i = 0; i < switches.length; i++) {
@@ -1263,6 +1276,7 @@ function kinchBuildSwitches(toolbar) {
                     case "kinch-switch-true":  kinchTrueTiers = checked;  kinchRerender(); break;
                     case "kinch-switch-empty": kinchHideEmpty = checked;  kinchRerender(); break;
                     case "kinch-switch-reqs":  kinchHideReqs = checked;   kinchApplyHideReqs(); break;
+                    case "kinch-switch-noformat": kinchDontFormat = checked; kinchApplyDontFormat(); kinchRerender(); break;
                 }
             });
             // tooltip on hover for switch labels
@@ -1310,18 +1324,24 @@ function kinchRerender() {
     kinchRenderTable(resultsTable);
     kinchApplyHideReqs();
     if (kinchColorBest) kinchApplyColorBest();
+    if (kinchDontFormat) kinchApplyDontFormat();
     // redraw chart if visible
     var container = document.getElementById("kinch-chart-container");
     if (container && container.style.display !== "none" && window.Chart) kinchUpdateChart();
 }
 
-//Sorting: click a header cell to sort by that column. Click again to reverse.
-//col 0=name, 1=symbol, 2=kinch, 3+ = category index.
+//Sorting: click a header cell to sort by that column (always descending = best first).
+//Second click resets sorting (ascending removed entirely).
 function kinchSetupSortableHeader(cell, col) {
     cell.style.cursor = "pointer";
     cell.addEventListener("click", function () {
-        if (kinchSortColumn === col) kinchSortAsc = !kinchSortAsc;
-        else { kinchSortColumn = col; kinchSortAsc = true; }
+        if (kinchSortColumn === col) {
+            kinchSortColumn = null;
+            kinchSortAsc = true;
+        } else {
+            kinchSortColumn = col;
+            kinchSortAsc = false;
+        }
         kinchRerender();
     });
 }
@@ -1454,7 +1474,8 @@ function kinchRenderTable(resultsTable) {
             var sNameCell = document.createElement("td");
             sNameCell.className = "player sortable-player";
             sNameCell.setAttribute("tier", ps.tier);
-            sNameCell.innerHTML = appendFlagIconToNickname(ps.name);
+            if (kinchDontFormat) { sNameCell.textContent = ps.name; }
+            else { sNameCell.innerHTML = appendFlagIconToNickname(ps.name); }
             (function (playerName) {
                 sNameCell.addEventListener("click", function () {
                     radioNxNWRs.checked = true;
@@ -1555,11 +1576,11 @@ function kinchRenderTable(resultsTable) {
             var info2 = parseId(cat2.id);
             var isAvg = (info2.avglen !== 1);
             tdLimit.textContent = getScoreLimit(threshold, bestValues[cat2.id], kinchReverse, kinchScoreType, isAvg);
-            (function (td, catId, thr) {
+            (function (td, catId, thr, tier) {
                 td.addEventListener("mouseenter", function () {
                     var tip = document.getElementById("kinch-score-tooltip");
                     if (!tip) return;
-                    tip.innerHTML = exactLimitString + "<br>" + tier + " " + catId + ":<br>" + getScoreLimitExact(thr, bestValues[catId], kinchReverse);
+                    tip.innerHTML = exactLimitString + "<br><span style=\"color:" + kinchGetTierColor(tier) + "\">" + tier + "</span> " + catId + ":<br>" + getScoreLimitExact(thr, bestValues[catId], kinchReverse);
                     tip.style.display = "block";
                     var rect = td.getBoundingClientRect();
                     var left = rect.left, top = rect.bottom + 4;
@@ -1573,7 +1594,7 @@ function kinchRenderTable(resultsTable) {
                     var tip = document.getElementById("kinch-score-tooltip");
                     if (tip) tip.style.display = "none";
                 });
-            })(tdLimit, cat2.id, threshold);
+            })(tdLimit, cat2.id, threshold, tier);
             reqRow.appendChild(tdLimit);
         }
 
@@ -1591,7 +1612,8 @@ function kinchRenderTable(resultsTable) {
                 var nameCell = document.createElement("td");
                 nameCell.className = "player sortable-player";
                 nameCell.setAttribute("tier", tierSlug);
-                nameCell.innerHTML = appendFlagIconToNickname(ps.name);
+                if (kinchDontFormat) { nameCell.textContent = ps.name; }
+                else { nameCell.innerHTML = appendFlagIconToNickname(ps.name); }
                 nameCell.addEventListener("click", function () {
                     radioNxNWRs.checked = true;
                     changePuzzleSize(radioNxNWRs.value);
@@ -1677,7 +1699,7 @@ function kinchBuildScoreCell(scoreData, scoreType, catInfo, tableTier) {
     if (nextTier && targetStr) {
         tipHTML += ' → ' + targetStr + ' (' + diffStr + ') for <span tierf="' + nextTier + '">' + nextTier.charAt(0).toUpperCase() + nextTier.slice(1) + '</span>';
     }
-    tipHTML += ' (' + pct.toFixed(1) + '%)';
+    tipHTML += '<br>Score: ' + pct.toFixed(3) + '%';
 
     // score breakdown
     var breakdown = "";
@@ -1713,7 +1735,7 @@ function kinchBuildScoreCell(scoreData, scoreType, catInfo, tableTier) {
     }
 
     // icons (web/lm circles, youtube, exe eggs)
-    if (!debugMode) {
+    if (!debugMode && !kinchDontFormat) {
         var videolink = videoLinkCheck(item.videolink);
         var makeYT = false;
         if (item.isWeb) mainValue.innerHTML = webElement + mainValue.textContent;
@@ -1744,7 +1766,7 @@ function kinchBuildScoreCell(scoreData, scoreType, catInfo, tableTier) {
         if (makeYT) {
             cell.addEventListener("click", function () { window.open(videolink, "_blank"); });
         }
-    } else {
+    } else if (!kinchDontFormat) {
         if (item.nameFilter === logged_in_as || logged_in_as === "vovker" || logged_in_as === "dphdmn") {
             cell.classList.add("kinch-clickable");
             mainValue.textContent = getScoreIDIcon + mainValue.textContent;
@@ -1840,7 +1862,11 @@ function kinchWireChartControls() {
     if (ignore) {
         ignore.addEventListener("input", function () {
             if (ignoreVal) ignoreVal.textContent = ignore.value;
-            kinchUpdateChart();
+            var container = document.getElementById("kinch-chart-container");
+            if (container && container.style.display !== "none") {
+                kinchUpdateChart();
+                requestAnimationFrame(function () { if (kinchTierChart) kinchTierChart.resize(); });
+            }
         });
     }
     var cum = document.getElementById("kinch-switch-cumulative");
@@ -1867,9 +1893,12 @@ function kinchPopulateCategoryPanel() {
     for (var i = 0; i < kinchValidCategories.length; i++) {
         (function (cat) {
             var label = document.createElement("label");
+            label.style.cssText = 'display:block;padding:2px 8px;color:#ddd;font-size:11px;cursor:pointer;white-space:nowrap;';
             var cb = document.createElement("input");
             cb.type = "checkbox";
             cb.value = cat.id;
+            cb.checked = kinchChartCategories.indexOf(cat.id) !== -1;
+            cb.style.cssText = 'vertical-align:middle;margin:0 4px 0 0;accent-color:#555;cursor:pointer;';
             cb.addEventListener("change", function () {
                 if (cb.checked) { if (kinchChartCategories.indexOf(cat.id) === -1) kinchChartCategories.push(cat.id); }
                 else { var idx = kinchChartCategories.indexOf(cat.id); if (idx !== -1) kinchChartCategories.splice(idx, 1); }
@@ -2009,20 +2038,33 @@ function kinchUpdateChart() {
     // y-axis max for percent+cumulative
     var yMax = (isPercent && isCumulative) ? 100 : undefined;
 
-    // build or update chart
-    if (kinchTierChart) {
+    // build or update chart (Power-style: update in-place to avoid re-animation)
+    var canUpdate = kinchTierChart && !kinchTierChart._destroyed &&
+        kinchTierChart.__isCategoryMode === isCategoryMode &&
+        kinchTierChart.data.datasets.length === datasets.length &&
+        kinchTierChart.data.datasets.every(function(ds, i) { return ds.label === datasets[i].label; });
+
+    if (canUpdate) {
         kinchTierChart.data.labels = labels;
-        kinchTierChart.data.datasets = datasets;
+        datasets.forEach(function(ds, di) {
+            kinchTierChart.data.datasets[di].data = ds.data;
+            kinchTierChart.data.datasets[di].backgroundColor = ds.backgroundColor;
+            kinchTierChart.data.datasets[di].borderColor = ds.borderColor;
+            kinchTierChart.data.datasets[di].hoverBackgroundColor = ds.hoverBackgroundColor;
+            kinchTierChart.data.datasets[di].hoverBorderColor = ds.hoverBorderColor;
+        });
         kinchTierChart.options.scales.x.ticks.color = labelColors;
         if (yMax !== undefined) kinchTierChart.options.scales.y.max = yMax;
-        else kinchTierChart.options.scales.y.max = undefined;
+        else delete kinchTierChart.options.scales.y.max;
         kinchTierChart.__rawData = rawData2D;
         kinchTierChart.__rawTotals = totals;
         kinchTierChart.__isPercent = isPercent;
         kinchTierChart.__isCumulative = isCumulative;
         kinchTierChart.__isCategoryMode = isCategoryMode;
+        kinchTierChart.__isTrueTiers = kinchTrueTiers;
         kinchTierChart.update();
     } else {
+        if (kinchTierChart) { kinchTierChart.destroy(); kinchTierChart = null; }
         var ctx = canvas.getContext("2d");
         // Custom datalabels plugin — draws count + percentage on each bar
         var kinchDataLabelsPlugin = {
@@ -2034,6 +2076,7 @@ function kinchUpdateChart() {
                 if (totalBars > 67) return;
                 ctx.save();
                 ctx.textAlign = 'center';
+                var isTrueTiers = chart.__isTrueTiers;
                 chart.data.datasets.forEach(function (dataset, di) {
                     var meta = chart.getDatasetMeta(di);
                     var rawData = chart.__rawData || [];
@@ -2058,12 +2101,13 @@ function kinchUpdateChart() {
                         // pct = displayVal / rawTotal (the FULL total, pre-skip)
                         var pct = rawTotal > 0 ? displayVal / rawTotal * 100 : 0;
                         // count (bold, light) — always an integer
+                        var labelStr = isTrueTiers ? 'True ' + displayVal : '' + displayVal;
                         ctx.font = 'bold 11px monospace';
                         ctx.fillStyle = '#ddd';
                         ctx.shadowColor = 'rgba(0,0,0,0.8)';
                         ctx.shadowBlur = 3;
                         ctx.textBaseline = 'bottom';
-                        ctx.fillText(displayVal, bar.x, bar.y - 22);
+                        ctx.fillText(labelStr, bar.x, bar.y - 22);
                         // percentage (tier-colored) — 1 decimal, capped at 100 for cumulative+percent
                         var bgArr = dataset.backgroundColor;
                         var pctColor = (Array.isArray(bgArr) && bgArr[i]) || '#999';
@@ -2088,7 +2132,7 @@ function kinchUpdateChart() {
                 responsive: true,
                 maintainAspectRatio: false,
                 animation: { duration: 300 },
-                layout: { padding: { top: 40, bottom: 8 } },
+                layout: { padding: { top: 60, bottom: 8 } },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -2122,7 +2166,8 @@ function kinchUpdateChart() {
                                 var pct = rawTotal > 0 ? displayVal / rawTotal * 100 : 0;
                                 var isPct = chart.__isPercent;
                                 var suffix = isPct ? "%" : "";
-                                return item.dataset.label + ': ' + (isPct ? displayVal.toFixed(1) : displayVal) + suffix + ' (' + pct.toFixed(1) + '%)';
+                                var prefix = chart.__isTrueTiers ? 'True ' : '';
+                                return prefix + item.dataset.label + ': ' + (isPct ? displayVal.toFixed(1) : displayVal) + suffix + ' (' + pct.toFixed(1) + '%)';
                             }
                         }
                     }
@@ -2139,6 +2184,7 @@ function kinchUpdateChart() {
         kinchTierChart.__isPercent = isPercent;
         kinchTierChart.__isCumulative = isCumulative;
         kinchTierChart.__isCategoryMode = isCategoryMode;
+        kinchTierChart.__isTrueTiers = kinchTrueTiers;
     }
 }
 
@@ -2243,6 +2289,8 @@ function createSheetHistory(recordsList, recordsListWR, showAll = false) {
     }
 }
 
+var kinchOriginalFormatTime = formatTime;
+
 function dontFormat() {
     formatTime = function (milliseconds, cut = false) {
         return (milliseconds / 1000).toFixed(3);
@@ -2250,6 +2298,16 @@ function dontFormat() {
     sendMyRequest();
     const images = document.querySelectorAll('img');
     images.forEach(img => img.remove());
+}
+
+function kinchApplyDontFormat() {
+    if (kinchDontFormat) {
+        formatTime = function (milliseconds, cut) {
+            return (milliseconds / 1000).toFixed(3);
+        };
+    } else {
+        formatTime = kinchOriginalFormatTime;
+    }
 }
 
 //"Public" (helper) function to format time from ms
