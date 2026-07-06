@@ -236,6 +236,7 @@ function addListenersToElements() {
             tierSliderLabel.appendChild(document.createTextNode(' ' + showRecordsAtleastTierWord));
 
         }
+        tierActive = true;
         sendMyRequest();
     });
     customRankingsArea.addEventListener("change", () => {

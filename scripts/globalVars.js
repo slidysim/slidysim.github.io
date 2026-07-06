@@ -90,6 +90,7 @@ let latestWebArchive;
 let latestLMArchive;
 let filteredSuggestions = [];
 let forceServerUpdate = false;
+let tierActive = false; // set by tierSlider input to prevent reset during user drag
 
 // ---------- Archive date slider state ----------
 // The slider replaces the old standalone archive page. It lives inside lb.html
