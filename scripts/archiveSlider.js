@@ -362,8 +362,19 @@ function updatePreviewSourceStatus(targetTs) {
             return;
         }
         if (t.key === 'exe' && isLiveMode && !isPreviewing) {
-            t.node.textContent = t.label + ' live';
-            t.node.className = 'as-status-item as-status-live';
+            if (exeFallbackArchive) {
+                t.node.textContent = t.label + ' ' + archiveNameToDotted(exeFallbackArchive);
+                t.node.className = 'as-status-item as-status-ok';
+            } else if (lastFetchOk && lastFetchOk.exe) {
+                t.node.textContent = t.label + ' live';
+                t.node.className = 'as-status-item as-status-live';
+            } else if (exeFetchAttempted) {
+                t.node.textContent = t.label + ' N/A';
+                t.node.className = 'as-status-item as-status-na';
+            } else {
+                t.node.textContent = t.label + ' live';
+                t.node.className = 'as-status-item as-status-live';
+            }
             return;
         }
         const candidate = findClosestOlderArchive(t.archives, targetTs);

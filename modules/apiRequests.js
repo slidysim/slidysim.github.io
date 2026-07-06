@@ -391,18 +391,10 @@ async function verifyLogin() {
                 window.location.reload();
                 return;
             } else {
-                console.log("Unexpected server response.");
-                if (confirm("Server might be temporarily unavailable. Reload the page, or click Cancel and use the date slider (the 'Live' button in the nav) to browse archived leaderboards without the live server. Check our Discord for updates.")) {
-                    window.location.reload();
-                    return;
-                }
+                console.log("Unexpected server response. Falling back to guest login.");
             }
         } catch (error) {
             console.log("Server unreachable:", error);
-            if (confirm("Server might be temporarily unavailable. Reload the page, or click Cancel and use the date slider (the 'Live' button in the nav) to browse archived leaderboards without the live server. Check our Discord for updates.")) {
-                window.location.reload();
-                return;
-            }
         }
     }
 

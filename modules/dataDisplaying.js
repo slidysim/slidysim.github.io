@@ -2165,9 +2165,13 @@ function buildTimestampSection() {
     const timeAgo = getTimeAgo(latestRecordTime);
     const parts = buildArchiveStatusParts();
     const suffix = parts.length ? ' · ' + parts.join(' · ') : '';
+    let fallbackMsg = '';
+    if (exeLeaderboardEnabled && exeFallbackArchive) {
+        fallbackMsg = '<br><span style="color:#ffaa00;font-size:0.85em">⚠ Exe live server unavailable, using latest archive as fallback</span>';
+    }
     setupLiveUpdateTimer(suffix);
 
-    return `<span class="leaderboardUpdateSpan">Last leaderboard update: <span style="color: #ffffff">${timeAgo}</span>${suffix}</span>`;
+    return `<span class="leaderboardUpdateSpan">Last leaderboard update: <span style="color: #ffffff">${timeAgo}</span>${suffix}${fallbackMsg}</span>`;
 }
 
 // Build the per-type status segments used by both buildTimestampSection and
@@ -2187,6 +2191,8 @@ function buildArchiveStatusParts() {
             } else {
                 parts.push('<span style="color:#ff6666">exe N/A</span>');
             }
+        } else if (exeFallbackArchive && lastFetchOk && lastFetchOk.exe) {
+            parts.push('<span style="color:#ffaa00">exe ' + archiveNameToDotted(exeFallbackArchive) + ' (fallback)</span>');
         } else if (selectedArchiveDates && selectedArchiveDates.exe) {
             parts.push('<span style="color:#00ffff">exe ' + archiveNameToDotted(selectedArchiveDates.exe) + '</span>');
         } else {

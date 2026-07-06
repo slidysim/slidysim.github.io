@@ -122,3 +122,5 @@ let sliderReady = false; // whether archiveSlider.js has been initialised
 // status line so it can show "exe N/A" when a live fetch failed (server down)
 // or when an archive couldn't be loaded, rather than falsely showing "exe live".
 let lastFetchOk = { exe: false, web: false, lm: false };
+let exeFetchAttempted = false; // true once any exe fetch callback runs
+let exeFallbackArchive = null; // set to archive name when exe live falls back to latest archive

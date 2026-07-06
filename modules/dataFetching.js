@@ -236,10 +236,12 @@ function updateServer(auth_token, displayType, controlType, pbType) {
         if (--pending > 0) return;
 
         // Track which types actually yielded data, for the status line.
+        // Don't reset a type's status when its toggle is off — that way
+        // toggling off then on doesn't briefly show "N/A" in the preview.
         lastFetchOk = {
-            exe: !!(isExeToggleOn && (archiveMode === 'live' || exeArchive) && exeData),
-            web: !!(isWebToggleOn && webArchive && webData),
-            lm:  !!(isLMToggleOn && lmArchive && lmData),
+            exe: isExeToggleOn ? !!exeData : lastFetchOk.exe,
+            web: isWebToggleOn ? !!webData : lastFetchOk.web,
+            lm:  isLMToggleOn  ? !!lmData  : lastFetchOk.lm,
         };
 
         let mergedScores = [];
@@ -271,7 +273,7 @@ function updateServer(auth_token, displayType, controlType, pbType) {
         // exe archive name (or the web/lm fallback) so the legacy
         // buildTimestampSection branch can still format something.
         if (archiveMode === 'live') {
-            archiveDate = "LIVE";
+            archiveDate = exeFallbackArchive || "LIVE";
         } else {
             archiveDate = exeArchive || webArchive || lmArchive || "LIVE";
         }
@@ -283,6 +285,11 @@ function updateServer(auth_token, displayType, controlType, pbType) {
                 web: isWebToggleOn ? { archive: webArchive, ok: lastFetchOk.web } : null,
                 lm:  isLMToggleOn  ? { archive: lmArchive,  ok: lastFetchOk.lm }  : null,
             });
+        }
+        // Sync the per-type preview items so they reflect actual fetch result.
+        if (typeof updatePreviewSourceStatus === 'function') {
+            const ts = archiveSlider ? parseInt(archiveSlider.value, 10) : NaN;
+            updatePreviewSourceStatus(!isNaN(ts) ? ts : (selectedSliderDate || Number.POSITIVE_INFINITY));
         }
 
         // handleScoresResponse expects the "primary" res (used for userList
@@ -300,11 +307,36 @@ function updateServer(auth_token, displayType, controlType, pbType) {
         const savedArchiveDate = archiveMode === 'live' ? "LIVE" : exeArchive;
         archiveDate = savedArchiveDate;
         getScoresWrapper(auth_token, displayType, controlType, pbType, (err, res) => {
+            exeFetchAttempted = true;
             if (!err && res?.scoresParsed) {
                 exeData = res.scoresParsed;
                 exeUserList = res.userList || [];
+                exeFallbackArchive = null;
+                finalize();
+            } else if (archiveMode === 'live' && !exeArchive) {
+                // Live server unavailable — try latest exe archive as fallback.
+                const fallback = availableExeArchives[0];
+                if (fallback) {
+                    exeArchive = fallback;
+                    archiveDate = fallback;
+                    selectedArchiveDates.exe = fallback;
+                    exeFallbackArchive = fallback;
+                    getScoresWrapper(auth_token, displayType, controlType, pbType, (fallbackErr, fallbackRes) => {
+                        exeFetchAttempted = true;
+                        if (!fallbackErr && fallbackRes?.scoresParsed) {
+                            exeData = fallbackRes.scoresParsed;
+                            exeUserList = fallbackRes.userList || [];
+                        } else {
+                            exeFallbackArchive = null;
+                        }
+                        finalize();
+                    });
+                    return;
+                }
+                finalize();
+            } else {
+                finalize();
             }
-            finalize();
         });
     }
 
