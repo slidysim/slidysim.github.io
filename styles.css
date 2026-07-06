@@ -288,38 +288,9 @@ table th {
     border-bottom: 2px solid #222;
 }
 
-table.rankingCells {
-    border-collapse: collapse;
-    width: auto;
-    background-color: transparent !important;
-}
-
-table.rankingCells tr.clickable {
-    background-color: transparent !important;
-}
-
 .no-box-shadow {
     box-shadow: none !important;
     border-color: transparent !important;
-}
-
-table.rankingCells th {
-    font-size: 12px;
-}
-
-table.rankingCells th,
-table.rankingCells td {
-    font-weight: bold;
-    min-width: 46px;
-    max-width: 46px;
-    height: 27px;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-}
-
-.smallTextForCellsRanks {
-    color: gray;
-    font-size: 11px;
 }
 
 .leaderboardUpdateSpan {
@@ -327,13 +298,6 @@ table.rankingCells td {
     display: block;
     color: gray;
     font-size: 14px;
-}
-
-table.rankingCells td {
-    padding: 5px;
-    font-size: 13px;
-    box-shadow: 0 0 1px #fff;
-    box-sizing: content-box;
 }
 
 .WRPB,
@@ -352,15 +316,6 @@ table.rankingCells td {
 .shadowFun {
     box-shadow: 0 0 1px #fff;
     height: 50px;
-}
-
-.blackBG {
-    background-color: black;
-}
-
-.nameCell {
-    min-width: 150px !important;
-    max-width: 150px !important;
 }
 
 .grayColor {
@@ -859,7 +814,6 @@ input[type="checkbox"] {
 
 label[for="constantTPSCheckbox"],
 label[for="autoDetectGridsCheckbox"],
-label[for="hideEmptyCheckbox"],
 label[for="onlySquaresCheckbox"] {
     position: relative;
     top: 10px;
@@ -872,7 +826,6 @@ label[for="onlySquaresCheckbox"] {
 }
 
 label[for="constantTPSCheckbox"]::before,
-label[for="hideEmptyCheckbox"]::before,
 label[for="autoDetectGridsCheckbox"]::before,
 label[for="onlySquaresCheckbox"]::before {
     content: '';
@@ -889,7 +842,6 @@ label[for="onlySquaresCheckbox"]::before {
 
 input[type="checkbox"]#constantTPSCheckbox:checked+label[for="constantTPSCheckbox"]::before,
 input[type="checkbox"]#autoDetectGridsCheckbox:checked+label[for="autoDetectGridsCheckbox"]::before,
-input[type="checkbox"]#hideEmptyCheckbox:checked+label[for="hideEmptyCheckbox"]::before,
 input[type="checkbox"]#onlySquaresCheckbox:checked+label[for="onlySquaresCheckbox"]::before {
     background-color: cyan;
     border-color: cyan;
@@ -2199,3 +2151,558 @@ iframe {
     .as-source-status { font-size: 10px; }
 }
 
+
+/* ============================================================================
+   KINCH / POPULAR RANKINGS — POWER-STYLE TABLE SYSTEM
+   All selectors scoped under .kinch-view. No !important — proper specificity.
+   Score cells: BLACK background + tier-colored TEXT (swapped from original).
+   Cell outline: box-shadow 0 0 1px #fff (white glow, matches original).
+   ========================================================================== */
+
+.kinch-view { --kinch-toolbar-h: 32px; }
+.kinch-view {
+    width: 100%;
+    min-height: 0;
+    text-align: center;
+    font-family: monospace;
+}
+
+/* --- toolbar --- */
+.kinch-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 4px 8px;
+    padding: 4px 8px;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    min-height: var(--kinch-toolbar-h);
+    box-sizing: border-box;
+}
+.kinch-toolbar .sliderlabel {
+    margin: 0;
+    text-align: left;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.kinch-toolbar input[type="range"] {
+    vertical-align: middle;
+    width: 100px;
+}
+
+/* chart button */
+.kinch-chart-btn {
+    background: transparent;
+    color: #00ffff;
+    border: 1px solid #007385;
+    border-radius: 0;
+    padding: 0 8px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 400;
+    font-family: monospace;
+    line-height: 26px;
+    transition: .2s;
+    white-space: nowrap;
+    display: inline-block;
+    height: 28px;
+}
+.kinch-chart-btn:hover { background: rgba(0,255,255,0.15); }
+.kinch-chart-btn.active { background: #00ffff; color: #000; }
+
+/* switch pills */
+#kinch-switch-dropdown {
+    display: flex;
+    align-items: stretch;
+    margin-left: auto;
+}
+.kinch-switch {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+.kinch-switch input[type="checkbox"] { display: none; }
+.kinch-switch .checkbox-text {
+    font-size: 11px;
+    color: #00ffff;
+    padding: 0 8px;
+    line-height: 26px;
+    cursor: pointer;
+    border: 1px solid #007385;
+    display: block;
+    border-radius: 0;
+    white-space: nowrap;
+    font-family: monospace;
+    height: 28px;
+}
+.kinch-switch + .kinch-switch .checkbox-text { border-left: none; }
+.kinch-switch input[type="checkbox"]:checked + .checkbox-text {
+    background: #00ffff;
+    color: #000;
+}
+.kinch-switch input[type="checkbox"]:not(:checked) + .checkbox-text:hover {
+    background: rgba(0,255,255,0.15);
+}
+
+#kinch-mobile-switch-btn {
+    display: none;
+    background: hsl(0, 0%, 8%);
+    border: 1px solid #007385;
+    color: #00ffff;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 10px;
+    line-height: 26px;
+    font-family: monospace;
+    border-radius: 0;
+    height: 28px;
+}
+@media (max-width: 1199px) {
+    #kinch-mobile-switch-btn { display: block; margin-left: auto; }
+    #kinch-switch-dropdown {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: #1a1a1a;
+        border: 1px solid #333;
+        z-index: 1000;
+        flex-direction: column;
+        padding: 0;
+    }
+    #kinch-switch-dropdown.open { display: flex; }
+    #kinch-switch-dropdown .kinch-switch .checkbox-text { border: 1px solid #007385; }
+}
+
+/* --- chart container --- */
+#kinch-chart-container {
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    height: 380px;
+    width: 100%;
+    overflow: clip;
+    box-sizing: border-box;
+    position: relative;
+}
+#kinch-chart-container .chart-controls {
+    position: absolute;
+    top: 6px;
+    left: 10px;
+    right: 10px;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    color: #999;
+    font-size: 11px;
+    gap: 8px;
+}
+#kinch-chart-container .chart-controls .spacer { flex: 1; }
+#kinch-chart-title {
+    color: #aaa;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    word-break: break-word;
+    line-height: 1.3;
+    max-width: 50%;
+}
+#kinch-chart-container .chart-controls label {
+    cursor: pointer;
+    user-select: none;
+    color: #999;
+    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+#kinch-chart-container .chart-controls input[type="checkbox"] {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin: 0;
+    accent-color: #666;
+    cursor: pointer;
+    vertical-align: middle;
+}
+#kinch-chart-container .chart-controls input[type="range"] {
+    width: 100px;
+    height: 14px;
+    vertical-align: middle;
+    accent-color: #666;
+    margin: 0;
+    cursor: pointer;
+}
+#kinch-chart-category-trigger {
+    cursor: pointer;
+    color: #999;
+    font-size: 11px;
+    user-select: none;
+}
+#kinch-chart-category-panel {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+    padding: 4px 0;
+    min-width: 150px;
+    white-space: nowrap;
+}
+#kinch-chart-category-panel label {
+    display: block;
+    padding: 2px 12px;
+    color: #ccc;
+    font-size: 11px;
+    cursor: pointer;
+}
+#kinch-chart-category-panel label:hover { background: #333; }
+#kinch-chart-category-panel input[type="checkbox"] {
+    margin-right: 4px;
+    accent-color: #555;
+}
+
+/* --- results table --- */
+.kinch-view .results-table {
+    padding-top: 0;
+    width: max-content;
+    margin: auto;
+    text-align: center;
+}
+.kinch-view .results-table table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.kinch-view .kinch-sticky-wrapper {
+    position: sticky;
+    top: var(--kinch-toolbar-h);
+    z-index: 40;
+    background: #000;
+}
+.kinch-view .kinch-sticky-wrapper > table {
+    width: max-content;
+}
+
+/* ALL cells: hard width, content-box.
+   Background: BLACK. Outline: box-shadow 0 0 1px #fff (white glow, original style).
+   Tier color applied as TEXT color via [tier] attribute. */
+.kinch-view .results-table td {
+    padding: 0 4px;
+    font-weight: 400;
+    font-size: 12px;
+    width: 58px;
+    height: 40px;
+    overflow: hidden;
+    box-sizing: content-box;
+    text-align: center;
+    vertical-align: middle;
+    font-family: monospace;
+    line-height: 1.4;
+    white-space: normal;
+    background-color: #000;
+    box-shadow: 0 0 1px #fff;
+}
+.kinch-view .results-table td:nth-child(-n+3) {
+    overflow: visible;
+}
+
+/* Name column — centered, black bg, tier-colored text */
+.kinch-view .results-table .player {
+    min-width: 132px;
+    max-width: 132px;
+    width: 132px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+}
+.kinch-view .results-table .player-symbol,
+.kinch-view .results-table .player-power {
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* table header — solid dark bg */
+.kinch-view .table-header {
+    color: rgb(220, 220, 220);
+    background-color: rgb(10, 10, 10);
+}
+.kinch-view .table-header td {
+    background-color: rgb(10, 10, 10);
+    box-shadow: 0 0 1px #fff;
+}
+.kinch-view .kinch-sticky-wrapper .table-header {
+    position: relative;
+}
+.kinch-view .results-table > table > thead {
+    position: sticky;
+    top: var(--kinch-toolbar-h);
+    z-index: 30;
+}
+
+/* req-row — dark GRAY bg (distinct from player rows), tier-colored text */
+.kinch-view .req-row td {
+    white-space: nowrap;
+    height: 40px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .3px;
+    background-color: #2a2a2a;
+    line-height: 1.4;
+    box-shadow: 0 0 1px #fff;
+}
+.kinch-view .req-row td:first-child {
+    white-space: normal;
+}
+.kinch-view .req-row .req-symbol {
+    font-size: 18px;
+}
+
+/* events-row — adjustable height for long category names */
+.kinch-view .events-row {
+    height: auto;
+    min-height: 40px;
+    color: rgb(170, 170, 170);
+}
+.kinch-view .events-row td {
+    background-color: rgb(10, 10, 10);
+    font-weight: 400;
+    font-size: 11px;
+    height: auto;
+    min-height: 40px;
+    line-height: 1.3;
+    padding: 4px 4px;
+    vertical-align: middle;
+}
+
+/* player rows */
+.kinch-view .player-row {
+    height: 40px;
+}
+.kinch-view .player-row td.kinch-clickable {
+    cursor: pointer;
+    transition: .2s;
+}
+.kinch-view .player-row td.kinch-clickable:hover {
+    filter: brightness(1.3);
+}
+.kinch-view .player-row:hover td {
+    background-color: #ffffff15;
+}
+.kinch-view .sortable-player { cursor: pointer; }
+.kinch-view .sortable-player:hover { filter: brightness(0.85); }
+
+/* empty score cell */
+.kinch-view .kinch-empty-cell {
+    color: #555;
+    box-shadow: 0 0 1px #fff;
+    background-color: #000;
+}
+
+/* icons — small, vertically aligned, drop-shadow outline */
+.kinch-view .results-table td .score-main {
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 1.4;
+    vertical-align: middle;
+    display: inline;
+}
+.kinch-view .results-table td .emoji {
+    max-height: 13px;
+    max-width: 13px;
+    margin: 0 1px;
+    vertical-align: middle;
+    display: inline-block;
+    filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.8));
+}
+.kinch-view .results-table td span[style*="border-radius:50%"] {
+    width: 5px;
+    height: 5px;
+    margin: 0 2px 0 0;
+    vertical-align: middle;
+    display: inline-block;
+}
+.kinch-view .results-table .player .emoji {
+    filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.8));
+}
+
+/* --- greek-tier color system (SWAPPED: black bg + tier-colored text) ---
+   [tier] sets TEXT color only (background stays black from the td rule).
+   [tierf] sets text-shadow glow for tier-name cells + tooltip. */
+.kinch-view [tier="alpha"]   { color: #00ffff; }
+.kinch-view [tier="beta"]    { color: #00ff00; }
+.kinch-view [tier="gamma"]   { color: #ff2262; }
+.kinch-view [tier="delta"]   { color: #a14dff; }
+.kinch-view [tier="epsilon"] { color: #ffff00; }
+.kinch-view [tier="zeta"]    { color: #ffaaf4; }
+.kinch-view [tier="eta"]     { color: #85fa85; }
+.kinch-view [tier="theta"]   { color: #b9f2ff; }
+.kinch-view [tier="iota"]    { color: #23958b; }
+.kinch-view [tier="kappa"]   { color: #afafaf; }
+
+.kinch-view [tierf="alpha"]   { color: #00ffff; text-shadow: 0 0 10px #00ffff; }
+.kinch-view [tierf="beta"]    { color: #00ff00; text-shadow: 0 0 10px #00ff00; }
+.kinch-view [tierf="gamma"]   { color: #ff2262; text-shadow: 0 0 10px #ff2262; }
+.kinch-view [tierf="delta"]   { color: #a14dff; text-shadow: 0 0 10px #a14dff; }
+.kinch-view [tierf="epsilon"] { color: #ffff00; text-shadow: 0 0 10px #ffff00; }
+.kinch-view [tierf="zeta"]    { color: #ffaaf4; text-shadow: 0 0 10px #ffaaf4; }
+.kinch-view [tierf="eta"]     { color: #85fa85; text-shadow: 0 0 10px #85fa85; }
+.kinch-view [tierf="theta"]   { color: #b9f2ff; text-shadow: 0 0 10px #b9f2ff; }
+.kinch-view [tierf="iota"]    { color: #23958b; text-shadow: 0 0 10px #23958b; }
+.kinch-view [tierf="kappa"]   { color: #afafaf; }
+
+/* WR cell — inset cyan border */
+.kinch-view .WRPB {
+    box-shadow: 0 0 1px #fff, inset 0 -2px 0 #00f1ff;
+}
+
+/* --- score tooltip --- */
+#kinch-score-tooltip {
+    position: fixed;
+    z-index: 9999;
+    display: none;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    white-space: nowrap;
+    pointer-events: none;
+    background: #1a1a1a;
+    border: 1px solid #555;
+    color: #ddd;
+    line-height: 1.4;
+    font-family: monospace;
+}
+#kinch-score-tooltip .tip-tier { font-weight: 700; }
+
+/* --- Popular controls — slider takes ALL available space --- */
+.kinch-view .kinch-popular-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    width: 100%;
+}
+.kinch-view .kinch-popular-controls input[type="range"] {
+    flex: 1;
+    width: 100%;
+    min-width: 100px;
+    height: 14px;
+    vertical-align: middle;
+    accent-color: #888;
+    margin: 0;
+    cursor: pointer;
+}
+.kinch-view .kinch-popular-info {
+    font-size: 11px;
+    font-family: monospace;
+    color: #fff;
+    white-space: nowrap;
+    min-width: 90px;
+    text-align: left;
+}
+.kinch-view .kinch-popular-interesting {
+    font-size: 11px;
+    color: #00ffff;
+    padding: 0 8px;
+    line-height: 26px;
+    cursor: pointer;
+    border: 1px solid #007385;
+    display: inline-block;
+    border-radius: 0;
+    white-space: nowrap;
+    font-family: monospace;
+    height: 28px;
+}
+.kinch-view .kinch-popular-controls input[type="checkbox"]#kinch-only-squares {
+    display: none;
+}
+.kinch-view .kinch-popular-controls input[type="checkbox"]#kinch-only-squares:checked + .kinch-popular-interesting {
+    background: #00ffff;
+    color: #000;
+}
+
+/* --- Kinch presets row — textarea + presets + share, properly aligned --- */
+.kinch-row {
+    display: flex;
+    align-items: stretch;
+    gap: 4px;
+    width: 100%;
+    max-width: 900px;
+    margin: 4px auto;
+}
+.kinch-row #containerCustomRanksText {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+}
+.kinch-row .text-input {
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+    height: 66px;
+    font-family: monospace;
+    font-size: 12px;
+    padding: 4px 6px;
+    resize: vertical;
+    background: #1a1a1a;
+    color: #00ff00;
+    border: 1px solid #007385;
+    border-radius: 0;
+    outline: none;
+}
+.kinch-row .text-input:focus {
+    border-color: #00ffff;
+}
+.kinch-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-shrink: 0;
+    justify-content: center;
+}
+.kinch-actions select,
+.kinch-actions .pause-button {
+    height: 31px;
+    min-width: 80px;
+    font-family: monospace;
+    font-size: 11px;
+    font-weight: 400;
+    padding: 0 8px;
+    box-sizing: border-box;
+    background: #1a1a1a;
+    color: #00ffff;
+    border: 1px solid #007385;
+    border-radius: 0;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    -webkit-border-radius: 0;
+    cursor: pointer;
+    margin: 0;
+    outline: none;
+}
+.kinch-actions select {
+    border-radius: 0;
+    -webkit-border-radius: 0;
+    background-image: none;
+}
+.kinch-actions select::-ms-expand {
+    display: none;
+}
+.kinch-actions select:hover,
+.kinch-actions .pause-button:hover {
+    background: rgba(0,255,255,0.15);
+}

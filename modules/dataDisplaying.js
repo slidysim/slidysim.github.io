@@ -1029,263 +1029,1127 @@ function createSheetNxM(WRList) {
     });
 }
 
-//"Public" function to create Rankings sheet
+//"Public" function to create Kinch/Popular rankings sheet.
+//Full Power-style re-implementation: sticky events-row header, per-tier
+//req-row tables, [tier]/[tierf] greek-tier colors, 5 switches (Hide Empty,
+//Hide Reqs, Color Best, True Tiers, Nerf), Chart.js tier-distribution chart,
+//score tooltip with source info, icons (web/lm circles, youtube, exe eggs).
+//Only Kinch (Rankings3) + Popular (Rankings2) are affected — createSheet,
+//createSheetNxM, createSheetHistory, the Power iframe, and all shared
+//CSS/classes/data-pipeline are untouched.
+var kinchPlayerScores = null;
+var kinchScoreType = "Time";
+var kinchReverse = false;
+var kinchValidCategories = [];
+var kinchTierChart = null;
+var kinchChartCategories = []; // selected categories for chart category mode
+var kinchSortColumn = null;   // null = no sort, 0=name, 1=place, 2=kinch, 3+ = category
+var kinchSortAsc = true;
+
 function createSheetRankings(playerScores) {
     savedPlayerScores = playerScores;
     let reverse = request.leaderboardType === "tps";
-
-    const scoreTypeDisplayMap = {
-        "move": "Moves",
-        "time": "Time",
-        "tps": "TPS",
-        "FMC": "FMC",
-        "FMC MTM": "FMC MTM"
-    };
-
+    const scoreTypeDisplayMap = { "move":"Moves","time":"Time","tps":"TPS","FMC":"FMC","FMC MTM":"FMC MTM" };
     let scoreType = scoreTypeDisplayMap[request.leaderboardType] || request.leaderboardType;
+
     const contentDiv = document.getElementById("contentDiv");
     contentDiv.classList = "NxMContent";
     contentDiv.innerHTML = "";
     resetContentDivLayout(contentDiv);
-    contentDiv.style.overflowX = "auto"
+    contentDiv.style.overflow = "visible";
     generateFormattedString(request);
-    createHideEmptyCheckbox();
-    if (playerScores.length === 0) {
-        contentDiv.innerHTML = notFoundError;
-    } else {
-        if (loadingPower) { loadPower(); return; }
-        const tableContainer = document.createElement('div');
-        tableContainer.classList.add('table-container');
-        tableContainer.classList.add('bigContainer');
-        contentDiv.appendChild(tableContainer);
-        let palyerId = 0;
-        for (const category in percentageTable) {
-            if (percentageTable.hasOwnProperty(category)) {
-                const table = document.createElement('table');
-                table.classList.add("rankingCells");
-                const tableHeaderRow = document.createElement('tr');
-                const currentPrecentage = percentageTable[category];
-                let categoryCapName = category.charAt(0).toUpperCase() + category.slice(1);
 
-                const thElementLetter = document.createElement('th');
-                thElementLetter.appendChild(greekLetterSpan(category));
-                tableHeaderRow.appendChild(thElementLetter);
+    if (playerScores.length === 0) { contentDiv.innerHTML = notFoundError; return; }
+    if (loadingPower) { loadPower(); return; }
 
-                const thElementName = document.createElement('th');
-                thElementName.textContent = categoryCapName;
-                thElementName.style.fontSize = "12px";
-                tableHeaderRow.appendChild(thElementName);
+    // Store for re-renders triggered by switch toggles
+    kinchPlayerScores = playerScores;
+    kinchScoreType = scoreType;
+    kinchReverse = reverse;
 
+    // --- .kinch-view wrapper ---
+    const view = document.createElement("div");
+    view.className = "kinch-view";
+    contentDiv.appendChild(view);
 
-                tableHeaderRow.appendChild(document.createElement('th'))
-                    .textContent = ">" + currentPrecentage + "%";
-                tableHeaderRow.classList.add(category);
-                playerScores[0].scores.forEach(function (score) {
-                    fakeScoreInfo = parseId(score.id); //fix for non-existing scores
-                    var th = document.createElement('th');
-                    var smallText = document.createElement('span');
-                    let isAverage = (fakeScoreInfo.avglen !== 1);
-                    const bestValue = bestValues[score.id];
-                    const newScoreLimit = getScoreLimit(currentPrecentage, bestValue, reverse, scoreType, isAverage);
-                    smallText.textContent = newScoreLimit;
-                    smallText.classList.add("smallTextForCellsRanks");
-                    th.innerHTML = score.id.replace(" ", "<br>");
-                    th.appendChild(document.createElement('br'));
-                    th.appendChild(smallText);
-                    th.classList.add("clickable");
-                    let newSize = fakeScoreInfo.width + "x" + fakeScoreInfo.height;
-                    let newGameMode = fakeScoreInfo.gameMode;
-                    th.addEventListener("click", function () {
-                        changePuzzleSize(newSize);
-                        for (const radio of gamemodeRadios) {
-                            if (radio.value === newGameMode) {
-                                radio.checked = true;
-                                break;
-                            }
-                        }
-                        changePuzzleSize(newSize);
-                        changeGameMode(newGameMode);
+    // --- toolbar (Popular controls + switches + chart toggle) ---
+    const toolbar = document.createElement("div");
+    toolbar.className = "kinch-toolbar";
+    view.appendChild(toolbar);
+    if (request.width === "Rankings2") { createCustomSlider(toolbar); }
+    kinchBuildSwitches(toolbar);
+
+    const chartBtn = document.createElement("button");
+    chartBtn.className = "kinch-chart-btn";
+    chartBtn.textContent = "Chart";
+    chartBtn.addEventListener("click", function () {
+        kinchChartVisible = !kinchChartVisible;
+        var c = document.getElementById("kinch-chart-container");
+        if (c) {
+            c.style.display = kinchChartVisible ? "block" : "none";
+            chartBtn.classList.toggle("active", kinchChartVisible);
+            if (kinchChartVisible) {
+                kinchLoadChartJS(function () {
+                    kinchUpdateChart();
+                    // Chart.js needs a resize after the container becomes visible
+                    requestAnimationFrame(function () {
+                        if (kinchTierChart) kinchTierChart.resize();
                     });
-                    th.addEventListener('mouseover', () => {
-                        tooltip.innerHTML = exactLimitString + "<br>" + category + " " + score.id + ":<br>" + getScoreLimitExact(currentPrecentage, bestValues[score.id], reverse);
-                        th.classList.add("highlightedCell");
-                        tooltip.classList.add(category);
-                        tooltip.style.display = 'block';
-                    });
-                    th.addEventListener('mousemove', (e) => {
-                        tooltip.style.left = (e.pageX - 150) + 'px';
-                        tooltip.style.top = (e.pageY - 100) + 'px';
-                    });
-                    th.addEventListener('mouseout', () => {
-                        th.classList.remove("highlightedCell");
-                        tooltip.classList.remove(category);
-                        tooltip.style.display = 'none';
-                    });
-                    if (bestValue !== defaultScore && !isInvalid(bestValue, scoreType)) {
-                        tableHeaderRow.appendChild(th);
-                    }
                 });
-                table.appendChild(tableHeaderRow);
-                let beforeAddingID = palyerId;
-                for (const playerScore of playerScores) {
-                    if (playerScore.tier === category) {
-                        palyerId++;
-                        const playerTableRow = document.createElement('tr');
-                        const playerPlaceCell = document.createElement('td');
-                        playerPlaceCell.textContent = palyerId;
-                        const playerNameCell = document.createElement('td');
-                        playerNameCell.innerHTML = appendFlagIconToNickname(playerScore.name);
-                        playerNameCell.classList.add("clickable");
-                        playerNameCell.addEventListener("click", function () {
-                            radioNxNWRs.checked = true;
-                            changePuzzleSize(radioNxNWRs.value);
-                            changeNameFilter(playerScore.name);
-                        });
-                        const playerPowerCell = document.createElement('td');
-                        playerPowerCell.textContent = playerScore.power.toFixed(3) + "%";
-                        playerPlaceCell.classList.add(category);
-                        playerNameCell.classList.add(category);
-                        playerNameCell.classList.add("nameCell");
-                        playerPowerCell.classList.add(category);
-                        playerNameCell.classList.add("blackBG");
-                        playerPowerCell.classList.add("blackBG");
-                        playerPlaceCell.classList.add("blackBG");
-                        playerTableRow.appendChild(playerPlaceCell);
-                        playerTableRow.appendChild(playerNameCell);
-                        playerTableRow.appendChild(playerPowerCell);
-                        playerScore.scores.forEach(function (scoreData) {
-                            let item = scoreData.scoreInfo;
-                            let isAverage = (item.avglen !== 1);
-                            let scoreString = getScoreString(item.time, item.moves, item.tps, scoreType, isAverage);
-                            const scoreCell = createTableCellScore([scoreString[0], ""], 'score', "kappa");
-                            scoreCell.classList.add(scoreData.scoreTier);
-                            let extraInfo = "";
-                            if (["Time", "FMC", "FMC MTM"].includes(scoreType)) {
-                                extraInfo = formatTime(item.time);
-                                extraInfo += ` (${(item.moves / 1000).toFixed(3).replace(/\.?0+$/, '')} / ${normalizeTPS(item.tps)})`
-                                extraInfo += "<br>";
-                            }
-                            if (scoreType === "Moves") {
-                                extraInfo = (item.moves / 1000).toFixed(3).replace(/\.?0+$/, ''); //remove extra 0
-                                extraInfo += ` (${formatTime(item.time)} / ${normalizeTPS(item.tps)})`
-                                extraInfo += "<br>";
-                            }
-                            if (scoreType === "TPS") {
-                                extraInfo = normalizeTPS(item.tps);
-                                extraInfo += ` (${formatTime(item.time)} / ${(item.moves / 1000).toFixed(3).replace(/\.?0+$/, '')})`
-                                extraInfo += "<br>";
-                            }
-                            if (scoreData.scorePercentage === 100) {
-                                scoreCell.classList.add("WRPB");
-                                extraInfo += " [WR]<br>";
-                            } else {
-                                extraInfo += " " + scoreData.scorePercentage + "%<br>"
-                            }
-                            if (scoreString[0].includes("NaN")) {
-                                scoreCell.classList.add("no-box-shadow");
-                                scoreCell.innerHTML = "-";
-                            } else {
-                                if (!debugMode) {
-                                    const videolink = videoLinkCheck(item.videolink);
-                                    let makeyoutubelink = false;
-                                    if (item.isWeb) {
-                                        scoreCell.firstChild.innerHTML = webElement + scoreCell.firstChild.textContent;
-                                    }
-                                    if (item.isLM) {
-                                        scoreCell.firstChild.innerHTML = lmElement + scoreCell.firstChild.textContent;
-                                    }
-                                    if (videolink) {
-                                        scoreCell.classList.add("clickable");
-                                        scoreCell.firstChild.innerHTML = youtubeElement + scoreCell.firstChild.textContent;
-                                        makeyoutubelink = true;
-                                    }
-                                    if (true//item.gameMode === "Standard" //&& !isAverage
-                                    ) {
-                                        //const solution = getSolutionForScore(item);
-                                        if (item.solve_data_available) {
-                                            makeyoutubelink = false;
-                                            let videoLinkForReplay = -1;
-                                            if (videolink) {
-                                                videoLinkForReplay = videolink;
-                                                scoreCell.innerHTML = redEggElement + scoreCell.textContent;
-                                            } else {
-                                                scoreCell.innerHTML = eggElement + scoreCell.textContent;
-                                            }
-                                            scoreCell.classList.add("clickable");
-                                            const scoreTitle = getScoreTitle(videoLinkForReplay, item.width, item.height, item.displayType, item.nameFilter, item.controls, item.timestamp, scoreData.scoreTier, scoreData.scorePercentage === 100, scoreType);
-                                            scoreCell.addEventListener('click', (event) => {
-                                                getSolutionForScore(item, (error, solveData) => {
-                                                    if (error) {
-                                                        alert(error);
-                                                    } else {
-                                                        //makeReplay(solution, event, item.tps, item.width, item.height, scoreTitle);
-                                                        handleSavedReplay(item, solveData, event, item.tps, item.width, item.height, scoreTitle, videoLinkForReplay, scoreData.scoreTier, scoreData.scorePercentage === 100);
-                                                    }
-                                                });
-                                            });
-                                        }
-                                    }
-                                    if (makeyoutubelink) {
-                                        scoreCell.addEventListener('click', function () {
-                                            window.open(videolink, '_blank');
-                                        });
-                                    }
-                                } else {
+            }
+        }
+    });
+    toolbar.appendChild(chartBtn);
 
-                                    if (item.nameFilter === logged_in_as || logged_in_as === "vovker" || logged_in_as === "dphdmn") {
-                                        scoreCell.classList.add("clickable");
-                                        scoreCell.firstChild.textContent = getScoreIDIcon + scoreCell.firstChild.textContent;
-                                        scoreCell.addEventListener('click', function () {
-                                            promptForVideoLink(item.time, item.moves, item.timestamp);
-                                        });
-                                    }
-                                }
-                                scoreCell.addEventListener('mouseover', () => {
-                                    tooltip.innerHTML = extraInfo + scoreData.id + byString + item.nameFilter + "<br>" + getControlsAndDate(item.timestamp, item.controls);
-                                    scoreCell.classList.add("highlightedCell");
-                                    tooltip.style.display = 'block';
-                                    tooltip.classList.add(scoreData.scoreTier);
-                                });
-                                scoreCell.addEventListener('mousemove', (e) => {
-                                    tooltip.style.left = (e.pageX - 200) + 'px';
-                                    tooltip.style.top = (e.pageY - 100) + 'px';
-                                });
+    // --- chart container (hidden by default) ---
+    const chartContainer = document.createElement("div");
+    chartContainer.id = "kinch-chart-container";
+    chartContainer.style.display = "none";
+    chartContainer.innerHTML =
+        '<div class="chart-controls">' +
+            '<div class="spacer"></div>' +
+            '<span id="kinch-chart-title"></span>' +
+            '<div class="spacer" style="display:flex;align-items:center;gap:8px;justify-content:flex-end;">' +
+                '<span>Skip</span>' +
+                '<input type="range" id="kinch-chart-ignore" value="0" min="0">' +
+                '<span id="kinch-chart-ignore-val">0</span>' +
+                '<div style="position:relative;display:inline-block;">' +
+                    '<span id="kinch-chart-category-trigger">Overall ▾</span>' +
+                    '<div id="kinch-chart-category-panel"></div>' +
+                '</div>' +
+                '<label><input type="checkbox" id="kinch-switch-cumulative" checked> Cumulative</label>' +
+                '<label><input type="checkbox" id="kinch-switch-percent" checked> Percent</label>' +
+            '</div>' +
+        '</div>' +
+        '<canvas id="kinch-tier-chart"></canvas>';
+    view.appendChild(chartContainer);
+    kinchWireChartControls();
 
-                                scoreCell.addEventListener('mouseout', () => {
-                                    scoreCell.classList.remove("highlightedCell");
-                                    tooltip.style.display = 'none';
-                                    tooltip.classList.remove(scoreData.scoreTier);
-                                });
-                            }
-                            if (bestValues[scoreData.id] !== defaultScore && !isInvalid(bestValues[scoreData.id], scoreType)) {
-                                playerTableRow.appendChild(scoreCell);
-                            }
-                        });
-                        table.appendChild(playerTableRow);
+    // --- results table ---
+    const resultsTable = document.createElement("div");
+    resultsTable.className = "results-table";
+    resultsTable.id = "kinch-results-table";
+    view.appendChild(resultsTable);
+
+    // --- score tooltip (Power-style, single global element) ---
+    var tooltip = document.getElementById("kinch-score-tooltip");
+    if (!tooltip) {
+        tooltip = document.createElement("div");
+        tooltip.id = "kinch-score-tooltip";
+        document.body.appendChild(tooltip);
+    }
+    tooltip.style.display = "none";
+
+    // --- render the table ---
+    kinchRenderTable(resultsTable);
+
+    // --- apply initial switch states ---
+    kinchApplyHideReqs();
+    if (kinchColorBest) kinchApplyColorBest();
+
+    // --- restore chart if it was visible ---
+    if (kinchChartVisible) {
+        chartContainer.style.display = "block";
+        chartBtn.classList.add("active");
+        kinchLoadChartJS(function () { kinchUpdateChart(); });
+    }
+}
+
+//Returns the tier keys in descending order (alpha first, kappa last) from the active percentageTable.
+function kinchGetTierOrder() {
+    return Object.keys(percentageTable); // alpha, beta, gamma, delta, epsilon, zeta, eta, theta, iota, kappa
+}
+
+//Filters the category list to those with a real WR (bestValue !== defaultScore && !isInvalid).
+function kinchGetValidCategories(playerScores) {
+    if (!playerScores || playerScores.length === 0) return [];
+    var cats = playerScores[0].scores;
+    var valid = [];
+    for (var i = 0; i < cats.length; i++) {
+        var id = cats[i].id;
+        var bv = bestValues[id];
+        if (bv !== defaultScore && !isInvalid(bv, kinchScoreType)) valid.push(cats[i]);
+    }
+    return valid;
+}
+
+//Returns true if the category id matches one of the "impossible in LM" categories.
+//For time mode: 4x4 relay, 12x12 single, 16x16 single, 20x20 single (per Power's nerf list).
+function kinchIsNerfedCategory(catId) {
+    var nerfList = ["4x4 relay", "12x12 single", "16x16 single", "20x20 single"];
+    return nerfList.indexOf(catId) !== -1;
+}
+
+//Transforms playerScores based on switch states (nerf, true-tiers).
+//Returns a new array; does not mutate the original savedPlayerScores.
+function kinchTransformScores(playerScores) {
+    var validCats = kinchGetValidCategories(playerScores);
+    var cats = validCats;
+    if (kinchNerf) {
+        cats = validCats.filter(function (c) { return !kinchIsNerfedCategory(c.id); });
+    }
+    var tierOrder = kinchGetTierOrder(); // alpha..kappa
+    var result = [];
+    for (var i = 0; i < playerScores.length; i++) {
+        var ps = playerScores[i];
+        var newScores = [];
+        var sum = 0, count = 0;
+        var worstTierIdx = -1;
+        var hasAllCats = true;
+        for (var j = 0; j < validCats.length; j++) {
+            var cat = validCats[j];
+            if (kinchNerf && kinchIsNerfedCategory(cat.id)) continue;
+            // find this player's score for this category
+            var sd = null;
+            for (var k = 0; k < ps.scores.length; k++) {
+                if (ps.scores[k].id === cat.id) { sd = ps.scores[k]; break; }
+            }
+            if (!sd || sd.scoreInfo === defaultScore || typeof sd.scoreInfo !== "object") {
+                hasAllCats = false;
+                newScores.push({ id: cat.id, score: defaultScore, scoreInfo: defaultScore, scorePercentage: 0, scoreTier: "kappa" });
+                continue;
+            }
+            newScores.push(sd);
+            sum += sd.scorePercentage;
+            count++;
+            var tierIdx = tierOrder.indexOf(sd.scoreTier);
+            if (tierIdx > worstTierIdx) worstTierIdx = tierIdx;
+        }
+        var power = count > 0 ? sum / count : 0;
+        var tier;
+        if (kinchTrueTiers) {
+            if (!hasAllCats) {
+                tier = "kappa"; // incomplete players go to the bottom in true mode
+            } else {
+                tier = worstTierIdx >= 0 ? tierOrder[worstTierIdx] : "kappa";
+            }
+        } else {
+            tier = getClassBasedOnPercentage(power, percentageTable);
+        }
+        result.push({ name: ps.name, scores: newScores, power: power, tier: tier });
+    }
+    result.sort(function (a, b) { return b.power - a.power; });
+    return result;
+}
+
+//Builds the 5 switch pills + mobile hamburger inside the toolbar.
+function kinchBuildSwitches(toolbar) {
+    var hamburger = document.createElement("button");
+    hamburger.id = "kinch-mobile-switch-btn";
+    hamburger.textContent = "☰";
+    toolbar.appendChild(hamburger);
+
+    var dropdown = document.createElement("div");
+    dropdown.id = "kinch-switch-dropdown";
+    toolbar.appendChild(dropdown);
+
+    var switches = [
+        { id: "kinch-switch-true",  label: "True Tiers",    state: kinchTrueTiers,  tt: "Off: All players are shown\nOn: Group players by their worst category tier" },
+        { id: "kinch-switch-empty", label: "Hide Empty",    state: kinchHideEmpty,  tt: "Off: All tiers are shown\nOn: Empty tiers are hidden" },
+        { id: "kinch-switch-reqs",  label: "Hide Reqs",     state: kinchHideReqs,   tt: "Off: All requirements are shown\nOn: Only the leaderboard rows are shown" }
+    ];
+
+    for (var i = 0; i < switches.length; i++) {
+        (function (sw) {
+            var label = document.createElement("label");
+            label.className = "kinch-switch";
+            label.setAttribute("data-tt", sw.tt);
+            label.innerHTML = '<input type="checkbox" id="' + sw.id + '"' + (sw.state ? " checked" : "") + '><span class="checkbox-text">' + sw.label + "</span>";
+            dropdown.appendChild(label);
+            var cb = label.querySelector("input");
+            cb.addEventListener("change", function () {
+                var checked = cb.checked;
+                switch (sw.id) {
+                    case "kinch-switch-true":  kinchTrueTiers = checked;  kinchRerender(); break;
+                    case "kinch-switch-empty": kinchHideEmpty = checked;  kinchRerender(); break;
+                    case "kinch-switch-reqs":  kinchHideReqs = checked;   kinchApplyHideReqs(); break;
+                }
+            });
+            // tooltip on hover for switch labels
+            label.addEventListener("mouseenter", function (e) {
+                var tip = document.getElementById("kinch-score-tooltip");
+                if (!tip) return;
+                var lines = sw.tt.split("\n");
+                var html = lines.map(function (ln) {
+                    var idx = ln.indexOf(": ");
+                    if (idx !== -1) return "<span>" + ln.substring(0, idx) + "</span>" + ln.substring(idx);
+                    return ln;
+                }).join("<br>");
+                tip.innerHTML = html;
+                tip.style.display = "block";
+                var rect = label.getBoundingClientRect();
+                var left = rect.left + rect.width / 2 - tip.offsetWidth / 2;
+                var top = rect.bottom + 4;
+                if (left + tip.offsetWidth > window.innerWidth - 8) left = window.innerWidth - tip.offsetWidth - 8;
+                if (left < 8) left = 8;
+                if (top + tip.offsetHeight > window.innerHeight - 8) top = rect.top - tip.offsetHeight - 4;
+                tip.style.left = left + "px";
+                tip.style.top = top + "px";
+            });
+            label.addEventListener("mouseleave", function () {
+                var tip = document.getElementById("kinch-score-tooltip");
+                if (tip) tip.style.display = "none";
+            });
+        })(switches[i]);
+    }
+
+    // mobile hamburger toggle
+    hamburger.addEventListener("click", function (e) {
+        e.stopPropagation();
+        dropdown.classList.toggle("open");
+    });
+    document.addEventListener("click", function () { dropdown.classList.remove("open"); });
+    dropdown.addEventListener("click", function (e) { e.stopPropagation(); });
+}
+
+//Re-renders the table from savedPlayerScores with current switch states.
+function kinchRerender() {
+    var resultsTable = document.getElementById("kinch-results-table");
+    if (!resultsTable || !kinchPlayerScores) return;
+    resultsTable.innerHTML = "";
+    kinchRenderTable(resultsTable);
+    kinchApplyHideReqs();
+    if (kinchColorBest) kinchApplyColorBest();
+    // redraw chart if visible
+    var container = document.getElementById("kinch-chart-container");
+    if (container && container.style.display !== "none" && window.Chart) kinchUpdateChart();
+}
+
+//Sorting: click a header cell to sort by that column. Click again to reverse.
+//col 0=name, 1=symbol, 2=kinch, 3+ = category index.
+function kinchSetupSortableHeader(cell, col) {
+    cell.style.cursor = "pointer";
+    cell.addEventListener("click", function () {
+        if (kinchSortColumn === col) kinchSortAsc = !kinchSortAsc;
+        else { kinchSortColumn = col; kinchSortAsc = true; }
+        kinchRerender();
+    });
+}
+
+//Returns the sort key for a playerScore + column index.
+//col 0=name, 1=place, 2=kinch, 3+ = category
+function kinchGetSortKey(ps, col) {
+    if (col === 0) return ps.name.toLowerCase();
+    if (col === 1) return 0; // place — sorting by place uses original order (power desc)
+    if (col === 2) return ps.power;
+    // category column (col >= 3)
+    var catIdx = col - 3;
+    var cat = kinchValidCategories[catIdx];
+    if (!cat) return 0;
+    for (var i = 0; i < ps.scores.length; i++) {
+        if (ps.scores[i].id === cat.id) {
+            return ps.scores[i].scoreInfo !== defaultScore && typeof ps.scores[i].scoreInfo === "object"
+                ? ps.scores[i].scorePercentage : -1;
+        }
+    }
+    return -1;
+}
+
+//Builds the sticky events-row wrapper + per-tier req-row tables + player rows.
+function kinchRenderTable(resultsTable) {
+    var transformed = kinchTransformScores(kinchPlayerScores);
+    kinchValidCategories = kinchGetValidCategories(kinchPlayerScores);
+    if (kinchNerf) {
+        kinchValidCategories = kinchValidCategories.filter(function (c) { return !kinchIsNerfedCategory(c.id); });
+    }
+    if (kinchValidCategories.length === 0) {
+        resultsTable.innerHTML = '<div style="padding:40px;color:#888;">No valid categories.</div>';
+        return;
+    }
+
+    var tierOrder = kinchGetTierOrder(); // alpha..kappa (descending)
+    var numCats = kinchValidCategories.length;
+
+    // --- sticky wrapper (events-row only, like Power) ---
+    var stickyWrap = document.createElement("div");
+    stickyWrap.className = "kinch-sticky-wrapper";
+    var stickyTable = document.createElement("table");
+    stickyWrap.appendChild(stickyTable);
+    var stickyHead = document.createElement("thead");
+    stickyHead.className = "table-header";
+    stickyTable.appendChild(stickyHead);
+    var eventsRow = document.createElement("tr");
+    eventsRow.className = "events-row";
+    stickyHead.appendChild(eventsRow);
+
+    // 3 fixed columns: Name | # | Kinch — all sortable (col 0=name, 1=place, 2=kinch)
+    // When sorting is active, Name header becomes "Reset sorting" (like Power)
+    var thName = document.createElement("td");
+    thName.className = "player";
+    if (kinchSortColumn !== null) {
+        thName.textContent = "Reset sorting";
+        thName.style.cursor = "pointer";
+        thName.style.minWidth = "132px";
+        thName.addEventListener("click", function () {
+            kinchSortColumn = null;
+            kinchSortAsc = true;
+            kinchRerender();
+        });
+    } else {
+        thName.textContent = "Name" + (kinchSortColumn === 0 ? (kinchSortAsc ? " ▲" : " ▼") : "");
+        thName.style.minWidth = "132px";
+        kinchSetupSortableHeader(thName, 0);
+    }
+    eventsRow.appendChild(thName);
+
+    var thPlace = document.createElement("td");
+    thPlace.textContent = "#" + (kinchSortColumn === 1 ? (kinchSortAsc ? " ▲" : " ▼") : "");
+    kinchSetupSortableHeader(thPlace, 1);
+    eventsRow.appendChild(thPlace);
+
+    var thPower = document.createElement("td");
+    thPower.textContent = "Kinch" + (kinchSortColumn === 2 ? (kinchSortAsc ? " ▲" : " ▼") : "");
+    kinchSetupSortableHeader(thPower, 2);
+    eventsRow.appendChild(thPower);
+
+    // per-category headers (sortable)
+    for (var c = 0; c < numCats; c++) {
+        (function (cat, colIdx) {
+            var th = document.createElement("td");
+            th.innerHTML = cat.id.replace(/ /g, "<br>");
+            if (kinchSortColumn === colIdx) th.innerHTML += kinchSortAsc ? " ▲" : " ▼";
+            th.style.cursor = "pointer";
+            kinchSetupSortableHeader(th, colIdx);
+            eventsRow.appendChild(th);
+        })(kinchValidCategories[c], c + 3);
+    }
+    resultsTable.appendChild(stickyWrap);
+
+    // --- if sorting is active, render ONE global table with all players sorted ---
+    if (kinchSortColumn !== null) {
+        var sortedPlayers = transformed.slice();
+        sortedPlayers.sort(function (a, b) {
+            var va = kinchGetSortKey(a, kinchSortColumn);
+            var vb = kinchGetSortKey(b, kinchSortColumn);
+            // -1 (no score) always sorts last
+            if (va === -1 && vb !== -1) return 1;
+            if (vb === -1 && va !== -1) return -1;
+            if (typeof va === "string" && typeof vb === "string") {
+                return kinchSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+            }
+            return kinchSortAsc ? va - vb : vb - va;
+        });
+
+        // Assign place numbers based on Kinch% rank (power descending),
+        // NOT the sorted order. In True Tiers mode, places follow the
+        // true tier grouping order.
+        var placeMap = {};
+        var sortedByPower = transformed.slice().sort(function (a, b) { return b.power - a.power; });
+        for (var pi = 0; pi < sortedByPower.length; pi++) {
+            placeMap[sortedByPower[pi].name] = pi + 1;
+        }
+
+        var globalTable = document.createElement("table");
+        globalTable.id = "kinch-sorted-table";
+        resultsTable.appendChild(globalTable);
+        var gTbody = document.createElement("tbody");
+        globalTable.appendChild(gTbody);
+        for (var sp = 0; sp < sortedPlayers.length; sp++) {
+            var ps = sortedPlayers[sp];
+            var sRow = document.createElement("tr");
+            sRow.className = "player-row";
+            gTbody.appendChild(sRow);
+
+            // Name column
+            var sNameCell = document.createElement("td");
+            sNameCell.className = "player sortable-player";
+            sNameCell.setAttribute("tier", ps.tier);
+            sNameCell.innerHTML = appendFlagIconToNickname(ps.name);
+            (function (playerName) {
+                sNameCell.addEventListener("click", function () {
+                    radioNxNWRs.checked = true;
+                    changePuzzleSize(radioNxNWRs.value);
+                    changeNameFilter(playerName);
+                });
+            })(ps.name);
+            sRow.appendChild(sNameCell);
+
+            // # column — place based on Kinch% rank, not sort position
+            var sPlaceCell = document.createElement("td");
+            sPlaceCell.className = "player-place";
+            sPlaceCell.setAttribute("tier", ps.tier);
+            sPlaceCell.textContent = placeMap[ps.name] || (sp + 1);
+            sRow.appendChild(sPlaceCell);
+
+            // Kinch% column
+            var sPowerCell = document.createElement("td");
+            sPowerCell.className = "player-power";
+            sPowerCell.setAttribute("tier", ps.tier);
+            sPowerCell.textContent = ps.power.toFixed(3) + "%";
+            sRow.appendChild(sPowerCell);
+
+            var sScoreMap = {};
+            for (var ss = 0; ss < ps.scores.length; ss++) sScoreMap[ps.scores[ss].id] = ps.scores[ss];
+            for (var svc = 0; svc < kinchValidCategories.length; svc++) {
+                sRow.appendChild(kinchBuildScoreCell(sScoreMap[kinchValidCategories[svc].id], kinchScoreType, kinchValidCategories[svc], ps.tier));
+            }
+        }
+        return;
+    }
+
+    // --- per-tier tables (descending: alpha first, kappa last) ---
+    var place = 0;
+    for (var t = 0; t < tierOrder.length; t++) {
+        var tier = tierOrder[t];
+        var threshold = percentageTable[tier];
+
+        // collect players in this tier
+        var tierPlayers = [];
+        for (var p = 0; p < transformed.length; p++) {
+            if (transformed[p].tier === tier) {
+                place++;
+                tierPlayers.push({ ps: transformed[p], placeNum: place });
+            }
+        }
+
+        // hide-empty: skip empty tiers entirely
+        if (kinchHideEmpty && tierPlayers.length === 0) continue;
+
+        var tierTable = document.createElement("table");
+        tierTable.id = "kinch-" + tier + "-table";
+        tierTable.style.contentVisibility = "auto";
+        tierTable.style.containIntrinsicSize = "auto 200px";
+        resultsTable.appendChild(tierTable);
+
+        var thead = document.createElement("thead");
+        thead.className = "table-header";
+        tierTable.appendChild(thead);
+
+        // req-row: tier name + threshold + >threshold% + per-category score limits
+        var reqRow = document.createElement("tr");
+        reqRow.className = "req-row";
+        thead.appendChild(reqRow);
+
+        // req-row: Tier Name | Greek Symbol | Threshold%
+        var tdTierName = document.createElement("td");
+        tdTierName.className = "player";
+        tdTierName.setAttribute("tierf", tier);
+        tdTierName.style.minWidth = "132px";
+        var tierDisplayName = tier.charAt(0).toUpperCase() + tier.slice(1);
+        if (kinchTrueTiers) tierDisplayName = "True " + tierDisplayName;
+        tdTierName.textContent = tierDisplayName;
+        reqRow.appendChild(tdTierName);
+
+        var tdSymbol = document.createElement("td");
+        tdSymbol.className = "req-symbol";
+        tdSymbol.setAttribute("tierf", tier);
+        var symbolSpan = greekLetterSpan(tier);
+        if (symbolSpan) {
+            tdSymbol.appendChild(symbolSpan);
+        } else {
+            tdSymbol.textContent = tier;
+        }
+        reqRow.appendChild(tdSymbol);
+
+        var tdReq = document.createElement("td");
+        tdReq.className = "req-limit";
+        tdReq.setAttribute("tierf", tier);
+        tdReq.textContent = threshold + "%";
+        reqRow.appendChild(tdReq);
+
+        for (var c2 = 0; c2 < numCats; c2++) {
+            var cat2 = kinchValidCategories[c2];
+            var tdLimit = document.createElement("td");
+            tdLimit.className = "req-limit";
+            tdLimit.setAttribute("tierf", tier);
+            var info2 = parseId(cat2.id);
+            var isAvg = (info2.avglen !== 1);
+            tdLimit.textContent = getScoreLimit(threshold, bestValues[cat2.id], kinchReverse, kinchScoreType, isAvg);
+            (function (td, catId, thr) {
+                td.addEventListener("mouseenter", function () {
+                    var tip = document.getElementById("kinch-score-tooltip");
+                    if (!tip) return;
+                    tip.innerHTML = exactLimitString + "<br>" + tier + " " + catId + ":<br>" + getScoreLimitExact(thr, bestValues[catId], kinchReverse);
+                    tip.style.display = "block";
+                    var rect = td.getBoundingClientRect();
+                    var left = rect.left, top = rect.bottom + 4;
+                    if (left + tip.offsetWidth > window.innerWidth - 8) left = window.innerWidth - tip.offsetWidth - 8;
+                    if (left < 8) left = 8;
+                    if (top + tip.offsetHeight > window.innerHeight - 8) top = rect.top - tip.offsetHeight - 4;
+                    tip.style.left = left + "px";
+                    tip.style.top = top + "px";
+                });
+                td.addEventListener("mouseleave", function () {
+                    var tip = document.getElementById("kinch-score-tooltip");
+                    if (tip) tip.style.display = "none";
+                });
+            })(tdLimit, cat2.id, threshold);
+            reqRow.appendChild(tdLimit);
+        }
+
+        // player rows
+        var tbody = document.createElement("tbody");
+        tierTable.appendChild(tbody);
+        for (var tp = 0; tp < tierPlayers.length; tp++) {
+            (function (entry, tierSlug) {
+                var ps = entry.ps;
+                var row = document.createElement("tr");
+                row.className = "player-row";
+                tbody.appendChild(row);
+
+                // Name column
+                var nameCell = document.createElement("td");
+                nameCell.className = "player sortable-player";
+                nameCell.setAttribute("tier", tierSlug);
+                nameCell.innerHTML = appendFlagIconToNickname(ps.name);
+                nameCell.addEventListener("click", function () {
+                    radioNxNWRs.checked = true;
+                    changePuzzleSize(radioNxNWRs.value);
+                    changeNameFilter(ps.name);
+                });
+                row.appendChild(nameCell);
+
+                // # column (place number)
+                var placeCell = document.createElement("td");
+                placeCell.className = "player-place";
+                placeCell.setAttribute("tier", tierSlug);
+                placeCell.textContent = entry.placeNum;
+                row.appendChild(placeCell);
+
+                // Kinch% column
+                var powerCell = document.createElement("td");
+                powerCell.className = "player-power";
+                powerCell.setAttribute("tier", tierSlug);
+                powerCell.textContent = ps.power.toFixed(3) + "%";
+                row.appendChild(powerCell);
+
+                // per-category score cells
+                var scoreMap = {};
+                for (var s = 0; s < ps.scores.length; s++) scoreMap[ps.scores[s].id] = ps.scores[s];
+                for (var vc = 0; vc < kinchValidCategories.length; vc++) {
+                    row.appendChild(kinchBuildScoreCell(scoreMap[kinchValidCategories[vc].id], kinchScoreType, kinchValidCategories[vc], tierSlug));
+                }
+            })(tierPlayers[tp], tier);
+        }
+    }
+}
+
+//Builds a single score <td> for one player × one category.
+//Preserves all icons (web/lm circles, youtube, exe replay eggs), sets the
+//[tier] attribute for background coloring, and attaches a Power-style
+//viewport-clamped tooltip with tier name glow + target + diff + rank/total + source.
+function kinchBuildScoreCell(scoreData, scoreType, catInfo, tableTier) {
+    var cell = document.createElement("td");
+    var noScore = !scoreData || !scoreData.scoreInfo || scoreData.scoreInfo === defaultScore || typeof scoreData.scoreInfo !== "object";
+    if (noScore) {
+        cell.className = "kinch-empty-cell";
+        cell.textContent = "—";
+        return cell;
+    }
+
+    var item = scoreData.scoreInfo;
+    var isAverage = (item.avglen !== 1);
+    var scoreString = getScoreString(item.time, item.moves, item.tps, scoreType, isAverage);
+    cell.setAttribute("tier", scoreData.scoreTier);
+
+    // tooltip data
+    var tierOrder = kinchGetTierOrder();
+    var tierIdx = tierOrder.indexOf(scoreData.scoreTier);
+    var nextTier = tierIdx > 0 ? tierOrder[tierIdx - 1] : null; // tier above (lower index = higher tier)
+    var nextThreshold = nextTier ? percentageTable[nextTier] : null;
+    var bestValue = bestValues[scoreData.id];
+    var targetStr = "";
+    var diffStr = "";
+    if (nextTier && nextThreshold !== null) {
+        var target = getScoreLimit(nextThreshold, bestValue, kinchReverse, scoreType, isAverage);
+        targetStr = target;
+        // diff = target - playerScore (for time/moves, lower is better; for tps, higher is better)
+        var playerVal = scoreData.score;
+        if (kinchReverse) {
+            // tps: higher is better. target is higher. diff = target - player
+            diffStr = (playerVal > 0 ? ((parseFloat(target) - (playerVal / 1000)).toFixed(3)) : "");
+        } else {
+            // time/moves: lower is better. target is lower. diff = player - target
+            diffStr = ((playerVal / 1000) - parseFloat(target)).toFixed(3);
+        }
+        var sign = parseFloat(diffStr) >= 0 ? "+" : "";
+        diffStr = sign + diffStr;
+    }
+    var rank = 0, total = kinchValidCategories.length;
+    // compute rank: player's best category = rank 1, worst = rank N
+    // (simplified: use scorePercentage to rank — higher % = better = lower rank number)
+    // We'll compute a rough rank from the scorePercentage relative to the player's other scores
+    // For now, just show the percentage
+    var pct = scoreData.scorePercentage;
+
+    // tooltip HTML (Power-style with tier glow + source info)
+    var tipHTML = '<span class="tip-tier" tierf="' + scoreData.scoreTier + '">' + scoreData.scoreTier.charAt(0).toUpperCase() + scoreData.scoreTier.slice(1) + "</span>";
+    if (nextTier && targetStr) {
+        tipHTML += ' → ' + targetStr + ' (' + diffStr + ') for <span tierf="' + nextTier + '">' + nextTier.charAt(0).toUpperCase() + nextTier.slice(1) + '</span>';
+    }
+    tipHTML += ' (' + pct.toFixed(1) + '%)';
+
+    // score breakdown
+    var breakdown = "";
+    if (["Time","FMC","FMC MTM"].includes(scoreType)) {
+        breakdown = formatTime(item.time) + ' (' + (item.moves/1000).toFixed(3).replace(/\.?0+$/,'') + ' / ' + normalizeTPS(item.tps) + ')';
+    } else if (scoreType === "Moves") {
+        breakdown = (item.moves/1000).toFixed(3).replace(/\.?0+$/,'') + ' (' + formatTime(item.time) + ' / ' + normalizeTPS(item.tps) + ')';
+    } else if (scoreType === "TPS") {
+        breakdown = normalizeTPS(item.tps) + ' (' + formatTime(item.time) + ' / ' + (item.moves/1000).toFixed(3).replace(/\.?0+$/,'') + ')';
+    }
+    tipHTML += '<br>' + breakdown;
+    tipHTML += '<br>' + scoreData.id + byString + item.nameFilter;
+    tipHTML += '<br>' + getControlsAndDate(item.timestamp, item.controls);
+    // source info (exe info stuff)
+    var sourceLabel = "Exe";
+    if (item.isWeb && !item.isLM) sourceLabel = "Web";
+    else if (item.isLM && !item.isWeb) sourceLabel = "LM";
+    else if (item.isLM && item.isWeb) sourceLabel = "Web+LM";
+    tipHTML += '<br>Source: ' + sourceLabel;
+
+    // main value span (no <br> + empty secondary — Kinch cells only show the score)
+    var mainValue = document.createElement("span");
+    mainValue.className = "score-main";
+    mainValue.textContent = scoreString[0];
+    cell.appendChild(mainValue);
+
+    if (scoreData.scorePercentage === 100) cell.classList.add("WRPB");
+
+    if (scoreString[0].includes("NaN")) {
+        cell.className = "kinch-empty-cell";
+        cell.textContent = "-";
+        return cell;
+    }
+
+    // icons (web/lm circles, youtube, exe eggs)
+    if (!debugMode) {
+        var videolink = videoLinkCheck(item.videolink);
+        var makeYT = false;
+        if (item.isWeb) mainValue.innerHTML = webElement + mainValue.textContent;
+        if (item.isLM) mainValue.innerHTML = lmElement + mainValue.textContent;
+        if (videolink) {
+            cell.classList.add("kinch-clickable");
+            mainValue.innerHTML = youtubeElement + mainValue.textContent;
+            makeYT = true;
+        }
+        if (item.solve_data_available) {
+            makeYT = false;
+            var videoLinkForReplay = -1;
+            if (videolink) {
+                videoLinkForReplay = videolink;
+                mainValue.innerHTML = redEggElement + mainValue.textContent;
+            } else {
+                mainValue.innerHTML = eggElement + mainValue.textContent;
+            }
+            cell.classList.add("kinch-clickable");
+            var scoreTitle = getScoreTitle(videoLinkForReplay, item.width, item.height, item.displayType, item.nameFilter, item.controls, item.timestamp, scoreData.scoreTier, scoreData.scorePercentage === 100, scoreType);
+            cell.addEventListener("click", function (event) {
+                getSolutionForScore(item, function (err, solveData) {
+                    if (err) { alert(err); }
+                    else { handleSavedReplay(item, solveData, event, item.tps, item.width, item.height, scoreTitle, videoLinkForReplay, scoreData.scoreTier, scoreData.scorePercentage === 100); }
+                });
+            });
+        }
+        if (makeYT) {
+            cell.addEventListener("click", function () { window.open(videolink, "_blank"); });
+        }
+    } else {
+        if (item.nameFilter === logged_in_as || logged_in_as === "vovker" || logged_in_as === "dphdmn") {
+            cell.classList.add("kinch-clickable");
+            mainValue.textContent = getScoreIDIcon + mainValue.textContent;
+            cell.addEventListener("click", function () { promptForVideoLink(item.time, item.moves, item.timestamp); });
+        }
+    }
+
+    // tooltip handlers (Power-style: fixed position, viewport-clamped)
+    cell.addEventListener("mouseenter", function () {
+        var tip = document.getElementById("kinch-score-tooltip");
+        if (!tip) return;
+        tip.innerHTML = tipHTML;
+        tip.style.display = "block";
+        var rect = cell.getBoundingClientRect();
+        var left = rect.left, top = rect.bottom + 4;
+        if (left + tip.offsetWidth > window.innerWidth - 8) left = window.innerWidth - tip.offsetWidth - 8;
+        if (left < 8) left = 8;
+        if (top + tip.offsetHeight > window.innerHeight - 8) top = rect.top - tip.offsetHeight - 4;
+        if (top < 8) top = 8;
+        tip.style.left = left + "px";
+        tip.style.top = top + "px";
+    });
+    cell.addEventListener("mouseleave", function () {
+        var tip = document.getElementById("kinch-score-tooltip");
+        if (tip) tip.style.display = "none";
+    });
+
+    return cell;
+}
+
+//Hide Reqs: toggles the <thead> of every per-tier table (but NOT the sticky wrapper).
+function kinchApplyHideReqs() {
+    var tables = document.querySelectorAll(".kinch-view .results-table table");
+    tables.forEach(function (table, idx) {
+        var thead = table.querySelector("thead");
+        if (!thead) return;
+        if (idx === 0) return; // sticky wrapper — no req-row to hide
+        thead.style.display = kinchHideReqs ? "none" : "";
+    });
+}
+
+//Color Best: for each player-row cell, if the cell's [tier] is BELOW the
+//table's tier, grey it out; if ABOVE, bold it. (Mirrors Power's changeTable.)
+function kinchApplyColorBest() {
+    var tierOrder = kinchGetTierOrder(); // alpha..kappa (best..worst)
+    var tables = document.querySelectorAll(".kinch-view .results-table table");
+    tables.forEach(function (table) {
+        var tableId = table.id || "";
+        var tableTier = tableId.replace("kinch-","").replace("-table","");
+        if (!tableTier || tierOrder.indexOf(tableTier) === -1) return;
+        var tableTierIdx = tierOrder.indexOf(tableTier);
+        var cells = table.querySelectorAll(".player-row td[tier]");
+        cells.forEach(function (cell) {
+            var cellTier = cell.getAttribute("tier");
+            var cellTierIdx = tierOrder.indexOf(cellTier);
+            if (cellTierIdx === -1) return;
+            if (cellTierIdx < tableTierIdx) {
+                // cell's tier is ABOVE (better than) the table's tier → bold
+                cell.style.fontWeight = "800";
+            } else if (cellTierIdx > tableTierIdx) {
+                // cell's tier is BELOW (worse than) the table's tier → grey
+                cell.style.backgroundColor = "#555";
+                cell.style.color = "#bbb";
+            }
+        });
+    });
+}
+
+//Clears Color Best styling (restores natural [tier] colors).
+function kinchClearColorBest() {
+    var cells = document.querySelectorAll(".kinch-view .results-table .player-row td[tier]");
+    cells.forEach(function (cell) {
+        cell.style.fontWeight = "";
+        cell.style.backgroundColor = "";
+        cell.style.color = "";
+    });
+}
+
+//Dynamically loads Chart.js from CDN, then calls callback.
+function kinchLoadChartJS(callback) {
+    if (window.Chart) { callback(); return; }
+    var s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js";
+    s.onload = callback;
+    s.onerror = function () { console.error("Failed to load Chart.js"); };
+    document.head.appendChild(s);
+}
+
+//Wires the chart control event handlers (skip slider, category dropdown, cumulative/percent).
+function kinchWireChartControls() {
+    var ignore = document.getElementById("kinch-chart-ignore");
+    var ignoreVal = document.getElementById("kinch-chart-ignore-val");
+    if (ignore) {
+        ignore.addEventListener("input", function () {
+            if (ignoreVal) ignoreVal.textContent = ignore.value;
+            kinchUpdateChart();
+        });
+    }
+    var cum = document.getElementById("kinch-switch-cumulative");
+    if (cum) cum.addEventListener("change", function () { kinchUpdateChart(); });
+    var pct = document.getElementById("kinch-switch-percent");
+    if (pct) pct.addEventListener("change", function () { kinchUpdateChart(); });
+    var trigger = document.getElementById("kinch-chart-category-trigger");
+    var panel = document.getElementById("kinch-chart-category-panel");
+    if (trigger && panel) {
+        trigger.addEventListener("click", function (e) {
+            e.stopPropagation();
+            panel.style.display = panel.style.display === "block" ? "none" : "block";
+        });
+        document.addEventListener("click", function () { panel.style.display = "none"; });
+        panel.addEventListener("click", function (e) { e.stopPropagation(); });
+    }
+}
+
+//Populates the chart category dropdown with one checkbox per valid category.
+function kinchPopulateCategoryPanel() {
+    var panel = document.getElementById("kinch-chart-category-panel");
+    if (!panel) return;
+    panel.innerHTML = "";
+    for (var i = 0; i < kinchValidCategories.length; i++) {
+        (function (cat) {
+            var label = document.createElement("label");
+            var cb = document.createElement("input");
+            cb.type = "checkbox";
+            cb.value = cat.id;
+            cb.addEventListener("change", function () {
+                if (cb.checked) { if (kinchChartCategories.indexOf(cat.id) === -1) kinchChartCategories.push(cat.id); }
+                else { var idx = kinchChartCategories.indexOf(cat.id); if (idx !== -1) kinchChartCategories.splice(idx, 1); }
+                kinchUpdateCategoryTrigger();
+                kinchUpdateChart();
+            });
+            label.appendChild(cb);
+            label.appendChild(document.createTextNode(" " + cat.id));
+            panel.appendChild(label);
+        })(kinchValidCategories[i]);
+    }
+}
+
+function kinchUpdateCategoryTrigger() {
+    var trigger = document.getElementById("kinch-chart-category-trigger");
+    if (!trigger) return;
+    trigger.textContent = kinchChartCategories.length === 0 ? "Overall ▾" : kinchChartCategories.length + " categor" + (kinchChartCategories.length === 1 ? "y ▾" : "ies ▾");
+}
+
+//Builds/updates the Chart.js tier-distribution bar chart.
+//Overall mode: count .player-row per tier table.
+//Category mode: count players per scoreTier for each selected category.
+//Supports Cumulative, Percent, and Skip.
+function kinchUpdateChart() {
+    if (!window.Chart) return;
+    var canvas = document.getElementById("kinch-tier-chart");
+    if (!canvas) return;
+    var container = document.getElementById("kinch-chart-container");
+    if (!container || container.style.display === "none") return;
+
+    kinchPopulateCategoryPanel();
+    kinchUpdateCategoryTrigger();
+
+    var tierOrder = kinchGetTierOrder(); // alpha..kappa (best..worst)
+    // reverse for display: worst (kappa) leftmost, best (alpha) rightmost
+    var displayTiers = tierOrder.slice().reverse(); // kappa..alpha
+
+    var cumBtn = document.getElementById("kinch-switch-cumulative");
+    var pctBtn = document.getElementById("kinch-switch-percent");
+    var ignoreInput = document.getElementById("kinch-chart-ignore");
+    var isCumulative = cumBtn ? cumBtn.checked : false;
+    var isPercent = pctBtn ? pctBtn.checked : false;
+    var ignoreN = ignoreInput ? parseInt(ignoreInput.value) || 0 : 0;
+
+    var datasets = [];
+    var labels = displayTiers.map(function (t) { return t.charAt(0).toUpperCase() + t.slice(1); });
+    var labelColors = displayTiers.map(function (t) { return kinchGetTierColor(t); });
+    var barColors = displayTiers.map(function (t) { return kinchGetTierColor(t); });
+
+    var isCategoryMode = kinchChartCategories.length > 0;
+
+    if (isCategoryMode) {
+        // category mode: one dataset per selected category
+        var transformed = kinchTransformScores(kinchPlayerScores);
+        for (var ci = 0; ci < kinchChartCategories.length; ci++) {
+            var catId = kinchChartCategories[ci];
+            var counts = displayTiers.map(function () { return 0; });
+            for (var p = 0; p < transformed.length; p++) {
+                var ps = transformed[p];
+                for (var s = 0; s < ps.scores.length; s++) {
+                    if (ps.scores[s].id === catId && ps.scores[s].scoreInfo !== defaultScore && typeof ps.scores[s].scoreInfo === "object") {
+                        var tierIdx = displayTiers.indexOf(ps.scores[s].scoreTier);
+                        if (tierIdx !== -1) counts[tierIdx]++;
+                        break;
                     }
                 }
-                if (palyerId === beforeAddingID) {
-                    const playerTableRow = document.createElement('tr');
-                    const playerPlaceCell = document.createElement('td');
-                    const playerNameCell = document.createElement('td');
-                    playerNameCell.textContent = emptyTierPlaceHolder;
-                    const playerPowerCell = document.createElement('td');
-                    playerPlaceCell.classList.add(category);
-                    playerNameCell.classList.add(category);
-                    playerNameCell.classList.add("nameCell");
-                    playerPowerCell.classList.add(category);
-                    playerTableRow.appendChild(playerPlaceCell);
-                    playerTableRow.appendChild(playerNameCell);
-                    playerTableRow.appendChild(playerPowerCell);
-                    table.appendChild(playerTableRow);
-                    if (hideEmptyTiers) {
-                        table.style.display = "none";
-                    }
-                }
-                tableContainer.appendChild(table);
+            }
+            datasets.push({
+                label: catId,
+                data: counts,
+                backgroundColor: barColors,
+                borderColor: barColors,
+                borderWidth: 1,
+                borderRadius: 3
+            });
+        }
+    } else {
+        // overall mode: count .player-row per tier table
+        var counts = displayTiers.map(function (t) {
+            var table = document.getElementById("kinch-" + t + "-table");
+            return table ? table.querySelectorAll(".player-row").length : 0;
+        });
+        datasets.push({ label: "Players", data: counts, backgroundColor: barColors, borderColor: barColors, borderWidth: 1, borderRadius: 3 });
+    }
+
+    // STEP 1: Apply skip FIRST (like Power) — removes lowest tiers before
+    // computing percent/cumulative. This way percentages are relative to
+    // the non-skipped total, and cumulative+percent starts at 100%.
+    if (ignoreN > 0) {
+        var n = Math.min(ignoreN, labels.length);
+        labels = labels.slice(n);
+        labelColors = labelColors.slice(n);
+        for (var d = 0; d < datasets.length; d++) {
+            datasets[d].data = datasets[d].data.slice(n);
+            datasets[d].backgroundColor = datasets[d].backgroundColor.slice(n);
+            datasets[d].borderColor = datasets[d].borderColor.slice(n);
+        }
+    }
+
+    // STEP 2: Capture RAW integer counts and compute totals (post-skip).
+    var rawData2D = datasets.map(function (ds) { return ds.data.slice(); });
+    var totals = datasets.map(function (ds) { return ds.data.reduce(function (a, b) { return a + b; }, 0); });
+
+    // STEP 3: Apply percent (divide by post-skip total)
+    if (isPercent) {
+        for (var d2 = 0; d2 < datasets.length; d2++) {
+            var tot = totals[d2] || 1;
+            datasets[d2].data = datasets[d2].data.map(function (v) { return v / tot * 100; });
+        }
+    }
+
+    // STEP 4: Apply cumulative (sum from END = highest tier, backward)
+    if (isCumulative) {
+        for (var d3 = 0; d3 < datasets.length; d3++) {
+            var sum = 0;
+            for (var i = datasets[d3].data.length - 1; i >= 0; i--) {
+                sum += datasets[d3].data[i];
+                datasets[d3].data[i] = sum;
             }
         }
     }
+
+    // build title
+    var titleParts = [];
+    if (kinchTrueTiers) titleParts.push("True");
+    if (isCumulative) titleParts.push("Cumulative");
+    if (isPercent) titleParts.push("Percent");
+    if (isCategoryMode) { titleParts.push("Category Distribution:"); titleParts.push(kinchChartCategories.join(", ")); }
+    else { titleParts.push("Tier Distribution"); }
+    if (ignoreN > 0) titleParts.push("(skip " + ignoreN + ")");
+    var titleEl = document.getElementById("kinch-chart-title");
+    if (titleEl) titleEl.textContent = titleParts.join(" ");
+
+    // update slider max
+    if (ignoreInput) ignoreInput.max = Math.max(0, tierOrder.length - 1);
+
+    // y-axis max for percent+cumulative
+    var yMax = (isPercent && isCumulative) ? 100 : undefined;
+
+    // build or update chart
+    if (kinchTierChart) {
+        kinchTierChart.data.labels = labels;
+        kinchTierChart.data.datasets = datasets;
+        kinchTierChart.options.scales.x.ticks.color = labelColors;
+        if (yMax !== undefined) kinchTierChart.options.scales.y.max = yMax;
+        else kinchTierChart.options.scales.y.max = undefined;
+        kinchTierChart.__rawData = rawData2D;
+        kinchTierChart.__rawTotals = totals;
+        kinchTierChart.__isPercent = isPercent;
+        kinchTierChart.__isCumulative = isCumulative;
+        kinchTierChart.__isCategoryMode = isCategoryMode;
+        kinchTierChart.update();
+    } else {
+        var ctx = canvas.getContext("2d");
+        // Custom datalabels plugin — draws count + percentage on each bar
+        var kinchDataLabelsPlugin = {
+            id: 'kinch-datalabels',
+            afterDatasetsDraw: function (chart) {
+                var ctx = chart.ctx;
+                var totalBars = 0;
+                chart.data.datasets.forEach(function (ds) { totalBars += ds.data.length; });
+                if (totalBars > 67) return;
+                ctx.save();
+                ctx.textAlign = 'center';
+                chart.data.datasets.forEach(function (dataset, di) {
+                    var meta = chart.getDatasetMeta(di);
+                    var rawData = chart.__rawData || [];
+                    var rawBarData = rawData[di] || [];
+                    var rawTotal = (chart.__rawTotals && chart.__rawTotals[di]) || 0;
+                    var isCum = chart.__isCumulative;
+                    var isPct = chart.__isPercent;
+                    meta.data.forEach(function (bar, i) {
+                        var val = dataset.data[i];
+                        if (val === 0) return;
+                        // displayVal = the RAW integer count (or cumulative sum of raw counts)
+                        var rawVal = rawBarData[i] !== undefined ? rawBarData[i] : 0;
+                        var displayVal;
+                        if (isCum) {
+                            // cumulative sum of RAW counts from this tier to the highest
+                            var cumSum = 0;
+                            for (var jj = rawBarData.length - 1; jj >= i; jj--) cumSum += (rawBarData[jj] || 0);
+                            displayVal = cumSum;
+                        } else {
+                            displayVal = rawVal;
+                        }
+                        // pct = displayVal / rawTotal (the FULL total, pre-skip)
+                        var pct = rawTotal > 0 ? displayVal / rawTotal * 100 : 0;
+                        // count (bold, light) — always an integer
+                        ctx.font = 'bold 11px monospace';
+                        ctx.fillStyle = '#ddd';
+                        ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                        ctx.shadowBlur = 3;
+                        ctx.textBaseline = 'bottom';
+                        ctx.fillText(displayVal, bar.x, bar.y - 22);
+                        // percentage (tier-colored) — 1 decimal, capped at 100 for cumulative+percent
+                        var bgArr = dataset.backgroundColor;
+                        var pctColor = (Array.isArray(bgArr) && bgArr[i]) || '#999';
+                        ctx.font = '9px monospace';
+                        ctx.fillStyle = pctColor;
+                        ctx.shadowBlur = 0;
+                        ctx.textBaseline = 'top';
+                        var displayPct = (isCum && isPct) ? Math.min(pct, 100) : pct;
+                        ctx.fillText(displayPct.toFixed(1) + '%', bar.x, bar.y - 22 + 5);
+                    });
+                });
+                ctx.restore();
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+            }
+        };
+
+        kinchTierChart = new Chart(ctx, {
+            type: "bar",
+            data: { labels: labels, datasets: datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 300 },
+                layout: { padding: { top: 40, bottom: 8 } },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        enabled: true,
+                        mode: "index",
+                        intersect: false,
+                        backgroundColor: "rgb(20,20,20)",
+                        titleColor: "#ddd", bodyColor: "#bbb",
+                        borderColor: "#333", borderWidth: 1, padding: 8,
+                        titleFont: { size: 10, weight: "bold" },
+                        bodyFont: { size: 10 },
+                        callbacks: {
+                            title: function (items) { return items[0].label; },
+                            label: function (item) {
+                                var chart = item.chart;
+                                var di = item.datasetIndex;
+                                var ii = item.dataIndex;
+                                var rawData = chart.__rawData || [];
+                                var rawVal = (rawData[di] && rawData[di][ii] !== undefined) ? rawData[di][ii] : item.raw;
+                                var isCum = chart.__isCumulative;
+                                var displayVal;
+                                if (isCum) {
+                                    var cumSum = 0;
+                                    var rawArr = rawData[di] || [];
+                                    for (var jj = rawArr.length - 1; jj >= ii; jj--) cumSum += (rawArr[jj] || 0);
+                                    displayVal = cumSum;
+                                } else {
+                                    displayVal = rawVal;
+                                }
+                                var rawTotal = (chart.__rawTotals && chart.__rawTotals[di]) || 0;
+                                var pct = rawTotal > 0 ? displayVal / rawTotal * 100 : 0;
+                                var isPct = chart.__isPercent;
+                                var suffix = isPct ? "%" : "";
+                                return item.dataset.label + ': ' + (isPct ? displayVal.toFixed(1) : displayVal) + suffix + ' (' + pct.toFixed(1) + '%)';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { ticks: { color: labelColors, maxRotation: 45, font: { size: 10, weight: "bold" } }, grid: { color: "#2a2a2a" } },
+                    y: { beginAtZero: true, ticks: { color: "#999", precision: 0, font: { size: 10 } }, grid: { color: "#2a2a2a" }, max: yMax }
+                }
+            },
+            plugins: [kinchDataLabelsPlugin]
+        });
+        kinchTierChart.__rawData = rawData2D;
+        kinchTierChart.__rawTotals = totals;
+        kinchTierChart.__isPercent = isPercent;
+        kinchTierChart.__isCumulative = isCumulative;
+        kinchTierChart.__isCategoryMode = isCategoryMode;
+    }
+}
+
+//Returns the CSS color for a greek tier (for chart bars/labels).
+function kinchGetTierColor(tier) {
+    var colors = {
+        alpha: "#00ffff", beta: "#00ff00", gamma: "#ff2262", delta: "#a14dff",
+        epsilon: "#ffff00", zeta: "#ffaaf4", eta: "#85fa85", theta: "#b9f2ff",
+        iota: "#23958b", kappa: "#afafaf"
+    };
+    return colors[tier] || "#999";
 }
 
 //"Public" function to create Latest records sheet
@@ -1535,6 +2399,10 @@ function makeExampleButtons(customRankButtonsExamples) {
 
     var select = document.createElement('select');
     select.id = 'presetsDropdown';
+    select.style.borderRadius = '0px';
+    select.style.appearance = 'none';
+    select.style.webkitAppearance = 'none';
+    select.style.MozAppearance = 'none';
     var placeholder = document.createElement('option');
     placeholder.value = '';
     placeholder.disabled = true;
@@ -1995,8 +2863,7 @@ function getPageConfig(width) {
         'Rankings2': {
             className: 'beta',
             text: 'Most Popular Categories of',
-            puzzleWord: 'sliding puzzles',
-            onBefore: createCustomSlider
+            puzzleWord: 'sliding puzzles'
         },
         'Rankings3': {
             className: 'beta',
@@ -2097,7 +2964,6 @@ function buildPageContent(config, request, wrTexts) {
         return `<span class="beta" style="font-weight: 900;">Main™ Rankings of 3x3 - 10x10</span> sliding puzzles`;
     }
     if (width === "Rankings2") {
-        createCustomSlider();
         return `<span class="beta" style="font-weight: 900;">Most Popular Categories of</span> sliding puzzles`;
     }
     if (width === "Rankings3") {
@@ -2494,75 +3360,62 @@ function getClosestAllowedValue(value, allowedValues) {
     );
 }
 
-function createCustomSlider() {
+//Popular-only controls (min-players slider + "only interesting" checkbox).
+//Appends into the passed parent (the .kinch-toolbar) so the Popular controls
+//live inside the Kinch toolbar alongside the switches + chart toggle.
+function createCustomSlider(parent) {
+    const wrap = document.createElement("div");
+    wrap.className = "kinch-popular-controls";
+
     const slider = document.createElement("input");
     slider.type = "range";
     allowedCategoryCountsCategories = Array.from(allowedCategoryCounts.keys());
     slider.min = Math.min(...allowedCategoryCountsCategories);
     slider.max = Math.max(...allowedCategoryCountsCategories);
 
-    // Find the closest allowed value for the initial slider value
     const closestAllowedValue = getClosestAllowedValue(lastSliderValue, allowedCategoryCountsCategories);
     slider.value = closestAllowedValue;
 
     const getMinPlayers = (value) => allowedCategoryCounts.get(parseInt(value));
 
-    const sliderLabel = document.createElement("label");
-    sliderLabel.innerHTML = `<span style="color: white;">Min. number of players: </span><span style="color: #00ff00;">${getMinPlayers(slider.value)}</span><br><span style="color: gray;font-style: italic;">${maxCategoriesForPopularString} ${slider.value}</span>`;
-    const contentDiv = document.getElementById("contentDiv");
-    contentDiv.insertBefore(sliderLabel, contentDiv.firstChild);
-    contentDiv.insertBefore(slider, contentDiv.firstChild);
+    // Compact info display: "N players · M cats" in one element
+    const infoSpan = document.createElement("span");
+    infoSpan.className = "kinch-popular-info";
+    infoSpan.textContent = getMinPlayers(slider.value) + " players · " + slider.value + " cats";
 
     slider.addEventListener("input", function () {
-        const closestAllowedValue = getClosestAllowedValue(slider.value, allowedCategoryCountsCategories);
-        slider.value = closestAllowedValue;
-        sliderLabel.innerHTML = `<span style="color: white;">Min. number of players: </span><span style="color: #00ff00;">${getMinPlayers(slider.value)}</span><br><span style="color: #90EE90;font-style: italic;">${maxCategoriesForPopularString} ${slider.value}</span>`;
+        const cav = getClosestAllowedValue(slider.value, allowedCategoryCountsCategories);
+        slider.value = cav;
+        infoSpan.textContent = getMinPlayers(slider.value) + " players · " + slider.value + " cats";
     });
-
     slider.addEventListener("change", function () {
-        const closestAllowedValue = getClosestAllowedValue(slider.value, allowedCategoryCountsCategories);
-        slider.value = closestAllowedValue;
-        lastSliderValue = closestAllowedValue;
+        const cav = getClosestAllowedValue(slider.value, allowedCategoryCountsCategories);
+        slider.value = cav;
+        lastSliderValue = cav;
         sendMyRequest();
     });
 
-    sliderLabel.classList.add("sliderlabel");
+    // Slider takes the majority of the space
+    wrap.appendChild(slider);
+    wrap.appendChild(infoSpan);
 
+    // Compact "Interesting" checkbox
     const onlySquaresCheckbox = document.createElement("input");
     onlySquaresCheckbox.type = "checkbox";
-    onlySquaresCheckbox.id = "onlySquaresCheckbox";
+    onlySquaresCheckbox.id = "kinch-only-squares";
     onlySquaresCheckbox.checked = lastSquaresCB;
     onlySquaresCheckbox.addEventListener("change", function () {
         lastSquaresCB = onlySquaresCheckbox.checked;
         sendMyRequest();
     });
-
     const onlySquaresLabel = document.createElement("label");
-    onlySquaresLabel.textContent = onlyInterestingCategoriesPopular;
-    onlySquaresLabel.htmlFor = "onlySquaresCheckbox";
+    onlySquaresLabel.textContent = "Interesting";
+    onlySquaresLabel.htmlFor = "kinch-only-squares";
+    onlySquaresLabel.className = "kinch-popular-interesting";
+    wrap.appendChild(onlySquaresCheckbox);
+    wrap.appendChild(onlySquaresLabel);
 
-    contentDiv.appendChild(onlySquaresCheckbox);
-    contentDiv.appendChild(onlySquaresLabel);
-    contentDiv.appendChild(document.createElement("br"));
-    contentDiv.appendChild(document.createElement("br"));
-}
-
-function createHideEmptyCheckbox() {
-    const hideEmptyCheckbox = document.createElement("input");
-    hideEmptyCheckbox.type = "checkbox";
-    hideEmptyCheckbox.id = "hideEmptyCheckbox";
-    hideEmptyCheckbox.checked = hideEmptyTiers;
-    hideEmptyCheckbox.addEventListener("change", function () {
-        hideEmptyTiers = hideEmptyCheckbox.checked;
-        sendMyRequest();
-    });
-    const hideEmptyCheckboxLabel = document.createElement("label");
-    hideEmptyCheckboxLabel.textContent = hideEmptyTiersCheckboxText;
-    hideEmptyCheckboxLabel.htmlFor = "hideEmptyCheckbox";
-    const contentDiv = document.getElementById("contentDiv");
-    contentDiv.appendChild(hideEmptyCheckbox);
-    contentDiv.appendChild(hideEmptyCheckboxLabel);
-    contentDiv.appendChild(document.createElement("br"));
+    parent.appendChild(wrap);
 }
 
 //_________________"Private" functions for createSheetRankings ends_________________

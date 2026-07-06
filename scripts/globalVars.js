@@ -6,7 +6,17 @@ var normalSheetTransposed = false; //default transposed view for normal createSh
 var controlType = "unique"; //default control type selection (must be one of controlTypeSelectValues)
 var lastSquaresCB = true; //default value for "only interesting popular categories"
 var lastSliderValue = 20; //default value for "popular categories"
-var hideEmptyTiers = true; //default value for "Hide empty tiers" in rankings pages
+
+// --- Kinch/Popular switch states (Power-style adaptation) ---
+// These mirror the Power ranking table switches (power.html #switch-dropdown),
+// adapted for the Kinch greek-letter tier system. All default to false except
+// hideEmpty (matches Power's default-on behaviour for a cleaner first view).
+var kinchHideEmpty = true;     // #switch-empty  — hide tier tables with 0 players
+var kinchHideReqs = false;     // #switch-reqs   — hide per-tier thead (req-rows)
+var kinchColorBest = false;    // #switch        — grey out cells below the table's tier
+var kinchTrueTiers = false;    // #switch-true   — group players by worst category tier
+var kinchNerf = false;         // #switch-nerf   — remove categories impossible in LM
+var kinchChartVisible = false; // chart toggle state
 let tierLimit = "Any"; //default value for "show X tier scores only" (must be one of tierLabels)
 let autoDetectGridsCheckbox_last = false; //default value for "Force fringe" in replays (false = don't force fringe)
 let constantTPSCheckbox_last = false; //default value for "Constant TPS" in replays
