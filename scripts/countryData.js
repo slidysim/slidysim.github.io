@@ -54,7 +54,8 @@ const rename_map = {
     '快去关注NITO_X神仙':'JZE',
     'past.SHcTo': 'SHcTo',
     'ax0292.': 'ax0292',
-    '清蒸鲈鱼':'JellyFish'
+    '清蒸鲈鱼':'JellyFish',
+    '祝望': '愿仔'
 };
 
 function appendFlagIconToNickname(nickname, minimal = false) {
