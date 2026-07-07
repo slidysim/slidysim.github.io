@@ -1265,7 +1265,7 @@ function kinchTransformScores(playerScores) {
         } else {
             tier = getClassBasedOnPercentage(power, percentageTable);
         }
-        result.push({ name: ps.name, scores: newScores, power: power, tier: tier });
+        result.push({ name: ps.name, scores: newScores, power: power, tier: tier, hasAllCats: hasAllCats });
     }
     result.sort(function (a, b) { return b.power - a.power; });
     return result;
@@ -2007,6 +2007,7 @@ function kinchComputeLeaderboard(playerScores, reverse) {
 //  Placement cells show plain numbers (1, 2, 3...) — no "#" prefix.
 function kinchRenderLeaderboard(resultsTable) {
     var transformed = kinchTransformScores(kinchPlayerScores);
+    if (kinchTrueTiers) transformed = transformed.filter(function (ps) { return ps.hasAllCats; });
     var numCats = kinchValidCategories.length;
     var rows = kinchComputeLeaderboard(transformed, kinchReverse);
 
@@ -2336,6 +2337,7 @@ function kinchComputeJZE(playerScores, reverse) {
 //  No sorting toggles — the grouping is the point of this sheet.
 function kinchRenderJZE(resultsTable) {
     var transformed = kinchTransformScores(kinchPlayerScores);
+    if (kinchTrueTiers) transformed = transformed.filter(function (ps) { return ps.hasAllCats; });
     var numCats = kinchValidCategories.length;
     var rows = kinchComputeJZE(transformed, kinchReverse);
 
@@ -2669,6 +2671,7 @@ function kinchComputeGoodBad(playerScores, reverse, mode) {
 function kinchRenderGoodBad(resultsTable, mode) {
     var isGood = (mode === "good");
     var transformed = kinchTransformScores(kinchPlayerScores);
+    if (kinchTrueTiers) transformed = transformed.filter(function (ps) { return ps.hasAllCats; });
     var numCats = kinchValidCategories.length;
     var rows = kinchComputeGoodBad(transformed, kinchReverse, mode);
 
