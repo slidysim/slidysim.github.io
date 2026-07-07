@@ -56,13 +56,14 @@ const rename_map = {
     'ax0292.': 'ax0292',
     '清蒸鲈鱼':'JellyFish',
     '祝望': '愿仔',
-    '笨笨还在做题': '非自'
+    '笨笨还在做题': '非自',
+    '水母不会点击': 'JellyFish',
+    'akyfake': '那一天的安康安康不起来'
     
 };
 //'Jur105': same as uid 126470 if later included
 //乌米玲 - ???
 //就此别过 - ???
-//akyfake (slidysim web) - ??? aky?
 //13975 (slidysim exe) - ??? (benbenhai in discord)
 
 
