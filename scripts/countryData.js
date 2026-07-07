@@ -51,9 +51,9 @@ const rename_map = {
     'Player123588': 'ap',
     'Xmeng': 'XMeng',
     '真情报_theLove': 'XMeng',
-    '快去关注NITO_X神仙':'JZE'
-
-
+    '快去关注NITO_X神仙':'JZE',
+    'past.SHcTo': 'SHcTo',
+    'ax0292.': 'ax0292'
 };
 
 function appendFlagIconToNickname(nickname, minimal = false) {
