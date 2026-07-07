@@ -258,9 +258,15 @@ function addListenersToElements() {
                 tierSliderLabel.innerHTML = `<span class="${tierClass}">${showPercentLabel} ${value}%</span>`;
             }
             updateSliderGradient();
+            tierActive = true;
+            sendMyRequest();
         }
-        tierActive = true;
-        sendMyRequest();
+    });
+    tierSlider.addEventListener("change", function () {
+        if (filterMode === "rank") {
+            tierActive = true;
+            sendMyRequest();
+        }
     });
     customRankingsArea.addEventListener("change", () => {
         changeCustomRanks();
