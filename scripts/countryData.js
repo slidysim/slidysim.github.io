@@ -58,14 +58,13 @@ const rename_map = {
     '祝望': '愿仔',
     '笨笨还在做题': '非自',
     '水母不会点击': 'JellyFish',
-    'akyfake': '那一天的安康安康不起来'
+    'akyfake': '那一天的安康安康不起来',
+    '13975':'非自'
     
 };
 //'Jur105': same as uid 126470 if later included
 //乌米玲 - ???
 //就此别过 - ???
-//13975 (slidysim exe) - ??? (benbenhai in discord)
-
 
 function appendFlagIconToNickname(nickname, minimal = false) {
     const lowerCaseNickname = nickname.toLowerCase();
