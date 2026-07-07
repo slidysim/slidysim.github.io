@@ -43,13 +43,16 @@ const rename_map = {
     'TheLie谎言': 'dphdmn',
     'Moka雨晞': 'MOKA',
     'diudiuhamburger': '丢丢hamburger',
+    '电焊报_TheHam': '丢丢hamburger',
     'Islamkit': 'IslamKitiev',
     'thelegendary': 'thelegendary08',
     '黑暗报': '636',
     'sqmasep': 'eskiu',
     'Player123588': 'ap',
     'Xmeng': 'XMeng',
-    '真情报_theLove': 'XMeng'
+    '真情报_theLove': 'XMeng',
+    '快去关注NITO_X神仙':'42i196'
+
 
 };
 
