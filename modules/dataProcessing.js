@@ -109,28 +109,29 @@ function createCountrySelect() {
 
 
 function filterScoresByCountry(countryParam) {
-    // Step 1: Define variables.
-    let scores = leaderboardData; // List of player scores.
-    let countries = userCountryMap; // Map of {nameFilter: country}.
-    let filteredScores = []; // Final list of scores filtered by country.
+    let scores = leaderboardData;
+    let countries = userCountryMap;
+    let filteredScores = [];
 
-    // Step 2: Iterate through each score in leaderboardData.
     for (let score of scores) {
         let playerCountry = countries[Object.keys(countries).find(key =>
             key.toLowerCase() === score.nameFilter.toLowerCase()
         )];
 
-        // Step 4: Skip scores for players that don't have an associated country.
-        if (!playerCountry) continue;
+        if (!playerCountry) {
+            // Auto-assign China for CJK-named players not in manual map
+            if (countryParam === 'China' && /[\u4e00-\u9fff\u3400-\u4dbf]/.test(score.nameFilter)) {
+                playerCountry = 'China';
+            } else {
+                continue;
+            }
+        }
 
-        // Step 5: Check if the player's country matches the provided parameter.
         if (playerCountry === countryParam) {
-            // Step 6: If it matches, add the score to filteredScores.
             filteredScores.push(score);
         }
     }
 
-    // Step 7: Return the filtered list of scores.
     return filteredScores;
 }
 
@@ -148,6 +149,20 @@ function getCountryPlayerCounts() {
             countryCounts[country]++;
         } else {
             countryCounts[country] = 1;
+        }
+    }
+
+    // Count CJK auto-assigned Chinese players not in the manual map
+    if (activeUsers.size > 0) {
+        for (var name of activeUsers) {
+            if (name in userCountryMap) continue;
+            if (/[\u4e00-\u9fff\u3400-\u4dbf]/.test(name)) {
+                if (countryCounts['China']) {
+                    countryCounts['China']++;
+                } else {
+                    countryCounts['China'] = 1;
+                }
+            }
         }
     }
 
