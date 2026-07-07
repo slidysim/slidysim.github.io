@@ -46,7 +46,8 @@ const rename_map = {
     'Islamkit': 'IslamKitiev',
     'thelegendary': 'thelegendary08',
     '黑暗报': '636',
-    'sqmasep': 'eskiu'
+    'sqmasep': 'eskiu',
+    'Player123588': 'ap'
 
 };
 
