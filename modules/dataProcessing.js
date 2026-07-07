@@ -395,9 +395,19 @@ function processRankingsData(cleanedData, rankingsType) {
     if (sheetType === "Rankings3") {
         if (!loadingPower) {
             rankingTabs.style.display = "block";
+            if (customRankingsArea.value) {
+                customRankList = generateRanksFromCategories(parseCommaSeparatedString(customRankingsArea.value));
+            } else {
+                var mainPreset30 = customRankButtonsExamples.find(function(obj) {
+                    return obj.hasOwnProperty('MAIN 30');
+                });
+                if (mainPreset30) {
+                    customRankingsArea.value = mainPreset30['MAIN 30'];
+                    customRankList = generateRanksFromCategories(parseCommaSeparatedString(mainPreset30['MAIN 30']));
+                }
+            }
         }
         rankList = customRankList;
-        //console.log(rankList);
     }
     organizedLists = organizeInRanks(cleanedData, rankList);
     sortedLists = sortData(organizedLists, request.leaderboardType);
