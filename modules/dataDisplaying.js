@@ -1959,7 +1959,10 @@ function kinchUpdateChart() {
     var datasets = [];
     var labels = displayTiers.map(function (t) {
         var tierLabel = t.charAt(0).toUpperCase() + t.slice(1);
-        return kinchTrueTiers ? 'True ' + tierLabel : tierLabel;
+        var pct = percentageTable[t];
+        var label = kinchTrueTiers ? 'True ' + tierLabel : tierLabel;
+        if (pct !== undefined) label += ' ' + pct + '%';
+        return label;
     });
     var labelColors = displayTiers.map(function (t) { return kinchGetTierColor(t); });
     var barColors = displayTiers.map(function (t) { return kinchGetTierColor(t); });
