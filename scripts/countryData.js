@@ -47,7 +47,9 @@ const rename_map = {
     'thelegendary': 'thelegendary08',
     '黑暗报': '636',
     'sqmasep': 'eskiu',
-    'Player123588': 'ap'
+    'Player123588': 'ap',
+    'Xmeng': 'XMeng',
+    '真情报_theLove': 'XMeng'
 
 };
 
