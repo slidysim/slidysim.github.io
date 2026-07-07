@@ -51,7 +51,7 @@ const rename_map = {
     'Player123588': 'ap',
     'Xmeng': 'XMeng',
     '真情报_theLove': 'XMeng',
-    '快去关注NITO_X神仙':'42i196'
+    '快去关注NITO_X神仙':'JZE'
 
 
 };
