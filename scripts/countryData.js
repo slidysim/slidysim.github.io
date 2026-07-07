@@ -55,8 +55,16 @@ const rename_map = {
     'past.SHcTo': 'SHcTo',
     'ax0292.': 'ax0292',
     '清蒸鲈鱼':'JellyFish',
-    '祝望': '愿仔'
+    '祝望': '愿仔',
+    '笨笨还在做题': '非自'
+    
 };
+//'Jur105': same as uid 126470 if later included
+//乌米玲 - ???
+//就此别过 - ???
+//akyfake (slidysim web) - ??? aky?
+//13975 (slidysim exe) - ??? (benbenhai in discord)
+
 
 function appendFlagIconToNickname(nickname, minimal = false) {
     const lowerCaseNickname = nickname.toLowerCase();
