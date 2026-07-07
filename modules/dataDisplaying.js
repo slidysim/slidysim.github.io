@@ -1,4 +1,4 @@
-//Module to create sheets of processed leaderboard data
+﻿//Module to create sheets of processed leaderboard data
 
 /*DEPENDENCIES
 dataFetching.js
@@ -16,50 +16,58 @@ function resetContentDivLayout(contentDiv) {
     contentDiv.style.overflowX = '';
 }
 
+var kinchGreekLetters = {
+    kappa: 'κ', iota: 'ι', theta: 'θ', eta: 'η', zeta: 'ζ',
+    epsilon: 'ε', delta: 'δ', gamma: 'γ', beta: 'β', alpha: 'α',
+    lambda: 'λ', mu: 'μ', nu: 'ν', xi: 'ξ', omicron: 'ο',
+    pi: 'π', rho: 'ρ', sigma: 'σ', tau: 'τ', upsilon: 'υ',
+    phi: 'φ', chi: 'χ', psi: 'ψ', omega: 'ω'
+};
+
 function greekLetterSpan(tierName) {
     if (tierName === "Any" || tierName === "WRs only") {
         return tierName;
     }
-    // Create a mapping of tier names to their corresponding letters, classes, and glow colors
-    const tierMap = {
-        kappa: { letter: 'κ', class: 'kappa', glow: '#afafaf' },
-        iota: { letter: 'ι', class: 'iota', glow: '#23958b' },
-        theta: { letter: 'θ', class: 'theta', glow: '#b9f2ff' },
-        eta: { letter: 'η', class: 'eta', glow: '#85fa85' },
-        zeta: { letter: 'ζ', class: 'zeta', glow: '#ffaaf4' },
-        epsilon: { letter: 'ε', class: 'epsilon', glow: '#ffff00' },
-        delta: { letter: 'δ', class: 'delta', glow: '#a14dff' },
-        gamma: { letter: 'γ', class: 'gamma', glow: '#ff2262' },
-        beta: { letter: 'β', class: 'beta', glow: '#00ff00' },
-        alpha: { letter: 'α', class: 'alpha', glow: '#00ffff' }
-    };
-
-    // Check if the tierName exists in the mapping
-    if (tierMap[tierName]) {
-        // Create a span element
-        const span = document.createElement('span');
-
-        // Set the class for base styling
-        span.className = tierMap[tierName].class;
-
-        // Set the letter as the text content
-        span.textContent = tierMap[tierName].letter;
-
-        // Apply glowing effect using inline style for text-shadow
-        span.style.textShadow = `
-            0 0 5px ${tierMap[tierName].glow},
-            0 0 10px ${tierMap[tierName].glow},
-            0 0 15px ${tierMap[tierName].glow}
-        `;
-
+    function wrapSub(letter, sub) {
+        var span = document.createElement('span');
         span.style.fontSize = '18px';
-
-        // Return the span element
+        span.innerHTML = letter + '<sub style="font-size:12px">' + sub + '</sub>';
         return span;
-    } else {
-        console.error('Invalid tier name:', tierName);
-        return null;
     }
+    // Handle omega — show "ω" with subscript 0
+    if (tierName === "omega") {
+        var glow = kinchGetTierColor("omega");
+        var span = wrapSub(kinchGreekLetters["omega"], "0");
+        span.style.color = glow;
+        span.style.textShadow = '0 0 5px ' + glow + ', 0 0 10px ' + glow + ', 0 0 15px ' + glow;
+        return span;
+    }
+    // Handle omega+N — show Greek letter + subscript number
+    var omegaMatch = tierName.match(/^omega\+(\d+)$/);
+    if (omegaMatch) {
+        var glow = kinchGetTierColor("omega");
+        var span = wrapSub(kinchGreekLetters["omega"], omegaMatch[1]);
+        span.style.color = glow;
+        span.style.textShadow = '0 0 5px ' + glow + ', 0 0 10px ' + glow + ', 0 0 15px ' + glow;
+        return span;
+    }
+    var letter = kinchGreekLetters[tierName];
+    if (letter) {
+        var glow = kinchGetTierColor(tierName);
+        var span = document.createElement('span');
+        span.className = tierName;
+        span.textContent = letter;
+        span.style.textShadow = '0 0 5px ' + glow + ', 0 0 10px ' + glow + ', 0 0 15px ' + glow;
+        span.style.fontSize = '18px';
+        return span;
+    }
+    // Fallback for any unknown tier — show name with gradient color
+    var color = kinchGetTierColor(tierName);
+    var span = document.createElement('span');
+    span.textContent = tierName;
+    span.style.color = color;
+    span.style.fontSize = '18px';
+    return span;
 }
 
 //"Public" function to create card-style sheets (normal or square WRs), sheetType = Squares / -1
@@ -1107,7 +1115,8 @@ function createSheetRankings(playerScores) {
 
     const chartBtn = document.createElement("button");
     chartBtn.className = "kinch-chart-btn";
-    chartBtn.textContent = "Chart";
+    chartBtn.textContent = "📊";
+    chartBtn.title = "Chart";
     chartBtn.addEventListener("click", function () {
         kinchChartVisible = !kinchChartVisible;
         var c = document.getElementById("kinch-chart-container");
@@ -1775,11 +1784,66 @@ function kinchRenderTable(resultsTable) {
 // by the existing [tier]/[tierf] CSS color system.
 // Layer 0 = alpha (best, cyan), layer 1 = beta (green), layer 2 = gamma (red),
 // layer 3+ = delta, epsilon, zeta, eta, theta, iota, then kappa for overflow.
+var kinchGreekTiers = [
+    "alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota", "kappa",
+    "lambda", "mu", "nu", "xi", "omicron", "pi", "rho", "sigma", "tau", "upsilon", "phi", "chi", "psi", "omega"
+];
+
 function kinchLayerToTier(layer) {
-    var map = ["alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota"];
-    if (layer < 0) return "kappa";
-    if (layer >= map.length) return "kappa";
-    return map[layer];
+    if (layer < 0) layer = 0;
+    if (layer < kinchGreekTiers.length) return kinchGreekTiers[layer];
+    var n = layer - kinchGreekTiers.length + 1;
+    return "omega+" + n;
+}
+
+// Returns the full English name for a tier slug (e.g. "Alpha", "Omega",
+// "Omega+14"). Used in the req-row name column.
+function kinchTierFullName(tier, layer) {
+    if (tier === "omega") return "Omega";
+    var omegaMatch = tier.match(/^omega\+(\d+)$/);
+    if (omegaMatch) return "Omega+" + omegaMatch[1];
+    return tier.charAt(0).toUpperCase() + tier.slice(1);
+}
+
+// Returns the Unicode subscript digit for a number (for chart labels).
+function toSubscript(n) {
+    var s = "";
+    if (n === 0) return "\u2080";
+    while (n > 0) {
+        s = String.fromCharCode(0x2080 + (n % 10)) + s;
+        n = Math.floor(n / 10);
+    }
+    return s;
+}
+
+// Returns a display name for a tier slug + layer, using Greek letters with
+// subscript for omega+N (e.g. omega → "ω₀", omega+1 → "ω₁", omega+2 → "ω₂").
+function kinchTierDisplayName(tier, layer) {
+    // Handle base omega — subscript 0
+    if (tier === "omega") return (kinchGreekLetters["omega"] || "\u03C9") + toSubscript(0);
+    // Handle omega+N
+    var omegaMatch = tier.match(/^omega\+(\d+)$/);
+    if (omegaMatch) {
+        return (kinchGreekLetters["omega"] || "\u03C9") + toSubscript(parseInt(omegaMatch[1]));
+    }
+    var letter = kinchGreekLetters[tier];
+    return letter || tier;
+}
+
+// Injects [tier] / [tierf] CSS rules for a tier slug that falls beyond the
+// static alpha–kappa declarations in styles.css. Idempotent (injects once per
+// tier). Also adds a bare .{tier} class for the greek letter span.
+function kinchEnsureTierCSS(tier) {
+    if (document.getElementById("kinch-tier-css-" + tier)) return;
+    var color = kinchGetTierColor(tier);
+    var style = document.createElement("style");
+    style.id = "kinch-tier-css-" + tier;
+    style.textContent =
+        ".kinch-view [tier=\"" + tier + "\"] { color: " + color + "; }" +
+        ".kinch-view [tierf=\"" + tier + "\"] { color: " + color + "; text-shadow: 0 0 10px " + color + "; }" +
+        "#kinch-score-tooltip [tierf=\"" + tier + "\"] { color: " + color + "; text-shadow: 0 0 10px " + color + "; }" +
+        "." + tier + " { color: " + color + "; }";
+    document.head.appendChild(style);
 }
 
 // Returns a sentinel-safe "raw score" for a player × category, used by the
@@ -2327,6 +2391,7 @@ function kinchRenderJZE(resultsTable) {
         var layerRows = byLayer[l2] || [];
         if (kinchHideEmpty && layerRows.length === 0) continue;
         var tierSlug = kinchLayerToTier(l2);
+        kinchEnsureTierCSS(tierSlug);
 
         var tierTable = document.createElement("table");
         // Use a layer-unique id (the greek slug may repeat for layers ≥9 which
@@ -2353,15 +2418,14 @@ function kinchRenderJZE(resultsTable) {
         tdTierName.className = "player";
         tdTierName.setAttribute("tierf", tierSlug);
         tdTierName.style.minWidth = "132px";
-        var niceName = tierSlug.charAt(0).toUpperCase() + tierSlug.slice(1);
-        tdTierName.textContent = niceName + " (L" + l2 + ")";
+        tdTierName.textContent = kinchTierFullName(tierSlug, l2);
         reqRow.appendChild(tdTierName);
 
         var tdSymbol = document.createElement("td");
         tdSymbol.className = "req-symbol";
         tdSymbol.setAttribute("tierf", tierSlug);
         var sym = greekLetterSpan(tierSlug);
-        if (sym) tdSymbol.appendChild(sym); else tdSymbol.textContent = tierSlug;
+        if (sym) tdSymbol.appendChild(sym);
         reqRow.appendChild(tdSymbol);
 
         // 1 spacer cell (for "Beats N" column) to keep alignment.
@@ -2656,6 +2720,7 @@ function kinchRenderGoodBad(resultsTable, mode) {
         var layerRows = byLayer[l2] || [];
         if (kinchHideEmpty && layerRows.length === 0) continue;
         var tierSlug = kinchLayerToTier(l2);
+        kinchEnsureTierCSS(tierSlug);
 
         var tierTable = document.createElement("table");
         tierTable.id = "kinch-" + tierSlug + "-L" + l2 + "-table";
@@ -2679,15 +2744,14 @@ function kinchRenderGoodBad(resultsTable, mode) {
         tdTierName.className = "player";
         tdTierName.setAttribute("tierf", tierSlug);
         tdTierName.style.minWidth = "132px";
-        var niceName = tierSlug.charAt(0).toUpperCase() + tierSlug.slice(1);
-        tdTierName.textContent = niceName + " (L" + l2 + ")";
+        tdTierName.textContent = kinchTierFullName(tierSlug, l2);
         reqRow.appendChild(tdTierName);
 
         var tdSymbol = document.createElement("td");
         tdSymbol.className = "req-symbol";
         tdSymbol.setAttribute("tierf", tierSlug);
         var sym = greekLetterSpan(tierSlug);
-        if (sym) tdSymbol.appendChild(sym); else tdSymbol.textContent = tierSlug;
+        if (sym) tdSymbol.appendChild(sym);
         reqRow.appendChild(tdSymbol);
 
         // 16 empty cells for category columns (no requirement scores).
@@ -3046,7 +3110,8 @@ function kinchUpdateChart() {
     var pctBtn = document.getElementById("kinch-switch-percent");
     var ignoreInput = document.getElementById("kinch-chart-ignore");
     var isCumulative = cumBtn ? cumBtn.checked : false;
-    var isPercent = pctBtn ? pctBtn.checked : false;
+    var isLayerMode = (kinchSheetMode === "jze" || kinchSheetMode === "good" || kinchSheetMode === "bad");
+    var isPercent = (kinchSheetMode === "place" || kinchSheetMode === "nemesis" || isLayerMode) ? false : (pctBtn ? pctBtn.checked : false);
     var ignoreN = ignoreInput ? parseInt(ignoreInput.value) || 0 : 0;
 
     var datasets = [];
@@ -3059,7 +3124,6 @@ function kinchUpdateChart() {
     // map to the same greek tier (e.g. kappa L9, L10, L11) show as separate
     // entries. Labels include the layer number: "Alpha (L0) 90%", "Kappa (L9) 0%".
     var chartEntries = []; // [{ tier, layer, label, color, count }]
-    var isLayerMode = (kinchSheetMode === "jze" || kinchSheetMode === "good" || kinchSheetMode === "bad");
 
     if (isLayerMode) {
         // Build entries from actual layer tables in the DOM (in display order:
@@ -3081,12 +3145,11 @@ function kinchUpdateChart() {
         var displayLayerEntries = layerEntries.slice().reverse();
         for (var le = 0; le < displayLayerEntries.length; le++) {
             var entry = displayLayerEntries[le];
-            var tierLabel = entry.tier.charAt(0).toUpperCase() + entry.tier.slice(1);
-            var pct = percentageTable[entry.tier];
-            var lbl = tierLabel + ' (L' + entry.layer + ')';
-            if (pct !== undefined) lbl += ' ' + pct + '%';
+            var lbl = kinchTierDisplayName(entry.tier, entry.layer);
             chartEntries.push({
                 label: lbl,
+                tier: entry.tier,
+                layer: entry.layer,
                 color: kinchGetTierColor(entry.tier),
                 count: entry.count
             });
@@ -3095,9 +3158,9 @@ function kinchUpdateChart() {
         // Default + Place modes: one entry per greek tier.
         for (var te = 0; te < displayTiers.length; te++) {
             var t = displayTiers[te];
-            var tLabel = t.charAt(0).toUpperCase() + t.slice(1);
+            var tLetter = kinchGreekLetters[t] || t;
             var tPct = percentageTable[t];
-            var tLbl = kinchTrueTiers ? 'True ' + tLabel : tLabel;
+            var tLbl = (kinchTrueTiers ? 'True ' : '') + tLetter;
             if (tPct !== undefined) tLbl += ' ' + tPct + '%';
             // Count players in this tier.
             var tCount = 0;
@@ -3112,6 +3175,7 @@ function kinchUpdateChart() {
             }
             chartEntries.push({
                 label: tLbl,
+                tier: t,
                 color: kinchGetTierColor(t),
                 count: tCount
             });
@@ -3214,6 +3278,12 @@ function kinchUpdateChart() {
         datasets.push({ label: "Players", data: overallCounts, backgroundColor: barColors, borderColor: barColors, borderWidth: 1, borderRadius: 3 });
     }
 
+    // Save total tier count BEFORE skip slicing — used to set slider max
+    // so the user can always skip from 0 to (totalTiers - 1) regardless of
+    // the current skip value. Without this, the max keeps shrinking as the
+    // user slides, causing confusing snap-back behavior.
+    var totalTierCount = labels.length;
+
     // STEP 1: Apply skip FIRST (like Power) — removes lowest tiers before
     // computing percent/cumulative. This way percentages are relative to
     // the non-skipped total, and cumulative+percent starts at 100%.
@@ -3262,9 +3332,10 @@ function kinchUpdateChart() {
     var titleEl = document.getElementById("kinch-chart-title");
     if (titleEl) titleEl.textContent = titleParts.join(" ");
 
-    // update slider max — use actual number of chart entries (can be more
-    // than tierOrder.length in layer modes where multiple layers map to kappa).
-    if (ignoreInput) ignoreInput.max = Math.max(0, labels.length - 1);
+    // update slider max — use pre-skip tier count so the user can skip
+    // from 0 to (totalTiers - 1). In layer modes there can be more entries
+    // than tierOrder.length when multiple layers map to the same greek tier.
+    if (ignoreInput) ignoreInput.max = Math.max(0, totalTierCount - 1);
 
     // y-axis max for percent+cumulative
     var yMax = (isPercent && isCumulative) ? 100 : undefined;
@@ -3285,6 +3356,7 @@ function kinchUpdateChart() {
             kinchTierChart.data.datasets[di].hoverBorderColor = ds.hoverBorderColor;
         });
         kinchTierChart.options.scales.x.ticks.color = labelColors;
+        kinchTierChart.options.scales.x.ticks.font.size = 20;
         if (yMax !== undefined) kinchTierChart.options.scales.y.max = yMax;
         else delete kinchTierChart.options.scales.y.max;
         kinchTierChart.__rawData = rawData2D;
@@ -3356,6 +3428,35 @@ function kinchUpdateChart() {
             }
         };
 
+        var kinchTickGlowPlugin = {
+            id: 'kinch-tick-glow',
+            afterDraw: function (chart) {
+                if (chart !== kinchTierChart) return;
+                var ctx = chart.ctx, xAxis = chart.scales.x;
+                if (!xAxis || !xAxis.ticks) return;
+                var items = xAxis._labelItems;
+                if (!items) return;
+                ctx.save();
+                for (var ti = 0; ti < xAxis.ticks.length && ti < items.length; ti++) {
+                    var item = items[ti];
+                    var opts = item.options;
+                    var font = item.font;
+                    var label = item.label;
+                    if (label === undefined || label === null) continue;
+                    ctx.shadowBlur = 14;
+                    ctx.shadowColor = opts.color;
+                    ctx.fillStyle = opts.color;
+                    ctx.font = font.string;
+                    ctx.textAlign = opts.textAlign || 'center';
+                    ctx.textBaseline = opts.textBaseline || 'middle';
+                    var tx = opts.translation[0];
+                    var ty = opts.translation[1];
+                    ctx.fillText(String(label), tx + 0, ty + item.textOffset);
+                }
+                ctx.restore();
+            }
+        };
+
         kinchTierChart = new Chart(ctx, {
             type: "bar",
             data: { labels: labels, datasets: datasets },
@@ -3373,10 +3474,14 @@ function kinchUpdateChart() {
                         backgroundColor: "rgb(20,20,20)",
                         titleColor: "#ddd", bodyColor: "#bbb",
                         borderColor: "#333", borderWidth: 1, padding: 8,
-                        titleFont: { size: 10, weight: "bold" },
-                        bodyFont: { size: 10 },
+                        titleFont: { size: 18, weight: "bold" },
+                        bodyFont: { size: 16 },
                         callbacks: {
-                            title: function (items) { return items[0].label; },
+                            title: function () { return ''; },
+                            labelTextColor: function (context) {
+                                var colors = context.chart.options.scales.x.ticks.color;
+                                return Array.isArray(colors) ? (colors[context.dataIndex] || '#bbb') : '#bbb';
+                            },
                             label: function (item) {
                                 var chart = item.chart;
                                 var di = item.datasetIndex;
@@ -3395,20 +3500,18 @@ function kinchUpdateChart() {
                                 }
                                 var rawTotal = (chart.__rawTotals && chart.__rawTotals[di]) || 0;
                                 var pct = rawTotal > 0 ? displayVal / rawTotal * 100 : 0;
-                                var isPct = chart.__isPercent;
-                                var suffix = isPct ? "%" : "";
                                 var prefix = chart.__isTrueTiers ? 'True ' : '';
-                                return prefix + item.dataset.label + ': ' + (isPct ? displayVal.toFixed(1) : displayVal) + suffix + ' (' + pct.toFixed(1) + '%)';
+                                return item.label + '  ' + prefix + item.dataset.label + ': ' + displayVal + ' (' + pct.toFixed(1) + '%)';
                             }
                         }
                     }
                 },
                 scales: {
-                    x: { ticks: { color: labelColors, maxRotation: 45, font: { size: 10, weight: "bold" } }, grid: { color: "#2a2a2a" } },
+                    x: { ticks: { color: labelColors, maxRotation: 0, font: { size: 20, weight: "bold" } }, grid: { color: "#2a2a2a" } },
                     y: { beginAtZero: true, ticks: { color: "#999", precision: 0, font: { size: 10 } }, grid: { color: "#2a2a2a" }, max: yMax }
                 }
             },
-            plugins: [kinchDataLabelsPlugin]
+            plugins: [kinchDataLabelsPlugin, kinchTickGlowPlugin]
         });
         kinchTierChart.__rawData = rawData2D;
         kinchTierChart.__rawTotals = totals;
@@ -3426,7 +3529,19 @@ function kinchGetTierColor(tier) {
         epsilon: "#ffff00", zeta: "#ffaaf4", eta: "#85fa85", theta: "#b9f2ff",
         iota: "#23958b", kappa: "#afafaf"
     };
-    return colors[tier] || "#999";
+    if (colors[tier] !== undefined) return colors[tier];
+    // Extended tiers: compute progressively darker grayscale gradient using
+    // an asymptotic curve. Starts near kappa's lightness and approaches
+    // a darker floor (15%) without ever reaching it, so every additional
+    // layer gets slightly darker regardless of depth.
+    var idx = kinchGreekTiers.indexOf(tier);
+    if (idx === -1) {
+        var m = tier.match(/omega\+(\d+)/);
+        idx = m ? 23 + parseInt(m[1]) : 24;
+    }
+    var offset = idx - 9; // tiers past kappa
+    var lightness = 15 + 54 / (1 + offset * 0.12);
+    return 'hsl(0, 0%, ' + lightness + '%)';
 }
 
 //"Public" function to create Latest records sheet
