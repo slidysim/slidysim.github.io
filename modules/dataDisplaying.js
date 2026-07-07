@@ -1069,6 +1069,11 @@ function createSheetRankings(playerScores) {
     }
     // Reset chart categories on page switch
     kinchChartCategories = [];
+    // Reset sort state on page switch — sorting should not persist across
+    // different pages (e.g. switching from Place-sorted-by-category back to
+    // Kinch, then to Place again, should start fresh with default sort).
+    kinchSortColumn = null;
+    kinchSortAsc = true;
 
     // Store for re-renders triggered by switch toggles
     kinchPlayerScores = playerScores;
@@ -1268,6 +1273,67 @@ function kinchBuildSwitches(toolbar) {
     dropdown.id = "kinch-switch-dropdown";
     toolbar.appendChild(dropdown);
 
+    // --- Sheet mode selector (radio-button style) ---
+    // 5 modes: Default (normal kinch), Leaderboard (#N placements), JZE (Pareto),
+    // GOOD (peel by MIN), BAD (peel by MAX). Lives inside #kinch-switch-dropdown
+    // so on mobile it folds into the same hamburger panel as the other switches.
+    var modesWrap = document.createElement("div");
+    modesWrap.id = "kinch-sheet-modes";
+    var modes = [
+        { id: "kinch-mode-default",    value: "default",    label: "Kinch",    tt: "Normal Kinch view — players sorted by Kinch%, grouped by tier" },
+        { id: "kinch-mode-leaderboard", value: "leaderboard", label: "Place", tt: "Overall # Leaderboard — shows placement (#N) per category instead of scores\nMain sort: average placement ascending (lower = better)\nKinch% shown for comparison\nClick headers to sort by name, place, kinch%, avg place, or any category" },
+        { id: "kinch-mode-jze",        value: "jze",        label: "Nemesis",        tt: "Combined Nemesis (JZE) — Pareto dominance grouping\nPlayer B 'beats' A if B is strictly better in ALL categories\nTier = longest chain of beaters; Alpha (top) has no beaters" },
+        { id: "kinch-mode-good",       value: "good",       label: "Good",       tt: "Combined Good — iterative peeling by fastest (MIN)\nLayer 0 = WR holders (tie fastest in ≥1 category)\nN = number of categories where player ties the min in their round" },
+        { id: "kinch-mode-bad",        value: "bad",        label: "Bad",        tt: "Combined Bad — iterative peeling by slowest (MAX)\nLayer 0 = last survivors\nN = number of categories where player ties the max in their round (0 for survivors)" }
+    ];
+    for (var mi = 0; mi < modes.length; mi++) {
+        (function (mode) {
+            var lab = document.createElement("label");
+            lab.className = "kinch-mode-btn";
+            lab.setAttribute("data-tt", mode.tt);
+            lab.innerHTML = '<input type="radio" name="kinch-sheet-mode" id="' + mode.id + '" value="' + mode.value + '"' + (kinchSheetMode === mode.value ? " checked" : "") + '><span class="checkbox-text">' + mode.label + "</span>";
+            modesWrap.appendChild(lab);
+            var r = lab.querySelector("input");
+            r.addEventListener("change", function () {
+                if (r.checked) {
+                    kinchSheetMode = mode.value;
+                    // Reset sort state when switching modes — different modes
+                    // have different column layouts, so a sort column index
+                    // from one mode would map to the wrong column in another.
+                    kinchSortColumn = null;
+                    kinchSortAsc = true;
+                    kinchRerender();
+                }
+            });
+            // tooltip on hover for mode labels
+            lab.addEventListener("mouseenter", function () {
+                var tip = document.getElementById("kinch-score-tooltip");
+                if (!tip) return;
+                var lines = mode.tt.split("\n");
+                var html = lines.map(function (ln) {
+                    var idx = ln.indexOf(": ");
+                    if (idx !== -1) return "<span>" + ln.substring(0, idx) + "</span>" + ln.substring(idx);
+                    return ln;
+                }).join("<br>");
+                tip.innerHTML = html;
+                tip.style.display = "block";
+                var rect = lab.getBoundingClientRect();
+                var left = rect.left + rect.width / 2 - tip.offsetWidth / 2;
+                var top = rect.bottom + 4;
+                if (left + tip.offsetWidth > window.innerWidth - 8) left = window.innerWidth - tip.offsetWidth - 8;
+                if (left < 8) left = 8;
+                if (top + tip.offsetHeight > window.innerHeight - 8) top = rect.top - tip.offsetHeight - 4;
+                tip.style.left = left + "px";
+                tip.style.top = top + "px";
+            });
+            lab.addEventListener("mouseleave", function () {
+                var tip = document.getElementById("kinch-score-tooltip");
+                if (tip) tip.style.display = "none";
+            });
+        })(modes[mi]);
+    }
+    dropdown.appendChild(modesWrap);
+
     var switches = [
         { id: "kinch-switch-true",  label: "True Tiers",    state: kinchTrueTiers,  tt: "Off: All players are shown\nOn: Group players by their worst category tier" },
         { id: "kinch-switch-empty", label: "Hide Empty",    state: kinchHideEmpty,  tt: "Off: All tiers are shown\nOn: Empty tiers are hidden" },
@@ -1380,7 +1446,6 @@ function kinchGetSortKey(ps, col) {
 
 //Builds the sticky events-row wrapper + per-tier req-row tables + player rows.
 function kinchRenderTable(resultsTable) {
-    var transformed = kinchTransformScores(kinchPlayerScores);
     kinchValidCategories = kinchGetValidCategories(kinchPlayerScores);
     if (kinchNerf) {
         kinchValidCategories = kinchValidCategories.filter(function (c) { return !kinchIsNerfedCategory(c.id); });
@@ -1390,6 +1455,29 @@ function kinchRenderTable(resultsTable) {
         return;
     }
 
+    // --- Dispatch to mode-specific renderers ---
+    // "default" keeps the original Power-style per-tier rendering. The four
+    // new modes (# Leaderboard, JZE, GOOD, BAD) use their own grouping logic
+    // and add extra columns inside the existing Name | # | Kinch structure so
+    // the rest of the table layout is unchanged.
+    if (kinchSheetMode === "leaderboard") {
+        kinchRenderLeaderboard(resultsTable);
+        return;
+    }
+    if (kinchSheetMode === "jze") {
+        kinchRenderJZE(resultsTable);
+        return;
+    }
+    if (kinchSheetMode === "good") {
+        kinchRenderGoodBad(resultsTable, "good");
+        return;
+    }
+    if (kinchSheetMode === "bad") {
+        kinchRenderGoodBad(resultsTable, "bad");
+        return;
+    }
+
+    var transformed = kinchTransformScores(kinchPlayerScores);
     var tierOrder = kinchGetTierOrder(); // alpha..kappa (descending)
     var numCats = kinchValidCategories.length;
 
@@ -1541,6 +1629,7 @@ function kinchRenderTable(resultsTable) {
 
         var tierTable = document.createElement("table");
         tierTable.id = "kinch-" + tier + "-table";
+        tierTable.setAttribute("data-tier", tier);
         tierTable.style.contentVisibility = "auto";
         tierTable.style.containIntrinsicSize = "auto 200px";
         resultsTable.appendChild(tierTable);
@@ -1658,6 +1747,1009 @@ function kinchRenderTable(resultsTable) {
         }
     }
 }
+
+// ============================================================================
+// KINCH FUN SHEETS — Overall # Leaderboard, Combined JZE / GOOD / BAD
+// ============================================================================
+// These four renderers reuse the existing sticky-wrapper + per-tier-table
+// structure (so the layout CSS already handles sticky headers, hover, etc.),
+// and only change:
+//   1. The events-row header cells (add extra column labels where needed)
+//   2. The player-row cells (add the extra info column + the 16 score cells)
+//   3. The grouping/sorting (mode-specific computation functions)
+//
+// Mapping from python-script layer → openslidy greek tier:
+//   Layer 0 = Alpha (cyan)      → "alpha"  (best — no beaters / WR holders / survivors)
+//   Layer 1 = Beta (green)      → "beta"
+//   Layer 2 = Gamma (red)       → "gamma"
+//   Layer 3 = Professional       → "delta"
+//   Layer 4 = Grandmaster        → "epsilon"
+//   Layer 5 = Master             → "zeta"
+//   Layer 6 = Good               → "eta"
+//   Layer 7 = Average            → "theta"
+//   Layer 8 = Beginner           → "iota"
+//   Layer 9+ = Beginner+...      → "kappa"
+// ============================================================================
+
+// Maps a JZE/GOOD/BAD layer index to the corresponding greek-tier slug used
+// by the existing [tier]/[tierf] CSS color system.
+// Layer 0 = alpha (best, cyan), layer 1 = beta (green), layer 2 = gamma (red),
+// layer 3+ = delta, epsilon, zeta, eta, theta, iota, then kappa for overflow.
+function kinchLayerToTier(layer) {
+    var map = ["alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota"];
+    if (layer < 0) return "kappa";
+    if (layer >= map.length) return "kappa";
+    return map[layer];
+}
+
+// Returns a sentinel-safe "raw score" for a player × category, used by the
+// JZE/GOOD/BAD grouping algorithms. Lower = better for time/moves; for TPS
+// higher is better, but the algorithms here treat "faster" uniformly by
+// using the player's numeric score (time/moves/tps) and the `reverse` flag
+// to decide which direction is "better". We precompute a single "lowerIsBetter"
+// boolean so the dominance / min / max logic stays symmetric.
+//
+// Returns { has: bool, value: Number, timestamp: Number, scoreData: scoreObj|null }
+// `timestamp` is the score's set-date (unix ms) — used for tie-breaking in
+// Place mode (earlier timestamp = better placement when scores are equal).
+function kinchGetRawScore(ps, catId, reverse) {
+    for (var i = 0; i < ps.scores.length; i++) {
+        var s = ps.scores[i];
+        if (s.id === catId) {
+            if (!s.scoreInfo || s.scoreInfo === defaultScore || typeof s.scoreInfo !== "object") {
+                return { has: false, value: NaN, timestamp: 0, scoreData: s };
+            }
+            // scoreData.score holds the main value already (time/moves/tps).
+            // For TPS (reverse=true) we negate so that "smaller = better" everywhere.
+            var v = (typeof s.score === "number") ? s.score : NaN;
+            if (reverse) v = -v;
+            var ts = (s.scoreInfo && typeof s.scoreInfo.timestamp === "number") ? s.scoreInfo.timestamp : 0;
+            return { has: true, value: v, timestamp: ts, scoreData: s };
+        }
+    }
+    return { has: false, value: NaN, timestamp: 0, scoreData: null };
+}
+
+// ---------------------------------------------------------------------------
+// Mode: Overall # Leaderboard
+// ---------------------------------------------------------------------------
+
+//Computes placements (#1, #2, …) per category for every player.
+//Ties are resolved by timestamp: the player who set the score earlier gets
+//the better placement. This avoids fractional placements (e.g. 8.5) that
+//would otherwise occur from average-rank tie handling.
+//When kinchTrueTiers is true, players with any missing score are excluded
+//entirely — placements are computed only among players who have all scores.
+//Returns an array of { name, kinchPower, kinchRank, avgPlace, places: [Number, …] }
+//where places[i] is the player's placement in kinchValidCategories[i].
+function kinchComputeLeaderboard(playerScores, reverse) {
+    var numCats = kinchValidCategories.length;
+
+    // Pre-extract raw values + timestamps into arrays.
+    var raw = [];
+    var timestamps = [];
+    for (var p = 0; p < playerScores.length; p++) {
+        var row = [];
+        var tsRow = [];
+        for (var c = 0; c < numCats; c++) {
+            var r = kinchGetRawScore(playerScores[p], kinchValidCategories[c].id, reverse);
+            row.push(r.has ? r.value : NaN);
+            tsRow.push(r.timestamp);
+        }
+        raw.push(row);
+        timestamps.push(tsRow);
+    }
+
+    // True tiers mode: filter out players with any missing score.
+    // Only players with all scores participate in the placement computation.
+    var eligibleIdx = [];
+    for (var pi = 0; pi < playerScores.length; pi++) {
+        var hasAll = true;
+        for (var c0 = 0; c0 < numCats; c0++) {
+            if (isNaN(raw[pi][c0])) { hasAll = false; break; }
+        }
+        if (hasAll) eligibleIdx.push(pi);
+    }
+    // If not true tiers mode, all players are eligible.
+    var activeIdx = kinchTrueTiers ? eligibleIdx : [];
+    if (!kinchTrueTiers) {
+        for (var pi1 = 0; pi1 < playerScores.length; pi1++) activeIdx.push(pi1);
+    }
+    var n = activeIdx.length;
+
+    // For each category, compute placements with tie-breaking by timestamp.
+    // placements maps original playerIdx → placement (1 = best).
+    // Players NOT in activeIdx (filtered out by true tiers) get no placement.
+    var placements = {};
+    for (var ai = 0; ai < activeIdx.length; ai++) {
+        placements[activeIdx[ai]] = new Array(numCats).fill(NaN);
+    }
+
+    for (var c2 = 0; c2 < numCats; c2++) {
+        // Build a list of {playerIdx, value, timestamp} for active players.
+        var list = [];
+        for (var ai2 = 0; ai2 < activeIdx.length; ai2++) {
+            var idx = activeIdx[ai2];
+            if (!isNaN(raw[idx][c2])) {
+                list.push({ idx: idx, v: raw[idx][c2], ts: timestamps[idx][c2] });
+            }
+        }
+        // Sort by value ascending (lower = better); ties broken by timestamp
+        // ascending (earlier = better).
+        list.sort(function (a, b) {
+            if (a.v !== b.v) return a.v - b.v;
+            return a.ts - b.ts;
+        });
+
+        // Assign placements — no ties (timestamp breaks them), so each player
+        // gets a distinct integer placement.
+        for (var k = 0; k < list.length; k++) {
+            placements[list[k].idx][c2] = k + 1;
+        }
+
+        // If NOT true tiers mode: players with no score get (highestPlace + 1).
+        // In true tiers mode, players with missing scores are already excluded
+        // from activeIdx, so they don't get a placement at all.
+        if (!kinchTrueTiers) {
+            var highestPlace = list.length;
+            var missingPlace = list.length > 0 ? highestPlace + 1 : 1;
+            for (var ai3 = 0; ai3 < activeIdx.length; ai3++) {
+                var idx3 = activeIdx[ai3];
+                if (isNaN(placements[idx3][c2])) placements[idx3][c2] = missingPlace;
+            }
+        }
+    }
+
+    // Compute avgPlace per active player.
+    var result = [];
+    for (var ai4 = 0; ai4 < activeIdx.length; ai4++) {
+        var pIdx = activeIdx[ai4];
+        var sum = 0;
+        var cnt = 0;
+        for (var c3 = 0; c3 < numCats; c3++) {
+            if (!isNaN(placements[pIdx][c3])) { sum += placements[pIdx][c3]; cnt++; }
+        }
+        var avg = cnt > 0 ? sum / cnt : Infinity;
+        result.push({
+            name: playerScores[pIdx].name,
+            kinchPower: playerScores[pIdx].power,
+            places: placements[pIdx],
+            avgPlace: avg
+        });
+    }
+
+    // Sort by avgPlace ascending (lower = better). Ties broken by Kinch% desc.
+    result.sort(function (a, b) {
+        if (a.avgPlace !== b.avgPlace) return a.avgPlace - b.avgPlace;
+        return b.kinchPower - a.kinchPower;
+    });
+
+    // Compute the original Kinch rank (1 = best) for comparison.
+    var byKinch = playerScores.slice().sort(function (a, b) { return b.power - a.power; });
+    var kinchRankMap = {};
+    for (var k2 = 0; k2 < byKinch.length; k2++) kinchRankMap[byKinch[k2].name] = k2 + 1;
+    for (var r2 = 0; r2 < result.length; r2++) result[r2].kinchRank = kinchRankMap[result[r2].name] || 0;
+
+    return result;
+}
+
+//Renders the Overall # Leaderboard sheet:
+//  Columns: Name | # | Kinch% | Avg Place | 16 placement columns
+//  Single flat table (no kinch tier grouping, no req rows).
+//  Default sort: by Avg Place ascending (lower = better).
+//  Click any header to sort by that column; click again to reset to Avg Place.
+//  Name cells retain their kinch tier color (from the default Kinch view) so
+//  players are still visually identifiable by their kinch tier.
+//  Placement cells show plain numbers (1, 2, 3...) — no "#" prefix.
+function kinchRenderLeaderboard(resultsTable) {
+    var transformed = kinchTransformScores(kinchPlayerScores);
+    var numCats = kinchValidCategories.length;
+    var rows = kinchComputeLeaderboard(transformed, kinchReverse);
+
+    // tierOf maps player name → kinch tier (for coloring name cells).
+    var tierOf = {};
+    for (var i = 0; i < transformed.length; i++) tierOf[transformed[i].name] = transformed[i].tier;
+
+    // --- sort rows ---
+    // Default (kinchSortColumn === null): sort by Avg Place ascending (best first).
+    // When a header is clicked: sort by that column, best-first for that column.
+    // Click same header again: reset to null (= Avg Place ascending).
+    var sortedRows = rows.slice();
+    if (kinchSortColumn !== null) {
+        var col = kinchSortColumn;
+        sortedRows.sort(function (a, b) {
+            var va, vb;
+            if (col === 0) {
+                // Name: A→Z
+                return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+            } else if (col === 1 || col === 3) {
+                // # (place rank) or Avg Place: lower = better → ascending
+                return a.avgPlace - b.avgPlace;
+            } else if (col === 2) {
+                // Kinch%: higher = better → descending
+                return b.kinchPower - a.kinchPower;
+            } else {
+                // Category placement (col >= 4): lower = better → ascending
+                var catIdx = col - 4;
+                return a.places[catIdx] - b.places[catIdx];
+            }
+        });
+    }
+    // If kinchSortColumn === null, rows are already sorted by avgPlace ascending
+    // from kinchComputeLeaderboard.
+
+    // --- sticky events-row header ---
+    var stickyWrap = document.createElement("div");
+    stickyWrap.className = "kinch-sticky-wrapper";
+    var stickyTable = document.createElement("table");
+    stickyWrap.appendChild(stickyTable);
+    var stickyHead = document.createElement("thead");
+    stickyHead.className = "table-header";
+    stickyTable.appendChild(stickyHead);
+    var eventsRow = document.createElement("tr");
+    eventsRow.className = "events-row";
+    stickyHead.appendChild(eventsRow);
+
+    // Column layout: Name(0) | #(1) | Kinch%(2) | Avg Place(3) | cat1(4) | ... | catN
+    // When sorting is active, the Name header becomes "Reset sorting".
+    var thName = document.createElement("td");
+    thName.className = "player";
+    if (kinchSortColumn !== null) {
+        thName.textContent = "Reset sorting";
+        thName.style.cursor = "pointer";
+        thName.style.minWidth = "132px";
+        thName.addEventListener("click", function () {
+            kinchSortColumn = null;
+            kinchSortAsc = true;
+            kinchRerender();
+        });
+    } else {
+        thName.textContent = "Name" + (kinchSortColumn === 0 ? (kinchSortAsc ? " ▲" : " ▼") : "");
+        thName.style.minWidth = "132px";
+        kinchSetupSortableHeader(thName, 0);
+    }
+    eventsRow.appendChild(thName);
+
+    var thPlace = document.createElement("td");
+    thPlace.textContent = "#" + (kinchSortColumn === 1 ? (kinchSortAsc ? " ▲" : " ▼") : "");
+    kinchSetupSortableHeader(thPlace, 1);
+    eventsRow.appendChild(thPlace);
+
+    var thKinchPct = document.createElement("td");
+    thKinchPct.textContent = "Kinch%" + (kinchSortColumn === 2 ? (kinchSortAsc ? " ▲" : " ▼") : "");
+    kinchSetupSortableHeader(thKinchPct, 2);
+    eventsRow.appendChild(thKinchPct);
+
+    var thAvg = document.createElement("td");
+    thAvg.textContent = "Avg Place" + (kinchSortColumn === 3 ? (kinchSortAsc ? " ▲" : " ▼") : "");
+    kinchSetupSortableHeader(thAvg, 3);
+    eventsRow.appendChild(thAvg);
+
+    for (var c = 0; c < numCats; c++) {
+        (function (cat, colIdx) {
+            var th = document.createElement("td");
+            th.innerHTML = cat.id.replace(/ /g, "<br>");
+            if (kinchSortColumn === colIdx) th.innerHTML += kinchSortAsc ? " ▲" : " ▼";
+            kinchSetupSortableHeader(th, colIdx);
+            eventsRow.appendChild(th);
+        })(kinchValidCategories[c], c + 4);
+    }
+    resultsTable.appendChild(stickyWrap);
+
+    // --- single flat table (no per-tier grouping, no req rows) ---
+    var table = document.createElement("table");
+    table.id = "kinch-leaderboard-table";
+    table.style.contentVisibility = "auto";
+    table.style.containIntrinsicSize = "auto 200px";
+    resultsTable.appendChild(table);
+
+    var tbody = document.createElement("tbody");
+    table.appendChild(tbody);
+
+    for (var rp = 0; rp < sortedRows.length; rp++) {
+        (function (r, idx) {
+            var tier = tierOf[r.name] || "kappa";
+            var row = document.createElement("tr");
+            row.className = "player-row";
+            tbody.appendChild(row);
+
+            // Name — colored by kinch tier
+            var nameCell = document.createElement("td");
+            nameCell.className = "player sortable-player";
+            nameCell.setAttribute("tier", tier);
+            if (kinchDontFormat) nameCell.textContent = r.name;
+            else nameCell.innerHTML = appendFlagIconToNickname(r.name);
+            nameCell.addEventListener("click", function () {
+                radioNxNWRs.checked = true;
+                changePuzzleSize(radioNxNWRs.value);
+                changeNameFilter(r.name);
+            });
+            row.appendChild(nameCell);
+
+            // # (place by current sort order — 1-based)
+            var placeCell = document.createElement("td");
+            placeCell.className = "player-place";
+            placeCell.setAttribute("tier", tier);
+            placeCell.textContent = idx + 1;
+            row.appendChild(placeCell);
+
+            // Kinch% (original)
+            var kinchPctCell = document.createElement("td");
+            kinchPctCell.className = "player-power";
+            kinchPctCell.setAttribute("tier", tier);
+            kinchPctCell.textContent = r.kinchPower.toFixed(3) + "%";
+            row.appendChild(kinchPctCell);
+
+            // Avg Place
+            var avgCell = document.createElement("td");
+            avgCell.className = "player-power";
+            avgCell.setAttribute("tier", tier);
+            avgCell.textContent = isFinite(r.avgPlace) ? r.avgPlace.toFixed(3) : "—";
+            row.appendChild(avgCell);
+
+            // Per-category placement cells — plain numbers, no "#" prefix.
+            // Cell tier color follows the player's kinch tier (consistent with
+            // name/kinch% cells). WR (place == 1) gets the WRPB glow.
+            for (var ci = 0; ci < numCats; ci++) {
+                var cell = document.createElement("td");
+                var pl = r.places[ci];
+                if (isNaN(pl)) {
+                    cell.className = "kinch-empty-cell";
+                    cell.textContent = "—";
+                } else {
+                    cell.setAttribute("tier", tier);
+                    var span = document.createElement("span");
+                    span.className = "score-main";
+                    span.textContent = Number.isInteger(pl) ? pl : pl.toFixed(2);
+                    cell.appendChild(span);
+                    if (pl === 1) cell.classList.add("WRPB");
+                }
+                row.appendChild(cell);
+            }
+        })(sortedRows[rp], rp);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Mode: Combined JZE (Pareto dominance grouping)
+// ---------------------------------------------------------------------------
+
+//Computes JZE dominance grouping.
+//Player B "beats" player A if B is strictly better in ALL categories.
+//Tier (layer) = longest chain of beaters (topological depth); layer 0 = Gamma.
+//Returns array with extra fields: layer, beatenCount, whoBeats (string),
+//beatsNext (string "X/Y").
+function kinchComputeJZE(playerScores, reverse) {
+    var n = playerScores.length;
+    var numCats = kinchValidCategories.length;
+
+    // Pre-extract raw values.
+    var raw = [];
+    for (var p = 0; p < n; p++) {
+        var row = [];
+        for (var c = 0; c < numCats; c++) {
+            var r = kinchGetRawScore(playerScores[p], kinchValidCategories[c].id, reverse);
+            row.push(r.has ? r.value : Infinity);
+        }
+        raw.push(row);
+    }
+
+    // For each player i, find all players j that beat i (j strictly better in all cats).
+    // We compute beaters (indices of players that beat i) and beaten_count.
+    var beaters = []; // beaters[i] = array of indices j that beat i
+    var beatenCount = [];
+    for (var i = 0; i < n; i++) {
+        var b = [];
+        for (var j = 0; j < n; j++) {
+            if (j === i) continue;
+            var dominates = true;
+            for (var c2 = 0; c2 < numCats; c2++) {
+                if (!(raw[j][c2] < raw[i][c2])) { dominates = false; break; }
+            }
+            if (dominates) b.push(j);
+        }
+        beaters.push(b);
+        beatenCount.push(b.length);
+    }
+
+    // Layer = max(layer of beaters) + 1; layer 0 = no beaters.
+    var layer = new Array(n).fill(-1);
+    // Iterate until all layers are resolved (since beaters always have lower index
+    // in topological order, but the input order is by Kinch% desc — not topological).
+    // Use a worklist: repeatedly compute layer for any player whose beaters are all resolved.
+    var pending = [];
+    for (var k = 0; k < n; k++) pending.push(k);
+    var safety = n * n + 10;
+    while (pending.length > 0 && safety-- > 0) {
+        var next = [];
+        var madeProgress = false;
+        for (var pi = 0; pi < pending.length; pi++) {
+            var idx = pending[pi];
+            var allResolved = true;
+            var maxBL = -1;
+            for (var bi = 0; bi < beaters[idx].length; bi++) {
+                var bj = beaters[idx][bi];
+                if (layer[bj] === -1) { allResolved = false; break; }
+                if (layer[bj] > maxBL) maxBL = layer[bj];
+            }
+            if (allResolved) {
+                layer[idx] = maxBL + 1;
+                madeProgress = true;
+            } else {
+                next.push(idx);
+            }
+        }
+        pending = next;
+        if (!madeProgress) {
+            // Cycle / fallback — assign remaining to layer 0.
+            for (var f = 0; f < pending.length; f++) layer[pending[f]] = 0;
+            break;
+        }
+    }
+
+    // Group players by layer.
+    var byLayer = {};
+    for (var l = 0; l < n; l++) {
+        if (!byLayer[layer[l]]) byLayer[layer[l]] = [];
+        byLayer[layer[l]].push(l);
+    }
+    var maxLayer = 0;
+    for (var key in byLayer) maxLayer = Math.max(maxLayer, parseInt(key));
+
+    // Column D: "X/Y" — for each player, X = # of players in next layer that this player beats, Y = total in next layer.
+    // Column C: names of beaters in directly-above layer + "+ N" for beaters in higher layers.
+    var result = [];
+    for (var i2 = 0; i2 < n; i2++) {
+        var myLayer = layer[i2];
+        var nextLayerNum = myLayer + 1;
+        var nextPlayers = byLayer[nextLayerNum] || [];
+        var yCount = nextPlayers.length;
+        var xCount = 0;
+        for (var np = 0; np < nextPlayers.length; np++) {
+            var j2 = nextPlayers[np];
+            var beats = true;
+            for (var c3 = 0; c3 < numCats; c3++) {
+                if (!(raw[i2][c3] < raw[j2][c3])) { beats = false; break; }
+            }
+            if (beats) xCount++;
+        }
+        var beatsNext = yCount > 0 ? (xCount + "/" + yCount) : "N/A";
+
+        // Who-beats-them: beaters in directly-above layer (named) + count of beaters in higher layers.
+        var directlyAbove = myLayer - 1;
+        var namesAbove = [];
+        var countHigher = 0;
+        for (var bi2 = 0; bi2 < beaters[i2].length; bi2++) {
+            var bj2 = beaters[i2][bi2];
+            if (layer[bj2] === directlyAbove) namesAbove.push(playerScores[bj2].name);
+            else countHigher++;
+        }
+        // Sort namesAbove by their index in playerScores (original kinch order).
+        namesAbove.sort(function (a, b) {
+            var ia = -1, ib = -1;
+            for (var q = 0; q < playerScores.length; q++) {
+                if (playerScores[q].name === a) ia = q;
+                if (playerScores[q].name === b) ib = q;
+            }
+            return ia - ib;
+        });
+        var whoBeats;
+        if (namesAbove.length === 0 && countHigher === 0) {
+            whoBeats = "No one!";
+        } else if (namesAbove.length === 0) {
+            whoBeats = "+ " + countHigher;
+        } else if (countHigher === 0) {
+            whoBeats = namesAbove.join(" / ");
+        } else {
+            whoBeats = namesAbove.join(" / ") + " + " + countHigher;
+        }
+
+        result.push({
+            name: playerScores[i2].name,
+            power: playerScores[i2].power,
+            scores: playerScores[i2].scores,
+            layer: myLayer,
+            tier: kinchLayerToTier(myLayer),
+            beatenCount: beatenCount[i2],
+            whoBeats: whoBeats,
+            beatsNext: beatsNext
+        });
+    }
+
+    // Sort: (layer asc, beatenCount asc, -power) — matches python script.
+    result.sort(function (a, b) {
+        if (a.layer !== b.layer) return a.layer - b.layer;
+        if (a.beatenCount !== b.beatenCount) return a.beatenCount - b.beatenCount;
+        return b.power - a.power;
+    });
+    return result;
+}
+
+//Renders the Combined JZE (Nemesis) sheet:
+//  Columns: Name | Beaten-by-N | Beats-N-in-next-tier | 16 scores
+//  "Who beats them?" info is shown as a tooltip on the "Beaten by N" cell.
+//  Sorted by (layer, beatenCount, -power). Layer 0 (Alpha) at top.
+//  No sorting toggles — the grouping is the point of this sheet.
+function kinchRenderJZE(resultsTable) {
+    var transformed = kinchTransformScores(kinchPlayerScores);
+    var numCats = kinchValidCategories.length;
+    var rows = kinchComputeJZE(transformed, kinchReverse);
+
+    // Group rows by layer for per-tier tables.
+    var byLayer = {};
+    var maxLayer = 0;
+    for (var i = 0; i < rows.length; i++) {
+        var l = rows[i].layer;
+        if (!byLayer[l]) byLayer[l] = [];
+        byLayer[l].push(rows[i]);
+        if (l > maxLayer) maxLayer = l;
+    }
+
+    // --- sticky events-row header ---
+    // Column layout: Player | Beaten by N | Beats N (next tier) | 16 categories
+    // (3 fixed columns + 16 category columns = 19 total, matching the default
+    // view's Name|#|Kinch + 16 = 19, so the sticky header aligns with per-tier
+    // tables perfectly).
+    var stickyWrap = document.createElement("div");
+    stickyWrap.className = "kinch-sticky-wrapper";
+    var stickyTable = document.createElement("table");
+    stickyWrap.appendChild(stickyTable);
+    var stickyHead = document.createElement("thead");
+    stickyHead.className = "table-header";
+    stickyTable.appendChild(stickyHead);
+    var eventsRow = document.createElement("tr");
+    eventsRow.className = "events-row";
+    stickyHead.appendChild(eventsRow);
+
+    var thName = document.createElement("td");
+    thName.className = "player";
+    thName.textContent = "Player";
+    thName.style.minWidth = "132px";
+    eventsRow.appendChild(thName);
+
+    var thBeaten = document.createElement("td");
+    thBeaten.textContent = "Beaten by N";
+    eventsRow.appendChild(thBeaten);
+
+    var thBeats = document.createElement("td");
+    thBeats.textContent = "Beats N (next tier)";
+    eventsRow.appendChild(thBeats);
+
+    for (var c = 0; c < numCats; c++) {
+        var th = document.createElement("td");
+        th.innerHTML = kinchValidCategories[c].id.replace(/ /g, "<br>");
+        eventsRow.appendChild(th);
+    }
+    resultsTable.appendChild(stickyWrap);
+
+    // --- per-layer tables (layer 0 = Alpha first) ---
+    for (var l2 = 0; l2 <= maxLayer; l2++) {
+        var layerRows = byLayer[l2] || [];
+        if (kinchHideEmpty && layerRows.length === 0) continue;
+        var tierSlug = kinchLayerToTier(l2);
+
+        var tierTable = document.createElement("table");
+        // Use a layer-unique id (the greek slug may repeat for layers ≥9 which
+        // all map to kappa — including the layer number keeps ids unique).
+        tierTable.id = "kinch-" + tierSlug + "-L" + l2 + "-table";
+        tierTable.setAttribute("data-tier", tierSlug);
+        tierTable.style.contentVisibility = "auto";
+        tierTable.style.containIntrinsicSize = "auto 200px";
+        resultsTable.appendChild(tierTable);
+
+        var thead = document.createElement("thead");
+        thead.className = "table-header";
+        tierTable.appendChild(thead);
+
+        // req-row: tier name | greek symbol | 1 spacer cell | 16 empty cells.
+        // No kinch requirement score values are shown because the layers here
+        // represent JZE dominance tiers, not kinch tiers — the score limits
+        // would be meaningless.
+        var reqRow = document.createElement("tr");
+        reqRow.className = "req-row";
+        thead.appendChild(reqRow);
+
+        var tdTierName = document.createElement("td");
+        tdTierName.className = "player";
+        tdTierName.setAttribute("tierf", tierSlug);
+        tdTierName.style.minWidth = "132px";
+        var niceName = tierSlug.charAt(0).toUpperCase() + tierSlug.slice(1);
+        tdTierName.textContent = niceName + " (L" + l2 + ")";
+        reqRow.appendChild(tdTierName);
+
+        var tdSymbol = document.createElement("td");
+        tdSymbol.className = "req-symbol";
+        tdSymbol.setAttribute("tierf", tierSlug);
+        var sym = greekLetterSpan(tierSlug);
+        if (sym) tdSymbol.appendChild(sym); else tdSymbol.textContent = tierSlug;
+        reqRow.appendChild(tdSymbol);
+
+        // 1 spacer cell (for "Beats N" column) to keep alignment.
+        var tdSpacer = document.createElement("td");
+        tdSpacer.className = "req-limit";
+        tdSpacer.setAttribute("tierf", tierSlug);
+        tdSpacer.textContent = "—";
+        reqRow.appendChild(tdSpacer);
+
+        // 16 empty cells for category columns (no requirement scores).
+        for (var c2 = 0; c2 < numCats; c2++) {
+            var tdBlank = document.createElement("td");
+            tdBlank.className = "req-limit";
+            tdBlank.setAttribute("tierf", tierSlug);
+            tdBlank.textContent = "—";
+            reqRow.appendChild(tdBlank);
+        }
+
+        var tbody = document.createElement("tbody");
+        tierTable.appendChild(tbody);
+        for (var rp = 0; rp < layerRows.length; rp++) {
+            (function (r, tierSlug2) {
+                var row = document.createElement("tr");
+                row.className = "player-row";
+                tbody.appendChild(row);
+
+                // Name
+                var nameCell = document.createElement("td");
+                nameCell.className = "player";
+                nameCell.setAttribute("tier", tierSlug2);
+                if (kinchDontFormat) nameCell.textContent = r.name;
+                else nameCell.innerHTML = appendFlagIconToNickname(r.name);
+                nameCell.addEventListener("click", function () {
+                    radioNxNWRs.checked = true;
+                    changePuzzleSize(radioNxNWRs.value);
+                    changeNameFilter(r.name);
+                });
+                row.appendChild(nameCell);
+
+                // Beaten by N — with tooltip showing who beats them.
+                var beatenCell = document.createElement("td");
+                beatenCell.className = "player-power kinch-clickable";
+                beatenCell.setAttribute("tier", tierSlug2);
+                beatenCell.textContent = r.beatenCount;
+                (function (cell, whoBeats, beatenCount) {
+                    cell.addEventListener("mouseenter", function () {
+                        var tip = document.getElementById("kinch-score-tooltip");
+                        if (!tip) return;
+                        tip.innerHTML = '<span class="tip-tier" tierf="' + tierSlug2 + '">Beaten by ' + beatenCount + '</span><br>' + whoBeats;
+                        tip.style.display = "block";
+                        var rect = cell.getBoundingClientRect();
+                        var left = rect.left, top = rect.bottom + 4;
+                        if (left + tip.offsetWidth > window.innerWidth - 8) left = window.innerWidth - tip.offsetWidth - 8;
+                        if (left < 8) left = 8;
+                        if (top + tip.offsetHeight > window.innerHeight - 8) top = rect.top - tip.offsetHeight - 4;
+                        tip.style.left = left + "px";
+                        tip.style.top = top + "px";
+                    });
+                    cell.addEventListener("mouseleave", function () {
+                        var tip = document.getElementById("kinch-score-tooltip");
+                        if (tip) tip.style.display = "none";
+                    });
+                })(beatenCell, r.whoBeats, r.beatenCount);
+                row.appendChild(beatenCell);
+
+                // Beats N in next tier
+                var beatsCell = document.createElement("td");
+                beatsCell.className = "player-power";
+                beatsCell.setAttribute("tier", tierSlug2);
+                beatsCell.textContent = r.beatsNext;
+                row.appendChild(beatsCell);
+
+                // Per-category score cells (reuse kinchBuildScoreCell for icons/tooltips)
+                var scoreMap = {};
+                for (var s = 0; s < r.scores.length; s++) scoreMap[r.scores[s].id] = r.scores[s];
+                for (var vc = 0; vc < kinchValidCategories.length; vc++) {
+                    row.appendChild(kinchBuildScoreCell(scoreMap[kinchValidCategories[vc].id], kinchScoreType, kinchValidCategories[vc], tierSlug2));
+                }
+            })(layerRows[rp], tierSlug);
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Mode: Combined GOOD / BAD (iterative peeling)
+// ---------------------------------------------------------------------------
+
+//Computes GOOD or BAD grouping by iterative peeling.
+//mode = "good" → peel by MIN (fastest). Layer 0 = WR holders.
+//mode = "bad"  → peel by MAX (slowest). Layer 0 = last survivors.
+//Returns array with extra fields: layer, tier, nScores, creditedCats (Set).
+function kinchComputeGoodBad(playerScores, reverse, mode) {
+    var n = playerScores.length;
+    var numCats = kinchValidCategories.length;
+    var isGood = (mode === "good");
+
+    // Pre-extract raw values. Missing → Infinity (worst).
+    var raw = [];
+    for (var p = 0; p < n; p++) {
+        var row = [];
+        for (var c = 0; c < numCats; c++) {
+            var r = kinchGetRawScore(playerScores[p], kinchValidCategories[c].id, reverse);
+            row.push(r.has ? r.value : Infinity);
+        }
+        raw.push(row);
+    }
+
+    var pool = [];
+    for (var i = 0; i < n; i++) pool.push(i);
+
+    // NOTE: `credited` must live OUTSIDE the while loop — earlier it was
+    // declared inside the loop body, which meant only the final round's
+    // credited-cats map survived, wiping out every earlier round's data
+    // (so every player ended up with N=0). Keeping it here preserves each
+    // player's credited-cats from the round they were actually removed in.
+    var credited = {}; // idx → array of cat indices (filled per-round)
+    var removalRounds = []; // [{round, removed: [idx], extremes: [Number per cat]}]
+    var round = 0;
+    var safety = n + 10;
+    while (pool.length > 0 && safety-- > 0) {
+        // Find extreme in each category among pool.
+        var extremes = [];
+        for (var c2 = 0; c2 < numCats; c2++) {
+            var ex = isGood ? Infinity : -Infinity;
+            for (var pi = 0; pi < pool.length; pi++) {
+                var v = raw[pool[pi]][c2];
+                if (isGood) { if (v < ex) ex = v; }
+                else { if (v > ex) ex = v; }
+            }
+            extremes.push(ex);
+        }
+
+        // Holders = players who tie the extreme in ≥1 category.
+        // For GOOD: a category is skipped only if NO player has a finite score
+        //   (ext === Infinity) — there's no "fastest" to tie.
+        // For BAD: a category is skipped only if the pool is empty (ext === -Infinity,
+        //   which can't happen here). Missing scores are Infinity, which IS a valid
+        //   "slowest" value — players with missing scores tie the max and become
+        //   holders. This matches the python reference script's behavior.
+        var holders = [];
+        for (var pi2 = 0; pi2 < pool.length; pi2++) {
+            var idx = pool[pi2];
+            var cats = null;
+            for (var c3 = 0; c3 < numCats; c3++) {
+                var ext = extremes[c3];
+                if (isGood) {
+                    // GOOD: skip categories with no finite score.
+                    if (ext === Infinity) continue;
+                } else {
+                    // BAD: skip only if pool is empty (shouldn't happen).
+                    if (ext === -Infinity) continue;
+                }
+                if (raw[idx][c3] === ext) {
+                    if (!cats) cats = [];
+                    cats.push(c3);
+                }
+            }
+            if (cats) {
+                holders.push(idx);
+                credited[idx] = cats;
+            }
+        }
+
+        if (holders.length === 0) {
+            // No finite extremes — all remaining players have Infinity everywhere
+            // (GOOD mode with all-missing categories, or BAD with empty pool).
+            // Assign them all to the current round with 0 credited cats.
+            var lastRemoved = [];
+            for (var pi3 = 0; pi3 < pool.length; pi3++) {
+                lastRemoved.push(pool[pi3]);
+                credited[pool[pi3]] = [];
+            }
+            removalRounds.push({ round: round, removed: lastRemoved, extremes: extremes });
+            pool = [];
+            break;
+        }
+
+        removalRounds.push({ round: round, removed: holders.slice(), extremes: extremes });
+        var holderSet = {};
+        for (var h = 0; h < holders.length; h++) holderSet[holders[h]] = true;
+        var newPool = [];
+        for (var pi4 = 0; pi4 < pool.length; pi4++) {
+            if (!holderSet[pool[pi4]]) newPool.push(pool[pi4]);
+        }
+        pool = newPool;
+        round++;
+    }
+
+    // Compute layer for each player.
+    // GOOD: layer = round number (0 = first peeled = WR holders).
+    // BAD: layer = (total_rounds - 1 - round) — last survivors = layer 0.
+    var totalRounds = removalRounds.length;
+    var layerMap = {}; // idx → layer
+    var creditedMap = {}; // idx → array of cat indices
+    for (var ri = 0; ri < removalRounds.length; ri++) {
+        var rr = removalRounds[ri];
+        var layerForRound = isGood ? rr.round : (totalRounds - 1 - rr.round);
+        for (var r2 = 0; r2 < rr.removed.length; r2++) {
+            var idx2 = rr.removed[r2];
+            layerMap[idx2] = layerForRound;
+            creditedMap[idx2] = credited[idx2] || [];
+        }
+    }
+
+    var result = [];
+    for (var i2 = 0; i2 < n; i2++) {
+        var l2 = layerMap[i2];
+        var nScores = (creditedMap[i2] || []).length;
+        result.push({
+            name: playerScores[i2].name,
+            power: playerScores[i2].power,
+            scores: playerScores[i2].scores,
+            layer: l2,
+            tier: kinchLayerToTier(l2),
+            nScores: nScores,
+            creditedCats: (creditedMap[i2] || []).slice()
+        });
+    }
+
+    // Sort:
+    // GOOD: (layer asc, -nScores, -power)
+    // BAD:  (layer asc, nScores asc, -power)
+    result.sort(function (a, b) {
+        if (a.layer !== b.layer) return a.layer - b.layer;
+        if (isGood) {
+            if (a.nScores !== b.nScores) return b.nScores - a.nScores;
+        } else {
+            if (a.nScores !== b.nScores) return a.nScores - b.nScores;
+        }
+        return b.power - a.power;
+    });
+    return result;
+}
+
+//Renders the Combined GOOD or BAD sheet:
+//  Columns: Name | N of Good/Bad scores | 16 scores
+//  Score cells use plain (non-tier-colored) text. Credited cells (the
+//  "good"/"bad" scores that caused the player to be peeled in their round)
+//  get green/red FONT highlighting instead of background highlighting.
+//  No sorting toggles — the grouping is the point of this sheet.
+function kinchRenderGoodBad(resultsTable, mode) {
+    var isGood = (mode === "good");
+    var transformed = kinchTransformScores(kinchPlayerScores);
+    var numCats = kinchValidCategories.length;
+    var rows = kinchComputeGoodBad(transformed, kinchReverse, mode);
+
+    // Group rows by layer.
+    var byLayer = {};
+    var maxLayer = 0;
+    for (var i = 0; i < rows.length; i++) {
+        var l = rows[i].layer;
+        if (!byLayer[l]) byLayer[l] = [];
+        byLayer[l].push(rows[i]);
+        if (l > maxLayer) maxLayer = l;
+    }
+
+    // --- sticky events-row header ---
+    // Column layout: Player | N of Good/Bad scores | 16 categories
+    // (2 fixed columns + 16 category columns = 18 total. The default view has
+    // 3 fixed + 16 = 19, so the Good/Bad tables are 1 column narrower — this
+    // is fine because the sticky header and per-tier tables both use 18.)
+    var stickyWrap = document.createElement("div");
+    stickyWrap.className = "kinch-sticky-wrapper";
+    var stickyTable = document.createElement("table");
+    stickyWrap.appendChild(stickyTable);
+    var stickyHead = document.createElement("thead");
+    stickyHead.className = "table-header";
+    stickyTable.appendChild(stickyHead);
+    var eventsRow = document.createElement("tr");
+    eventsRow.className = "events-row";
+    stickyHead.appendChild(eventsRow);
+
+    var thName = document.createElement("td");
+    thName.className = "player";
+    thName.textContent = "Player";
+    thName.style.minWidth = "132px";
+    eventsRow.appendChild(thName);
+
+    var thN = document.createElement("td");
+    thN.textContent = isGood ? "N of Good scores" : "N of Bad scores";
+    eventsRow.appendChild(thN);
+
+    for (var c = 0; c < numCats; c++) {
+        var th = document.createElement("td");
+        th.innerHTML = kinchValidCategories[c].id.replace(/ /g, "<br>");
+        eventsRow.appendChild(th);
+    }
+    resultsTable.appendChild(stickyWrap);
+
+    // --- per-layer tables ---
+    for (var l2 = 0; l2 <= maxLayer; l2++) {
+        var layerRows = byLayer[l2] || [];
+        if (kinchHideEmpty && layerRows.length === 0) continue;
+        var tierSlug = kinchLayerToTier(l2);
+
+        var tierTable = document.createElement("table");
+        tierTable.id = "kinch-" + tierSlug + "-L" + l2 + "-table";
+        tierTable.setAttribute("data-tier", tierSlug);
+        tierTable.style.contentVisibility = "auto";
+        tierTable.style.containIntrinsicSize = "auto 200px";
+        resultsTable.appendChild(tierTable);
+
+        var thead = document.createElement("thead");
+        thead.className = "table-header";
+        tierTable.appendChild(thead);
+
+        // req-row: tier name | greek symbol | 16 empty cells.
+        // No kinch requirement score values are shown because the layers here
+        // represent GOOD/BAD peeling tiers, not kinch tiers.
+        var reqRow = document.createElement("tr");
+        reqRow.className = "req-row";
+        thead.appendChild(reqRow);
+
+        var tdTierName = document.createElement("td");
+        tdTierName.className = "player";
+        tdTierName.setAttribute("tierf", tierSlug);
+        tdTierName.style.minWidth = "132px";
+        var niceName = tierSlug.charAt(0).toUpperCase() + tierSlug.slice(1);
+        tdTierName.textContent = niceName + " (L" + l2 + ")";
+        reqRow.appendChild(tdTierName);
+
+        var tdSymbol = document.createElement("td");
+        tdSymbol.className = "req-symbol";
+        tdSymbol.setAttribute("tierf", tierSlug);
+        var sym = greekLetterSpan(tierSlug);
+        if (sym) tdSymbol.appendChild(sym); else tdSymbol.textContent = tierSlug;
+        reqRow.appendChild(tdSymbol);
+
+        // 16 empty cells for category columns (no requirement scores).
+        for (var c2 = 0; c2 < numCats; c2++) {
+            var tdBlank = document.createElement("td");
+            tdBlank.className = "req-limit";
+            tdBlank.setAttribute("tierf", tierSlug);
+            tdBlank.textContent = "—";
+            reqRow.appendChild(tdBlank);
+        }
+
+        var tbody = document.createElement("tbody");
+        tierTable.appendChild(tbody);
+        for (var rp = 0; rp < layerRows.length; rp++) {
+            (function (r, tierSlug2) {
+                var row = document.createElement("tr");
+                row.className = "player-row";
+                tbody.appendChild(row);
+
+                // Name
+                var nameCell = document.createElement("td");
+                nameCell.className = "player";
+                nameCell.setAttribute("tier", tierSlug2);
+                if (kinchDontFormat) nameCell.textContent = r.name;
+                else nameCell.innerHTML = appendFlagIconToNickname(r.name);
+                nameCell.addEventListener("click", function () {
+                    radioNxNWRs.checked = true;
+                    changePuzzleSize(radioNxNWRs.value);
+                    changeNameFilter(r.name);
+                });
+                row.appendChild(nameCell);
+
+                // N of Good/Bad scores
+                var nCell = document.createElement("td");
+                nCell.className = "player-power";
+                nCell.setAttribute("tier", tierSlug2);
+                nCell.textContent = r.nScores;
+                row.appendChild(nCell);
+
+                // Per-category score cells.
+                // In Good/Bad mode we remove the [tier] attribute from score
+                // cells so they don't get kinch-tier font colors — the only
+                // coloring should be the green/red font highlight for credited
+                // (good/bad) cells. Non-credited cells use default text color.
+                var scoreMap = {};
+                for (var s = 0; s < r.scores.length; s++) scoreMap[r.scores[s].id] = r.scores[s];
+                for (var vc = 0; vc < kinchValidCategories.length; vc++) {
+                    var cell = kinchBuildScoreCell(scoreMap[kinchValidCategories[vc].id], kinchScoreType, kinchValidCategories[vc], tierSlug2);
+                    // Remove kinch-tier font color from score cells.
+                    cell.removeAttribute("tier");
+                    // If this category is credited, add a font-highlight class.
+                    if (r.creditedCats.indexOf(vc) !== -1) {
+                        cell.classList.add(isGood ? "kinch-good-cell" : "kinch-bad-cell");
+                    }
+                    row.appendChild(cell);
+                }
+            })(layerRows[rp], tierSlug);
+        }
+    }
+}
+
+// ___________________ End of Kinch Fun Sheets ___________________
 
 //Builds a single score <td> for one player × one category.
 //Preserves all icons (web/lm circles, youtube, exe replay eggs), sets the
@@ -1827,8 +2919,9 @@ function kinchApplyColorBest() {
     var tierOrder = kinchGetTierOrder(); // alpha..kappa (best..worst)
     var tables = document.querySelectorAll(".kinch-view .results-table table");
     tables.forEach(function (table) {
-        var tableId = table.id || "";
-        var tableTier = tableId.replace("kinch-","").replace("-table","");
+        // Use data-tier attribute (works for both default "kinch-{tier}-table"
+        // ids and the new "kinch-{tier}-L{layer}-table" ids in JZE/GOOD/BAD).
+        var tableTier = table.getAttribute("data-tier") || "";
         if (!tableTier || tierOrder.indexOf(tableTier) === -1) return;
         var tableTierIdx = tierOrder.indexOf(tableTier);
         var cells = table.querySelectorAll(".player-row td[tier]");
@@ -1957,31 +3050,152 @@ function kinchUpdateChart() {
     var ignoreN = ignoreInput ? parseInt(ignoreInput.value) || 0 : 0;
 
     var datasets = [];
-    var labels = displayTiers.map(function (t) {
-        var tierLabel = t.charAt(0).toUpperCase() + t.slice(1);
-        var pct = percentageTable[t];
-        var label = kinchTrueTiers ? 'True ' + tierLabel : tierLabel;
-        if (pct !== undefined) label += ' ' + pct + '%';
-        return label;
-    });
-    var labelColors = displayTiers.map(function (t) { return kinchGetTierColor(t); });
-    var barColors = displayTiers.map(function (t) { return kinchGetTierColor(t); });
+
+    // --- Build labels and counts based on current mode ---
+    // Default + Place modes: use the standard greek tier order (kappa..alpha),
+    // one bar per tier. Place mode has a single flat table (no data-tier on
+    // the table element), so we count players by their name cell's [tier] attr.
+    // JZE/GOOD/BAD modes: each layer gets its own bar, so multiple layers that
+    // map to the same greek tier (e.g. kappa L9, L10, L11) show as separate
+    // entries. Labels include the layer number: "Alpha (L0) 90%", "Kappa (L9) 0%".
+    var chartEntries = []; // [{ tier, layer, label, color, count }]
+    var isLayerMode = (kinchSheetMode === "jze" || kinchSheetMode === "good" || kinchSheetMode === "bad");
+
+    if (isLayerMode) {
+        // Build entries from actual layer tables in the DOM (in display order:
+        // layer 0 first = best, but we reverse for chart display below).
+        var layerTables = document.querySelectorAll('.kinch-view .results-table table[data-tier]');
+        var layerEntries = [];
+        layerTables.forEach(function (tbl) {
+            var tier = tbl.getAttribute("data-tier");
+            // Extract layer number from id: "kinch-{tier}-L{layer}-table"
+            var layerMatch = tbl.id.match(/-L(\d+)-table$/);
+            var layer = layerMatch ? parseInt(layerMatch[1]) : 0;
+            var count = tbl.querySelectorAll(".player-row").length;
+            layerEntries.push({ tier: tier, layer: layer, count: count });
+        });
+        // Sort by layer ascending (0 = best first), then reverse for display
+        // (worst = highest layer leftmost, best = layer 0 rightmost).
+        layerEntries.sort(function (a, b) { return a.layer - b.layer; });
+        // Reverse for display: worst (highest layer) leftmost, best (layer 0) rightmost.
+        var displayLayerEntries = layerEntries.slice().reverse();
+        for (var le = 0; le < displayLayerEntries.length; le++) {
+            var entry = displayLayerEntries[le];
+            var tierLabel = entry.tier.charAt(0).toUpperCase() + entry.tier.slice(1);
+            var pct = percentageTable[entry.tier];
+            var lbl = tierLabel + ' (L' + entry.layer + ')';
+            if (pct !== undefined) lbl += ' ' + pct + '%';
+            chartEntries.push({
+                label: lbl,
+                color: kinchGetTierColor(entry.tier),
+                count: entry.count
+            });
+        }
+    } else {
+        // Default + Place modes: one entry per greek tier.
+        for (var te = 0; te < displayTiers.length; te++) {
+            var t = displayTiers[te];
+            var tLabel = t.charAt(0).toUpperCase() + t.slice(1);
+            var tPct = percentageTable[t];
+            var tLbl = kinchTrueTiers ? 'True ' + tLabel : tLabel;
+            if (tPct !== undefined) tLbl += ' ' + tPct + '%';
+            // Count players in this tier.
+            var tCount = 0;
+            if (kinchSheetMode === "leaderboard") {
+                // Place mode: single flat table, count by name cell [tier] attr.
+                var playerRows = document.querySelectorAll('.kinch-view .player-row .player[tier="' + t + '"]');
+                tCount = playerRows.length;
+            } else {
+                // Default mode: count per tier table with data-tier.
+                var tTables = document.querySelectorAll('.kinch-view .results-table table[data-tier="' + t + '"]');
+                tTables.forEach(function (tbl) { tCount += tbl.querySelectorAll(".player-row").length; });
+            }
+            chartEntries.push({
+                label: tLbl,
+                color: kinchGetTierColor(t),
+                count: tCount
+            });
+        }
+    }
+
+    var labels = chartEntries.map(function (e) { return e.label; });
+    var labelColors = chartEntries.map(function (e) { return e.color; });
+    var barColors = chartEntries.map(function (e) { return e.color; });
 
     var isCategoryMode = kinchChartCategories.length > 0;
 
     if (isCategoryMode) {
-        // category mode: one dataset per selected category
+        // Category mode: one dataset per selected category.
+        // For layer modes, count per layer; for default/Place, count per tier.
         var transformed = kinchTransformScores(kinchPlayerScores);
         for (var ci = 0; ci < kinchChartCategories.length; ci++) {
             var catId = kinchChartCategories[ci];
-            var counts = displayTiers.map(function () { return 0; });
-            for (var p = 0; p < transformed.length; p++) {
-                var ps = transformed[p];
-                for (var s = 0; s < ps.scores.length; s++) {
-                    if (ps.scores[s].id === catId && ps.scores[s].scoreInfo !== defaultScore && typeof ps.scores[s].scoreInfo === "object") {
-                        var tierIdx = displayTiers.indexOf(ps.scores[s].scoreTier);
-                        if (tierIdx !== -1) counts[tierIdx]++;
-                        break;
+            var counts;
+            if (isLayerMode) {
+                // Count players per layer for this category.
+                // We need to map each player to their layer. Get layer info
+                // from the DOM tables (layer number from table id).
+                counts = chartEntries.map(function () { return 0; });
+                var layerTableList = document.querySelectorAll('.kinch-view .results-table table[data-tier]');
+                // Build a map: playerName → layer (from the first table that
+                // contains them).
+                var playerLayer = {};
+                layerTableList.forEach(function (tbl) {
+                    var layerMatch = tbl.id.match(/-L(\d+)-table$/);
+                    var layer = layerMatch ? parseInt(layerMatch[1]) : 0;
+                    var rows = tbl.querySelectorAll(".player-row");
+                    rows.forEach(function (r) {
+                        var nameCell = r.querySelector(".player");
+                        if (nameCell) {
+                            var name = nameCell.textContent.trim();
+                            if (!(name in playerLayer)) playerLayer[name] = layer;
+                        }
+                    });
+                });
+                // For each entry in chartEntries (which is in display order =
+                // reversed layer order), count players in that layer who have
+                // a score in this category.
+                // Build layer → count map first.
+                var layerCatCounts = {};
+                for (var p = 0; p < transformed.length; p++) {
+                    var ps = transformed[p];
+                    var pLayer = playerLayer[ps.name];
+                    if (pLayer === undefined) continue;
+                    for (var s = 0; s < ps.scores.length; s++) {
+                        if (ps.scores[s].id === catId && ps.scores[s].scoreInfo !== defaultScore && typeof ps.scores[s].scoreInfo === "object") {
+                            if (!layerCatCounts[pLayer]) layerCatCounts[pLayer] = 0;
+                            layerCatCounts[pLayer]++;
+                            break;
+                        }
+                    }
+                }
+                // chartEntries is in display order (reversed layers). We need
+                // to map each entry back to its layer. Rebuild from the
+                // displayLayerEntries (which we computed above).
+                // Since chartEntries was built from displayLayerEntries, the
+                // layer for entry i is displayLayerEntries[i].layer.
+                // But displayLayerEntries is local to the isLayerMode block above.
+                // Instead, parse the layer from the label: "TierName (L{n}) pct%"
+                for (var ce = 0; ce < chartEntries.length; ce++) {
+                    var match = chartEntries[ce].label.match(/\(L(\d+)\)/);
+                    var entryLayer = match ? parseInt(match[1]) : 0;
+                    counts[ce] = layerCatCounts[entryLayer] || 0;
+                }
+            } else {
+                // Default/Place: count per greek tier.
+                counts = chartEntries.map(function () { return 0; });
+                for (var p2 = 0; p2 < transformed.length; p2++) {
+                    var ps2 = transformed[p2];
+                    for (var s2 = 0; s2 < ps2.scores.length; s2++) {
+                        if (ps2.scores[s2].id === catId && ps2.scores[s2].scoreInfo !== defaultScore && typeof ps2.scores[s2].scoreInfo === "object") {
+                            var tierIdx = displayTiers.indexOf(ps2.scores[s2].scoreTier);
+                            if (tierIdx !== -1) {
+                                // displayTiers is kappa..alpha; chartEntries for
+                                // non-layer mode is also kappa..alpha, so same index.
+                                counts[tierIdx]++;
+                            }
+                            break;
+                        }
                     }
                 }
             }
@@ -1995,12 +3209,9 @@ function kinchUpdateChart() {
             });
         }
     } else {
-        // overall mode: count .player-row per tier table
-        var counts = displayTiers.map(function (t) {
-            var table = document.getElementById("kinch-" + t + "-table");
-            return table ? table.querySelectorAll(".player-row").length : 0;
-        });
-        datasets.push({ label: "Players", data: counts, backgroundColor: barColors, borderColor: barColors, borderWidth: 1, borderRadius: 3 });
+        // Overall mode: one dataset with player counts per entry.
+        var overallCounts = chartEntries.map(function (e) { return e.count; });
+        datasets.push({ label: "Players", data: overallCounts, backgroundColor: barColors, borderColor: barColors, borderWidth: 1, borderRadius: 3 });
     }
 
     // STEP 1: Apply skip FIRST (like Power) — removes lowest tiers before
@@ -2051,8 +3262,9 @@ function kinchUpdateChart() {
     var titleEl = document.getElementById("kinch-chart-title");
     if (titleEl) titleEl.textContent = titleParts.join(" ");
 
-    // update slider max
-    if (ignoreInput) ignoreInput.max = Math.max(0, tierOrder.length - 1);
+    // update slider max — use actual number of chart entries (can be more
+    // than tierOrder.length in layer modes where multiple layers map to kappa).
+    if (ignoreInput) ignoreInput.max = Math.max(0, labels.length - 1);
 
     // y-axis max for percent+cumulative
     var yMax = (isPercent && isCumulative) ? 100 : undefined;

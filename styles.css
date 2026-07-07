@@ -2281,6 +2281,59 @@ iframe {
     #kinch-switch-dropdown .kinch-switch .checkbox-text { border: 1px solid #007385; }
 }
 
+/* --- sheet mode selector (radio-button style, mirrors .kinch-switch look) ---
+   Lives inside #kinch-switch-dropdown so it folds into the hamburger panel on
+   mobile (the parent's display:none hides it; the parent's display:flex shows
+   it). On desktop the dropdown is always flex, so the modes show inline with
+   the other switches, separated by a small right margin. */
+#kinch-sheet-modes {
+    display: flex;
+    align-items: stretch;
+    margin-right: 8px;
+}
+.kinch-mode-btn {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+.kinch-mode-btn input[type="radio"] { display: none; }
+.kinch-mode-btn .checkbox-text {
+    font-size: 11px;
+    color: #00ffff;
+    padding: 0 8px;
+    line-height: 26px;
+    cursor: pointer;
+    border: 1px solid #007385;
+    display: block;
+    border-radius: 0;
+    white-space: nowrap;
+    font-family: monospace;
+    height: 28px;
+}
+.kinch-mode-btn + .kinch-mode-btn .checkbox-text { border-left: none; }
+.kinch-mode-btn input[type="radio"]:checked + .checkbox-text {
+    background: #00ffff;
+    color: #000;
+}
+.kinch-mode-btn input[type="radio"]:not(:checked) + .checkbox-text:hover {
+    background: rgba(0,255,255,0.15);
+}
+@media (max-width: 1199px) {
+    /* Mobile: stack modes vertically at the top of the dropdown panel,
+       above the toggle switches. */
+    #kinch-sheet-modes {
+        flex-direction: column;
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 4px;
+        padding-bottom: 4px;
+        border-bottom: 1px solid #333;
+    }
+    #kinch-sheet-modes .kinch-mode-btn .checkbox-text { border: 1px solid #007385; width: 100%; box-sizing: border-box; }
+    #kinch-sheet-modes .kinch-mode-btn + .kinch-mode-btn .checkbox-text { border-left: 1px solid #007385; border-top: none; }
+}
+
 /* --- chart container --- */
 #kinch-chart-container {
     background: #1a1a1a;
@@ -2607,6 +2660,18 @@ iframe {
 /* WR cell — inset cyan border */
 .kinch-view .WRPB {
     box-shadow: 0 0 1px #fff, inset 0 -2px 0 #00f1ff;
+}
+
+/* GOOD/BAD mode credited-cell highlights — semi-transparent BACKGROUND.
+   GOOD: green semi-transparent bg (player ties the fastest remaining time).
+   BAD:  red semi-transparent bg (player ties the slowest remaining time).
+   The [tier] attribute is removed from Good/Bad score cells so no kinch font
+   colors apply — text stays default color on the tinted background. */
+.kinch-view .kinch-good-cell {
+    background-color: rgba(0, 255, 0, 0.3) !important;
+}
+.kinch-view .kinch-bad-cell {
+    background-color: rgba(255, 0, 0, 0.3) !important;
 }
 
 /* --- score tooltip --- */
