@@ -18,7 +18,8 @@ var kinchTrueTiers = false;    // #switch-true   — group players by worst cate
 var kinchNerf = false;         // #switch-nerf   — remove categories impossible in LM
 var kinchChartVisible = false; // chart toggle state
 var kinchDontFormat = false;  // hide all extra icons (eggs, flags, web/lm, youtube)
-let tierLimit = "Any"; //default value for "show X tier scores only" (must be one of tierLabels)
+let filterMode = "percentage"; // "percentage" (NxN/history) or "rank" (Kinch)
+let filterThreshold = 0; // percentage: 0-100 (0=all), rank: 1-100 or Infinity (Infinity=all)
 let autoDetectGridsCheckbox_last = false; //default value for "Force fringe" in replays (false = don't force fringe)
 let constantTPSCheckbox_last = false; //default value for "Constant TPS" in replays
 let latestRecordTime = new Date(); //default value for latest update time, should usually never show

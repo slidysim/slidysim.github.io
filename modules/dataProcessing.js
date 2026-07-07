@@ -258,6 +258,7 @@ function processSquareRecordsData(cleanedData) {
     if (request.nameFilter !== "") {
         //if there is a name, we should prepare more data to get WRs using modified request
         tierLimiterTab.style.display = "block";
+        filterMode = "percentage";
         let modifiedRequest = {
             ...request,
             nameFilter: ""
@@ -307,6 +308,7 @@ function processNxMRecordsData(cleanedData) {
     if (request.nameFilter !== "") {
         //if there is a name, we should prepare more data to get WRs using modified request
         tierLimiterTab.style.display = "block";
+        filterMode = "percentage";
         let modifiedRequest = {
             ...request,
             nameFilter: ""
@@ -352,6 +354,17 @@ function processRankingsData(cleanedData, rankingsType) {
     const sheetType = rankingsType;
     if (!loadingPower) {
         tierLimiterTab.style.display = "block";
+        filterMode = "rank";
+        let raw = parseInt(tierSlider.value);
+        let n = raw === 0 ? Infinity : 101 - raw;
+        filterThreshold = n;
+        if (n === Infinity) {
+            tierSliderLabel.innerHTML = `<span class="kappa">Include all records</span>`;
+        } else if (n === 1) {
+            tierSliderLabel.innerHTML = `<span class="alpha WRPB">Only including WRs</span>`;
+        } else {
+            tierSliderLabel.innerHTML = `<span class="alpha">${showTopLabel} ${n}</span>`;
+        }
     }
     solveTypeDiv.style.display = "none";
     let uniqueNames = getUniqueNames(cleanedData);
@@ -412,6 +425,7 @@ function processHistoryData(cleanedData) {
     let sortedLists;
 
     tierLimiterTab.style.display = "block";
+    filterMode = "percentage";
     radio_allGameModsLabel.style.display = "block";
     radio_allGameModsLabelInteresting.style.display = "block";
     radio_allGameModsLabelNMSingles.style.display = "block";
@@ -804,7 +818,8 @@ function getKinchRankings(uniqueNames, scoresLists, scoreType, percentageTable, 
                 let score = getMainScore(scoreInfo, scoreType);
                 let scorePercentage = getPercentage(score, bestValues[key], reverse);
                 let scoreTier = getScoreTier(scorePercentage);
-                if (scorePercentage < getTierPercentageLimit()) {
+                const rank = scoreInfo !== defaultScore ? scoresList.indexOf(scoreInfo) : Infinity;
+                if (!loadingPower && rank >= getFilterThreshold() && scoreInfo !== defaultScore) {
                     scorePercentage = 0;
                     scoreTier = "kappa";
                     score = defaultScore;

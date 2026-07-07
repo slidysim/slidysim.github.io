@@ -385,8 +385,9 @@ function directUpdate() {
     // Reset tier slider on any update/view change, unless the user is actively dragging it.
     if (!tierActive) {
         tierSlider.value = "0";
-        tierLimit = "Any";
-        tierSliderLabel.innerHTML = `<span class="kappa">${showAnyLevelRecords}</span>`;
+        filterThreshold = 0;
+        filterMode = "percentage";
+        tierSliderLabel.innerHTML = `<span class="kappa">Show All Records</span>`;
     }
     tierActive = false;
 
@@ -476,6 +477,7 @@ function directUpdate() {
 
     }
     updateSelectSizes();
+    if (typeof updateSliderGradient === 'function') updateSliderGradient();
 }
 
 //"Public" function for sending request for processing data based on request

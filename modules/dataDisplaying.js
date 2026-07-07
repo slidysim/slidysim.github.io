@@ -527,7 +527,7 @@ function createSheet(sortedLists, sheetType) {
                     item = sortedLists[header]?.[itemIndex] || null;
                 }
                 const result = createTableRowForItem(item, header, itemIndex, item === null);
-                if (item !== null && (noNameFilter || result.percentageCurrent >= getTierPercentageLimit())) {
+                if (item !== null && (noNameFilter || result.percentageCurrent >= getFilterThreshold())) {
                     table.appendChild(result.row);
                 } else if (item === null) {
                     table.appendChild(result.row);
@@ -582,7 +582,7 @@ function createSheet(sortedLists, sheetType) {
 
                 itemsToProcess.forEach((item, itemIndex) => {
                     const result = createTableRowForItem(item, header, itemIndex, item === null);
-                    if (item !== null && (noNameFilter || result.percentageCurrent >= getTierPercentageLimit())) {
+                    if (item !== null && (noNameFilter || result.percentageCurrent >= getFilterThreshold())) {
                         table.appendChild(result.row);
                     } else if (item === null) {
                         table.appendChild(result.row);
@@ -897,7 +897,7 @@ function createSheetNxM(WRList) {
                 if (request.nameFilter !== "") {
                     bestValue = getBestValue(WRsDataForPBs, scoreType, result.width, result.height);
                     percentage = calculatePercentage(mainValue, bestValue, reverse);
-                    if (percentage < getTierPercentageLimit()) {
+                    if (percentage < getFilterThreshold()) {
                         recordisInvalid = true;
                     }
                     tierName = getClassBasedOnPercentage(percentage, percentageTable);
@@ -2294,7 +2294,7 @@ function createSheetHistory(recordsList, recordsListWR, showAll = false) {
             var allButton = document.createElement("button");
             allButton.textContent = showAllHistoryString;
             allButton.addEventListener("click", function () {
-                createSheetHistory(recordsList, recordsListWR, showAll = true);
+                createSheetHistory(recordsList, recordsListWR, true);
                 updateSelectSizes();
             });
             contentDiv.appendChild(allButton);
@@ -2401,15 +2401,9 @@ function getTimeAgo(timestamp) {
 }
 
 
-//"Public" (helper) function to get current limit of scores to display
-function getTierPercentageLimit() {
-    if (tierLimit === "Any") {
-        return 0;
-    }
-    if (tierLimit === "WRs only") {
-        return 100;
-    }
-    return percentageTable[tierLimit];
+//"Public" (helper) function to get current filter threshold
+function getFilterThreshold() {
+    return filterThreshold;
 }
 
 //"Public" function to update styles of filters (displayType, leaderboardType, controlType)
@@ -2849,7 +2843,7 @@ function isInvalidScore(result) {
 function getScoreLimitExact(precentage, bestscore, reverse) {
     precentage = precentage / 100;
     if (bestscore === defaultScore || precentage === 0) {
-        return tierLabels[0];
+        return "Any";
     }
     if (reverse) {
         return (Math.floor(precentage * bestscore) / 1000)
@@ -2864,7 +2858,7 @@ function getScoreLimit(precentage, bestscore, reverse, scoreType, isAverage) {
     precentage = precentage / 100;
     let value;
     if (bestscore === defaultScore || precentage === 0) {
-        return tierLabels[0];
+        return "Any";
     }
     if (reverse) {
         value = Math.floor(precentage * bestscore);
@@ -3500,7 +3494,7 @@ function tableIsEmpty(records, recordsListWR, scoreType) {
     for (const item of records) {
         const tierInfo = getTier(item, recordsListWR, scoreType);
         const percentage = tierInfo[0];
-        if (percentage >= getTierPercentageLimit() && !isInvalidScore(item)) {
+        if (percentage >= getFilterThreshold() && !isInvalidScore(item)) {
             return false;
         }
     }
@@ -3619,7 +3613,7 @@ function populateTableHistory(records, recordsListWR, scoreType, table, reverse)
     records.forEach(item => {
         const tierInfo = getTier(item, recordsListWR, scoreType);
         const percentage = tierInfo[0];
-        if (percentage >= getTierPercentageLimit() && !isInvalidScore(item)) {
+        if (percentage >= getFilterThreshold() && !isInvalidScore(item)) {
             scoresCounter++;
             const dataRow = document.createElement('tr');
             table.appendChild(dataRow);

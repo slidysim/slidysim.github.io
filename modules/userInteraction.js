@@ -132,6 +132,18 @@ function changePuzzleSize(puzzleSize) {
 }
 
 
+//"Public" function to update tier slider gradient to match current mode
+function updateSliderGradient() {
+    if (filterMode === "rank") {
+        const value = parseInt(tierSlider.value);
+        tierSlider.style.background = `linear-gradient(to right, rgb(175, 175, 175) ${value}%, #00ffff ${value}%)`;
+    } else {
+        const entries = Object.entries(percentageTable).sort((a, b) => a[1] - b[1]);
+        const stops = entries.map(([tier, pct]) => `${kinchGetTierColor(tier)} ${pct}%`);
+        tierSlider.style.background = `linear-gradient(to right, ${stops.join(', ')})`;
+    }
+}
+
 //"Public" function to add major event listeners for html elements
 function addListenersToElements() {
     updateVideoButtonVisibility();
@@ -223,18 +235,29 @@ function addListenersToElements() {
         }
     });
     tierSlider.addEventListener("input", function () {
-        const value = tierSlider.value;
-        tierLimit = tierLabels[value];
-        if (value < 1) {
-            tierSliderLabel.innerHTML = `<span class="kappa">${showAnyLevelRecords}</span>`;
-        } else if (value > 9) {
-            tierSliderLabel.innerHTML = `<span class="alpha WRPB">${showWRsOnly}</span>`;
+        const value = parseInt(tierSlider.value);
+        if (filterMode === "rank") {
+            const n = value === 0 ? Infinity : 101 - value;
+            filterThreshold = n;
+            if (n === Infinity) {
+                tierSliderLabel.innerHTML = `<span class="kappa">Include all records</span>`;
+            } else if (n === 1) {
+                tierSliderLabel.innerHTML = `<span class="alpha WRPB">Only including WRs</span>`;
+            } else {
+                tierSliderLabel.innerHTML = `<span class="alpha">${showTopLabel} ${n}</span>`;
+            }
+            updateSliderGradient();
         } else {
-            tierSliderLabel.textContent = '';
-            tierSliderLabel.appendChild(document.createTextNode(showRecordsAtleast + ' '));
-            tierSliderLabel.appendChild(greekLetterSpan(tierLimit));
-            tierSliderLabel.appendChild(document.createTextNode(' ' + showRecordsAtleastTierWord));
-
+            filterThreshold = value;
+            if (filterThreshold === 0) {
+                tierSliderLabel.innerHTML = `<span class="kappa">Show All Records</span>`;
+            } else if (filterThreshold === 100) {
+                tierSliderLabel.innerHTML = `<span class="alpha WRPB">${showWRsOnly}</span>`;
+            } else {
+                const tierClass = getClassBasedOnPercentage(value, percentageTable);
+                tierSliderLabel.innerHTML = `<span class="${tierClass}">${showPercentLabel} ${value}%</span>`;
+            }
+            updateSliderGradient();
         }
         tierActive = true;
         sendMyRequest();

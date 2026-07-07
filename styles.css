@@ -1090,7 +1090,7 @@ img {
     -webkit-appearance: none;
     appearance: none;
     height: 10px;
-    background: linear-gradient(to right, gray, #23958b, #b9f2ff, #85fa85, #ffaaf4, #ffff00, #a14dff, #ff2262, #00ff00, #00ffff, white);
+    background: linear-gradient(to right, rgb(175, 175, 175), #23958b, #b9f2ff, #85fa85, #ffaaf4, #ffff00, #a14dff, #ff2262, #00ff00, #00ffff);
     border-radius: 5px;
     outline: none;
     opacity: 0.7;

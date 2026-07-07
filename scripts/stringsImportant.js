@@ -32,19 +32,6 @@ const displayTypeOptions = [
     "Split square fringe",
     "Checkerboard"
 ];
-const tierLabels = [
-    "Any",
-    "iota",
-    "theta",
-    "eta",
-    "zeta",
-    "epsilon",
-    "delta",
-    "gamma",
-    "beta",
-    "alpha",
-    "WRs only"
-];
 const tierstable = [
     'alpha',
     'beta',
