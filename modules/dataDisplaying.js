@@ -1272,7 +1272,7 @@ function kinchBuildSwitches(toolbar) {
         { id: "kinch-switch-true",  label: "True Tiers",    state: kinchTrueTiers,  tt: "Off: All players are shown\nOn: Group players by their worst category tier" },
         { id: "kinch-switch-empty", label: "Hide Empty",    state: kinchHideEmpty,  tt: "Off: All tiers are shown\nOn: Empty tiers are hidden" },
         { id: "kinch-switch-reqs",  label: "Hide Reqs",     state: kinchHideReqs,   tt: "Off: All requirements are shown\nOn: Only the leaderboard rows are shown" },
-        { id: "kinch-switch-noformat", label: "Dont Format", state: kinchDontFormat, tt: "Off: Normal icons and formatting\nOn: Hide all icons (eggs, flags, web/lm dots, youtube), plain time format" }
+        { id: "kinch-switch-noformat", label: "Don't Format", state: kinchDontFormat, tt: "Off: Normal icons and formatting\nOn: Hide all icons (eggs, flags, web/lm dots, youtube), plain time format" }
     ];
 
     for (var i = 0; i < switches.length; i++) {
@@ -2753,7 +2753,7 @@ function normalizeMoves(moves, isAverage) {
             if (moves % 1000 === 0) {
                 return (moves / 1000).toFixed(0);
             } else {
-                if (moves > 100000) {
+                if (moves > 100000 && !kinchDontFormat) {
                     return Math.floor(moves / 1000) + "~";
                 } else {
                     return (moves / 1000).toFixed(3);
