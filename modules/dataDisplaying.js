@@ -1232,13 +1232,13 @@ function kinchTransformScores(playerScores) {
             if (!sd || sd.scoreInfo === defaultScore || typeof sd.scoreInfo !== "object") {
                 hasAllCats = false;
                 newScores.push({ id: cat.id, score: defaultScore, scoreInfo: defaultScore, scorePercentage: 0, scoreTier: "kappa" });
-                continue;
+            } else {
+                newScores.push(sd);
+                sum += sd.scorePercentage;
+                var tierIdx = tierOrder.indexOf(sd.scoreTier);
+                if (tierIdx > worstTierIdx) worstTierIdx = tierIdx;
             }
-            newScores.push(sd);
-            sum += sd.scorePercentage;
             count++;
-            var tierIdx = tierOrder.indexOf(sd.scoreTier);
-            if (tierIdx > worstTierIdx) worstTierIdx = tierIdx;
         }
         var power = count > 0 ? sum / count : 0;
         var tier;
