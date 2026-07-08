@@ -66,20 +66,22 @@ const rename_map = {
 //乌米玲 - ???
 //就此别过 - ???
 
-function appendFlagIconToNickname(nickname, minimal = false) {
-    const lowerCaseNickname = nickname.toLowerCase();
-    let country = null;
-
+function getPlayerCountry(playerName) {
+    const lowerName = playerName.toLowerCase();
     for (const user in userCountryMap) {
-        if (user.toLowerCase() === lowerCaseNickname) {
-            country = userCountryMap[user];
-            break;
+        if (user.toLowerCase() === lowerName) {
+            return userCountryMap[user];
         }
     }
-
-    if (!country && /[\u4e00-\u9fff\u3400-\u4dbf]/.test(nickname)) {
-        country = 'China';
+    if (/[\u4e00-\u9fff\u3400-\u4dbf]/.test(playerName)) {
+        return 'China';
     }
+    return null;
+}
+
+function appendFlagIconToNickname(nickname, minimal = false) {
+    const country = getPlayerCountry(nickname);
+    const lowerCaseNickname = nickname.toLowerCase();
 
     const flagIconLink = country && countryEmojis[country]
         ? countryEmojis[country]

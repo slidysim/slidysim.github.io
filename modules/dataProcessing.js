@@ -110,22 +110,11 @@ function createCountrySelect() {
 
 function filterScoresByCountry(countryParam) {
     let scores = leaderboardData;
-    let countries = userCountryMap;
     let filteredScores = [];
 
     for (let score of scores) {
-        let playerCountry = countries[Object.keys(countries).find(key =>
-            key.toLowerCase() === score.nameFilter.toLowerCase()
-        )];
-
-        if (!playerCountry) {
-            // Auto-assign China for CJK-named players not in manual map
-            if (countryParam === 'China' && /[\u4e00-\u9fff\u3400-\u4dbf]/.test(score.nameFilter)) {
-                playerCountry = 'China';
-            } else {
-                continue;
-            }
-        }
+        let playerCountry = getPlayerCountry(score.nameFilter);
+        if (!playerCountry) continue;
 
         if (playerCountry === countryParam) {
             filteredScores.push(score);
@@ -139,29 +128,13 @@ function getCountryPlayerCounts() {
     var countryCounts = {};
     var activeUsers = fullUniqueNames ? new Set(fullUniqueNames) : new Set();
 
-    for (var key in userCountryMap) {
-        if (!Object.prototype.hasOwnProperty.call(userCountryMap, key)) continue;
-        var country = userCountryMap[key];
-        if (key === country) continue;
-        if (!activeUsers.has(key)) continue;
-
-        if (countryCounts[country]) {
-            countryCounts[country]++;
-        } else {
-            countryCounts[country] = 1;
-        }
-    }
-
-    // Count CJK auto-assigned Chinese players not in the manual map
-    if (activeUsers.size > 0) {
-        for (var name of activeUsers) {
-            if (name in userCountryMap) continue;
-            if (/[\u4e00-\u9fff\u3400-\u4dbf]/.test(name)) {
-                if (countryCounts['China']) {
-                    countryCounts['China']++;
-                } else {
-                    countryCounts['China'] = 1;
-                }
+    for (var name of activeUsers) {
+        var country = getPlayerCountry(name);
+        if (country) {
+            if (countryCounts[country]) {
+                countryCounts[country]++;
+            } else {
+                countryCounts[country] = 1;
             }
         }
     }
@@ -178,24 +151,12 @@ function getCountryPlayerCounts() {
 }
 
 function getCountryScores() {
-    // Step 1: Define variables.
-    let scores = leaderboardData; // List of player scores.
-    let countries = userCountryMap; // Map of {nameFilter: country}.
-    let countryScores = []; // Final list of scores by country.
-    let countryBestScores = {}; // Track the best score for each unique combination per country.
+    let scores = leaderboardData;
+    let countryScores = [];
+    let countryBestScores = {};
 
-    // Build case-insensitive country map once
-    let lowerCountries = {};
-    for (let key of Object.keys(countries)) {
-        lowerCountries[key.toLowerCase()] = countries[key];
-    }
-
-    // Step 2: Iterate through each score in leaderboardData.
     for (let score of scores) {
-        // Step 3: Get the country of the player using nameFilter (case-insensitive).
-        let country = lowerCountries[score.nameFilter.toLowerCase()];
-
-        // Step 4: Ignore scores for players that don't have an associated country.
+        let country = getPlayerCountry(score.nameFilter);
         if (!country) continue;
 
         // Step 5: Create a key based on the unique combination of attributes.
