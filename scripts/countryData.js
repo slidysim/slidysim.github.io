@@ -181,6 +181,7 @@ let userCountryMap = {
     retsni: 'Australia',
     TeamMathcraft: 'Australia',
     VCP29: 'Australia',
+    fanstvo: 'Australia',
   
     Utochka: 'Belarus',
   
