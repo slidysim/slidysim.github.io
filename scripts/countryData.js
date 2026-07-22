@@ -59,7 +59,8 @@ const rename_map = {
     '笨笨还在做题': '非自',
     '水母不会点击': 'JellyFish',
     'akyfake': '那一天的安康安康不起来',
-    '13975':'非自'
+    '13975':'非自',
+    'Ton618': 'Morset347'
     
 };
 //'Jur105': same as uid 126470 if later included
