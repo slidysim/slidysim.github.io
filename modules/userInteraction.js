@@ -537,6 +537,13 @@ function setupSearch() {
 
     function openSearch() {
         searchOverlay.hidden = false;
+        // mobile: header can wrap to 2+ lines — drop the panel below its actual edge
+        var header = document.querySelector('.page-header');
+        if (header && window.matchMedia('(max-width: 1000px)').matches) {
+            searchOverlay.style.paddingTop = Math.ceil(header.getBoundingClientRect().bottom) + 'px';
+        } else {
+            searchOverlay.style.paddingTop = '';
+        }
         searchInput.value = '';
         currentResults = searchAll('');
         selectedIdx = -1;

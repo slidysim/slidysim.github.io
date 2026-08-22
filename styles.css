@@ -1606,7 +1606,7 @@ img {
     .search-panel { width: 100%; max-width: none; border-radius: 0; border: none; display: flex; flex-direction: column; }
     .search-input-wrap { padding: 16px; }
     .search-overlay-input { font-size: 18px; }
-    .search-results { max-height: calc(100vh - 60px); }
+    .search-results { flex: 1 1 auto; min-height: 0; max-height: none; }
     .search-result { padding: 14px 16px; }
     .search-result .sr-type { font-size: 11px; min-width: 56px; }
     .search-result .sr-label { font-size: 15px; }
