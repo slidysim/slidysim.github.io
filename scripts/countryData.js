@@ -19,6 +19,7 @@ const adminsList = [
     "ivy"
 ];
 
+//alt/old/bad name -> official/good/new name
 const rename_map = {
     'daanbe': 'ivy',
     'iota': 'skye',
@@ -60,8 +61,8 @@ const rename_map = {
     '水母不会点击': 'JellyFish',
     'akyfake': '那一天的安康安康不起来',
     '13975':'非自',
-    'Ton618': 'Morset347'
-    
+    'Ton618': 'Morset347',
+    'xhx1791': '_1791'
 };
 //'Jur105': same as uid 126470 if later included
 //乌米玲 - ???
@@ -390,6 +391,7 @@ let userCountryMap = {
     lopsidedhampter: 'USA',
     '2023RAMA09': 'USA',
     Chanoh17: 'USA',
+    lostsky: 'USA',
   
     Sakinuto: 'Brazil',
     PedroAM: 'Brazil',
