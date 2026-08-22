@@ -370,7 +370,10 @@ function updateServer(auth_token, displayType, controlType, pbType) {
 function removeBannedScores(scores) {
     const bannedScores = [
         { nameFilter: "MOKA", tps: 181512 },
-        { nameFilter: "robotmania", tps: 9999000, leaderboardType: "tps", gameMode: "Marathon 42" }
+        { nameFilter: "robotmania", tps: 9999000, leaderboardType: "tps", gameMode: "Marathon 42" },
+        { gameMode: "Everything-up-to relay", width: 3, height: 2 },
+        { gameMode: "Everything-up-to relay", width: 4, height: 2 },
+        { gameMode: "Everything-up-to relay", width: 5, height: 2 },
     ];
 
     return scores.filter(score =>
