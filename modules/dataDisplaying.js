@@ -2847,16 +2847,19 @@ function kinchBuildScoreCell(scoreData, scoreType, catInfo, tableTier) {
     if (nextTier && nextThreshold !== null) {
         var target = getScoreLimit(nextThreshold, bestValue, kinchReverse, scoreType, isAverage);
         targetStr = target;
-        // diff = target - playerScore (for time/moves, lower is better; for tps, higher is better)
+        // numeric target for delta math — getScoreLimit returns a formatted string
+        // ("1:23.456" for time), which parseFloat() mangles; getScoreLimitExact
+        // returns raw seconds so the diff stays correct.
+        var targetNum = parseFloat(getScoreLimitExact(nextThreshold, bestValue, kinchReverse));
         var playerVal = scoreData.score;
         if (kinchReverse) {
             // tps: higher is better. target is higher. diff = target - player
-            diffStr = (playerVal > 0 ? ((parseFloat(target) - (playerVal / 1000)).toFixed(3)) : "");
+            diffStr = (playerVal > 0 && !isNaN(targetNum)) ? (targetNum - (playerVal / 1000)).toFixed(3) : "";
         } else {
             // time/moves: lower is better. target is lower. diff = player - target
-            diffStr = ((playerVal / 1000) - parseFloat(target)).toFixed(3);
+            diffStr = isNaN(targetNum) ? "" : ((playerVal / 1000) - targetNum).toFixed(3);
         }
-        var sign = parseFloat(diffStr) >= 0 ? "+" : "";
+        var sign = parseFloat(diffStr) > 0 ? "-" : "";
         diffStr = sign + diffStr;
     }
     var rank = 0, total = kinchValidCategories.length;
