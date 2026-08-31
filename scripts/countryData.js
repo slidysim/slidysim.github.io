@@ -333,6 +333,7 @@ let userCountryMap = {
     iota: 'UK',
     Waldi: 'UK',
     '2017HARR08': 'UK',
+    solomonp: 'UK',
   
     HoHo: 'Japan',
     Ncuber: 'Japan',
