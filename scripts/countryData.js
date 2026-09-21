@@ -63,7 +63,8 @@ const rename_map = {
     '13975':'非自',
     'Ton618': 'Morset347',
     'xhx1791': '_1791',
-    'KoluNoa': 'kolunoa'
+    'KoluNoa': 'kolunoa',
+    'skye_trackpad': 'skye'
 };
 //'Jur105': same as uid 126470 if later included
 //乌米玲 - ???
