@@ -10,6 +10,9 @@ let fmcPower;
 let simplifiedView = false;
 let trueView = false;
 let nerfSlidysim = false;
+let activeOnly = false;
+let scoreTimestamps = {}; // Player name -> array of score set-dates (unix ms, -1 = unknown)
+let activeCutoff = 0; // Oldest timestamp that still counts as active (unix ms)
 let categoryOrder = [];
 let sortedPlayerRow = null;
 let sortColumn = null;
@@ -117,16 +120,54 @@ function applyNerf(data) {
     return result;
 }
 
-function hasScores(user) {
-    if (!nerfSlidysim) {
-        for (var c = 0; c < num_categories; c++) {
-            if (user[c + 3] != -1) return true;
-        }
-        return false;
+// --- "Active" toggle ------------------------------------------------------
+// Nerf-index set for the current render. hasScores()/isPlayerActive() are both
+// called once per player per render, so the index scan is computed once here
+// and reused. Invalidated at the top of populate_table().
+var _nerfSet = {};
+var _nerfSetValid = false;
+
+function getNerfSet() {
+    if (_nerfSetValid) return _nerfSet;
+    _nerfSet = {};
+    _nerfSetValid = true;
+    if (nerfSlidysim) {
+        var nIdx = getNerfIndices();
+        for (var ni = 0; ni < nIdx.length; ni++) _nerfSet[nIdx[ni]] = 1;
     }
-    var nerfSet = {};
-    var nIdx = getNerfIndices();
-    for (var ni = 0; ni < nIdx.length; ni++) nerfSet[nIdx[ni]] = 1;
+    return _nerfSet;
+}
+
+// Mirrors isTimestampActive() from dataProcessing.js (parent document) — kept
+// in sync on purpose. Missing/unusable dates count as recent so that a source
+// without dates can never empty the sheet.
+function isActiveTimestamp(timestamp) {
+    if (typeof timestamp !== "number" || !isFinite(timestamp) || timestamp <= 0) return true;
+    return timestamp >= activeCutoff;
+}
+
+// True when the player has at least one score from the last 365 days among the
+// categories currently on the sheet (nerf-aware). A single recent score in any
+// one category is enough. Returns true whenever no date data is available, so
+// the toggle can never hide players just because dates are missing.
+function isPlayerActive(user) {
+    if (!activeOnly) return true;
+    if (!activeCutoff || !user) return true;
+    var row = scoreTimestamps[user[0]];
+    if (!row || row.length < num_categories) return true;
+    var nerfSet = getNerfSet();
+    for (var c = 0; c < num_categories; c++) {
+        if (nerfSet[c]) continue;
+        if (user[c + 3] == -1) continue;
+        if (isActiveTimestamp(row[c])) return true;
+    }
+    return false;
+}
+window.__isPlayerActive = isPlayerActive;
+
+function hasScores(user) {
+    if (!isPlayerActive(user)) return false;
+    var nerfSet = getNerfSet();
     for (var c = 0; c < num_categories; c++) {
         if (nerfSet[c]) continue;
         if (user[c + 3] != -1) return true;
@@ -225,6 +266,7 @@ function result_tier(category, time){
 
 
 function populate_table(table){
+    _nerfSetValid = false;
     if (nerfSlidysim) table = applyNerf(table);
     if (sortedPlayerRow && !table.some(function(u){ return u[0] === sortedPlayerRow[0]; })) resetSort();
 
@@ -278,6 +320,21 @@ function populate_table(table){
         for (var si = 0; si < table.length; si++) {
             if (table[si]) table[si][1] = si + 1;
         }
+    }
+
+    // Renumber the # column over the rows that are actually rendered.
+    // Places are assigned in the parent across the whole field before anything
+    // is filtered, so players hidden here (no scores at all, or dropped by the
+    // "Active" toggle) would otherwise leave the # column with gaps — 1, 2, 7,
+    // 15... `table` is already in rank order (tier, then power), so walking it
+    // in order reproduces the same relative ranking without the holes.
+    // Idempotent: re-running after toggling Active off restores 1..N.
+    var visiblePlace = 0;
+    for (var vp = 0; vp < table.length; vp++) {
+        var vu = table[vp];
+        if (vu === undefined) break;
+        if (!hasScores(vu)) continue;
+        vu[1] = ++visiblePlace;
     }
 
     var results_table = document.getElementById("results-table");
@@ -900,7 +957,7 @@ export function show_results_from_date(){
     }
 }
 
-const SWITCH_IDS = ["switch-true", "switch-simplified", "switch", "switch-reqs", "switch-empty", "switch-cumulative", "switch-percent", "switch-nerf"];
+const SWITCH_IDS = ["switch-true", "switch-simplified", "switch", "switch-reqs", "switch-empty", "switch-cumulative", "switch-percent", "switch-nerf", "switch-active"];
 let _chartToggleState = false;
 
 function applySwitchStates(states) {
@@ -915,6 +972,8 @@ function applySwitchStates(states) {
     if (simEl) simplifiedView = simEl.checked;
     var nerfEl = document.getElementById("switch-nerf");
     if (nerfEl) nerfSlidysim = nerfEl.checked;
+    var activeEl = document.getElementById("switch-active");
+    if (activeEl) activeOnly = activeEl.checked;
     var chartEl = document.getElementById("chart-container");
     if (chartEl && states["chart-toggle"] !== undefined) {
         chartEl.style.display = states["chart-toggle"] ? "block" : "none";
@@ -976,6 +1035,10 @@ window.addEventListener('message', (event) => {
     oldTiers = eventOldTiers;
     userFinalTierMap = eventuserFinalTierMap;
     fmcPower = gettingFMCPower;
+    // "Active" toggle inputs — must be set before the first populate_table().
+    scoreTimestamps = data[11] || {};
+    activeCutoff = typeof data[12] === "number" ? data[12] : 0;
+    activeOnly = false;
     
     window.__powerData = powerData;
     if (oldTiers) {
@@ -1059,6 +1122,19 @@ if (nerfBtn) {
         if (savedCol !== null) resetSort();
         nerfSlidysim = nerfBtn.checked;
         renderSortedTableWithSavedStateReal(savedCol, savedAsc);
+    });
+}
+
+const activeBtn = document.getElementById("switch-active");
+if (activeBtn) {
+    activeBtn.addEventListener("change", () => {
+        activeOnly = activeBtn.checked;
+        // True Tiers renders places from this cache, so it has to be dropped
+        // when the visible set changes — otherwise players keep the place they
+        // had before filtering and the # column gaps again.
+        __truePlaces = {};
+        populate_table(powerData);
+        document.dispatchEvent(new Event("table-repopulated"));
     });
 }
 

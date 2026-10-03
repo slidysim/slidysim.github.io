@@ -1,5 +1,6 @@
 let userFinalTierMap = {}; // Player name -> Final Tier name
 let powerSwitchStates = {}; // Saved switch states from power iframe
+let powerScoreTimestamps = {}; // Player name -> array of score set-dates (unix ms, -1 = unknown)
 
 const funTiers = ['Gamma+', 'G++', "Egg"];
 
@@ -18,9 +19,13 @@ function calculatePlayerPower(savedPlayerScores, tiers, fmc=false) {
 
     const players = [];
     let isOldPower = false;
+    // Rebuilt from scratch on every calculation so the "Active" toggle never
+    // sees stale dates from a previously loaded leaderboard.
+    powerScoreTimestamps = {};
 
     for (const player of savedPlayerScores) {
         const playerTimes = [];
+        const playerTimestamps = [];
         let totalPower = 0;
         let highestScoreTiers = [];
 
@@ -32,6 +37,9 @@ function calculatePlayerPower(savedPlayerScores, tiers, fmc=false) {
             } else {
                 time = score.scoreInfo.time;
             }
+            // Same category order as playerTimes, so the iframe can line up
+            // dates with times for the "Active" toggle.
+            playerTimestamps.push(getScoreSetTimestamp(score.scoreInfo));
             if (typeof time !== 'number' || isNaN(time)) {
                 playerTimes.push(-1);
                 highestScoreTiers.push(tiers[0]);
@@ -79,6 +87,7 @@ function calculatePlayerPower(savedPlayerScores, tiers, fmc=false) {
             finalTierIndex = 0; // For sorting
         }
         // Store player info
+        powerScoreTimestamps[player.name] = playerTimestamps;
         players.push({
             name: player.name,
             totalPower,
@@ -166,7 +175,10 @@ function loadPower() {
     contentDiv.insertAdjacentElement('afterend', iframe);
     iframe.onload = () => {
         //console.log(powerData);
-        iframe.contentWindow.postMessage([powerData, gettingOldPower, gettingFMCPower, userFinalTierMap, tiers, FMCtiers, tiersOld, categoriesNew, categoriesOld, categoriesFMC, powerSwitchStates], '*');
+        // Last two entries feed the iframe's "Active" toggle: per-player score
+        // dates plus the 365-day cutoff (already resolved against the archive
+        // date when browsing a snapshot).
+        iframe.contentWindow.postMessage([powerData, gettingOldPower, gettingFMCPower, userFinalTierMap, tiers, FMCtiers, tiersOld, categoriesNew, categoriesOld, categoriesFMC, powerSwitchStates, powerScoreTimestamps, getActiveCutoffTimestamp()], '*');
     }
     loadingPower = false;
 }

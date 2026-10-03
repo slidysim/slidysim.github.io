@@ -18,6 +18,7 @@ var kinchTrueTiers = false;    // #switch-true   — group players by worst cate
 var kinchNerf = false;         // #switch-nerf   — remove categories impossible in LM
 var kinchChartVisible = false; // chart toggle state
 var kinchDontFormat = false;  // hide all extra icons (eggs, flags, web/lm, youtube)
+var kinchActiveOnly = false;  // #kinch-switch-active — only players with a score in the last 365 days
 // Kinch sheet mode: "default" (normal kinch view), "leaderboard" (Overall # Leaderboard),
 // "jze" (Combined JZE / Nemesis), "good" (Combined GOOD), "bad" (Combined BAD).
 // All modes apply to both Kinch (Rankings3) and Popular (Rankings2) views.

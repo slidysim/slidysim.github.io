@@ -6,6 +6,44 @@ dataFetching.js
 userInteractions.js
 */
 
+// --- "Active" toggle (Kinch / Popular / Power sheets) ----------------------
+// A score counts as recent when it was set within this window, measured
+// backwards from getActiveReferenceTime(). Using a reference date instead of
+// Date.now() keeps the filter consistent when an archive snapshot is loaded.
+const ACTIVE_WINDOW_MS = 365 * 24 * 60 * 60 * 1000;
+
+// Reference date for the Active window: the archive slider's picked date when
+// an archive is being browsed, otherwise the current time.
+function getActiveReferenceTime() {
+    if (typeof archiveMode !== "undefined" && archiveMode === "archive" && selectedSliderDate != null) {
+        return selectedSliderDate;
+    }
+    return Date.now();
+}
+
+// Oldest timestamp (unix ms) that still counts as "active".
+function getActiveCutoffTimestamp() {
+    return getActiveReferenceTime() - ACTIVE_WINDOW_MS;
+}
+
+// Normalises a scoreInfo's set-date to unix ms. Returns -1 when the source did
+// not provide a usable date.
+function getScoreSetTimestamp(scoreInfo) {
+    if (!scoreInfo || typeof scoreInfo !== "object") return -1;
+    const ts = scoreInfo.timestamp;
+    if (typeof ts !== "number" || !isFinite(ts) || ts <= 0) return -1;
+    return ts;
+}
+
+// Single rule shared by every sheet: is this score recent enough to keep the
+// player on the list? Missing/unusable dates count as recent on purpose — we
+// only want to hide players we can prove have not scored recently, so a source
+// without dates can never wipe out a whole sheet.
+function isTimestampActive(timestamp, cutoff) {
+    if (typeof timestamp !== "number" || !isFinite(timestamp) || timestamp <= 0) return true;
+    return timestamp >= cutoff;
+}
+
 function removePlayerScores(nameFilter) {
     leaderboardData = leaderboardData.filter(score => score.nameFilter !== nameFilter);
 }

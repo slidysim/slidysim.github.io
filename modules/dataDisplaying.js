@@ -1046,6 +1046,7 @@ function createSheetNxM(WRList) {
 //createSheetNxM, createSheetHistory, the Power iframe, and all shared
 //CSS/classes/data-pipeline are untouched.
 var kinchPlayerScores = null;
+var kinchBasePlayerScores = null; // unfiltered roster — the "Active" toggle derives kinchPlayerScores from it
 var kinchScoreType = "Time";
 var kinchReverse = false;
 var kinchValidCategories = [];
@@ -1067,6 +1068,12 @@ function createSheetRankings(playerScores) {
     contentDiv.style.overflow = "visible";
     generateFormattedString(request);
 
+    // Drop the roster from the previously displayed Kinch sheet before any early
+    // return below. Otherwise a Power sheet (which returns via loadPower) would
+    // leave a stale — and possibly Active-filtered — roster behind.
+    kinchBasePlayerScores = null;
+    kinchPlayerScores = null;
+
     if (playerScores.length === 0) { contentDiv.innerHTML = notFoundError; return; }
     if (loadingPower) { loadPower(); return; }
 
@@ -1084,6 +1091,7 @@ function createSheetRankings(playerScores) {
     kinchSortAsc = true;
 
     // Store for re-renders triggered by switch toggles
+    kinchBasePlayerScores = playerScores;
     kinchPlayerScores = playerScores;
     kinchScoreType = scoreType;
     kinchReverse = reverse;
@@ -1219,6 +1227,32 @@ function kinchIsNerfedCategory(catId) {
     return nerfList.indexOf(catId) !== -1;
 }
 
+//"Active" toggle: drops every player without a score from the last 365 days in
+//any of the currently displayed categories. One recent score is enough to stay
+//on the list. validCats is the nerf-filtered category list, so this composes
+//with the Nerf toggle (nerfed categories don't count towards being active).
+//Pure filter — returns a new array and never mutates the input.
+function kinchFilterActivePlayerScores(playerScores, validCats) {
+    if (!playerScores) return playerScores;
+    var cutoff = getActiveCutoffTimestamp();
+    var catLookup = {};
+    for (var i = 0; i < validCats.length; i++) catLookup[validCats[i].id] = 1;
+    var result = [];
+    for (var p = 0; p < playerScores.length; p++) {
+        var ps = playerScores[p];
+        if (!ps || !ps.scores) continue;
+        var active = false;
+        for (var j = 0; j < ps.scores.length && !active; j++) {
+            var sd = ps.scores[j];
+            if (!sd || sd.scoreInfo === defaultScore || typeof sd.scoreInfo !== "object") continue;
+            if (!catLookup[sd.id]) continue;
+            if (isTimestampActive(getScoreSetTimestamp(sd.scoreInfo), cutoff)) active = true;
+        }
+        if (active) result.push(ps);
+    }
+    return result;
+}
+
 //Transforms playerScores based on switch states (nerf, true-tiers).
 //Returns a new array; does not mutate the original savedPlayerScores.
 function kinchTransformScores(playerScores) {
@@ -1271,7 +1305,7 @@ function kinchTransformScores(playerScores) {
     return result;
 }
 
-//Builds the 5 switch pills + mobile hamburger inside the toolbar.
+//Builds the 6 switch pills + mobile hamburger inside the toolbar.
 function kinchBuildSwitches(toolbar) {
     var hamburger = document.createElement("button");
     hamburger.id = "kinch-mobile-switch-btn";
@@ -1347,7 +1381,8 @@ function kinchBuildSwitches(toolbar) {
         { id: "kinch-switch-true",  label: "True Tiers",    state: kinchTrueTiers,  tt: "Off: All players are shown\nOn: Group players by their worst category tier" },
         { id: "kinch-switch-empty", label: "Hide Empty",    state: kinchHideEmpty,  tt: "Off: All tiers are shown\nOn: Empty tiers are hidden" },
         { id: "kinch-switch-reqs",  label: "Hide Reqs",     state: kinchHideReqs,   tt: "Off: All requirements are shown\nOn: Only the leaderboard rows are shown" },
-        { id: "kinch-switch-noformat", label: "Don't Format", state: kinchDontFormat, tt: "Off: Normal icons and formatting\nOn: Hide all icons (eggs, flags, web/lm dots, youtube), plain time format" }
+        { id: "kinch-switch-noformat", label: "Don't Format", state: kinchDontFormat, tt: "Off: Normal icons and formatting\nOn: Hide all icons (eggs, flags, web/lm dots, youtube), plain time format" },
+        { id: "kinch-switch-active", label: "Active", state: kinchActiveOnly, tt: "Off: All players are shown\nOn: Only players with a score from the last 365 days are shown\nA single recent score in any of the displayed categories is enough" }
     ];
 
     for (var i = 0; i < switches.length; i++) {
@@ -1365,6 +1400,7 @@ function kinchBuildSwitches(toolbar) {
                     case "kinch-switch-empty": kinchHideEmpty = checked;  kinchRerender(); break;
                     case "kinch-switch-reqs":  kinchHideReqs = checked;   kinchApplyHideReqs(); break;
                     case "kinch-switch-noformat": kinchDontFormat = checked; kinchApplyDontFormat(); kinchRerender(); break;
+                    case "kinch-switch-active":  kinchActiveOnly = checked;  kinchRerender(); break;
                 }
             });
             // tooltip on hover for switch labels
@@ -1407,7 +1443,7 @@ function kinchBuildSwitches(toolbar) {
 //Re-renders the table from savedPlayerScores with current switch states.
 function kinchRerender() {
     var resultsTable = document.getElementById("kinch-results-table");
-    if (!resultsTable || !kinchPlayerScores) return;
+    if (!resultsTable || !(kinchBasePlayerScores || kinchPlayerScores)) return;
     resultsTable.innerHTML = "";
     kinchRenderTable(resultsTable);
     kinchApplyHideReqs();
@@ -1455,12 +1491,30 @@ function kinchGetSortKey(ps, col) {
 
 //Builds the sticky events-row wrapper + per-tier req-row tables + player rows.
 function kinchRenderTable(resultsTable) {
-    kinchValidCategories = kinchGetValidCategories(kinchPlayerScores);
+    // Categories come from the full roster so that they stay identical no
+    // matter what the "Active" toggle is set to.
+    kinchValidCategories = kinchGetValidCategories(kinchBasePlayerScores || kinchPlayerScores);
     if (kinchNerf) {
         kinchValidCategories = kinchValidCategories.filter(function (c) { return !kinchIsNerfedCategory(c.id); });
     }
     if (kinchValidCategories.length === 0) {
         resultsTable.innerHTML = '<div style="padding:40px;color:#888;">No valid categories.</div>';
+        return;
+    }
+
+    // "Active" toggle: filter the base player list once per render, before any
+    // mode/grouping logic runs, so every mode (Kinch, Place, Nemesis, Good,
+    // Bad), the sorting views and the chart all see the same roster.
+    // Derived from kinchBasePlayerScores (not the previous render's output) so
+    // switching the toggle back off restores the full roster.
+    // savedPlayerScores is untouched — the Power iframe still needs everyone.
+    if (kinchBasePlayerScores) {
+        kinchPlayerScores = kinchActiveOnly
+            ? kinchFilterActivePlayerScores(kinchBasePlayerScores, kinchValidCategories)
+            : kinchBasePlayerScores;
+    }
+    if (kinchActiveOnly && kinchPlayerScores && kinchPlayerScores.length === 0) {
+        resultsTable.innerHTML = '<div style="padding:40px;color:#888;">No players with a score in the last 365 days.</div>';
         return;
     }
 

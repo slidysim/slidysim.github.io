@@ -511,6 +511,8 @@ let tierlist = [
 
         powerData.forEach(function(player) {
           if (!player) return;
+          // Respect the "Active" toggle so the chart matches the rows below it.
+          if (typeof window.__isPlayerActive === "function" && !window.__isPlayerActive(player)) return;
           if (isTrueTries) {
             var incomplete = false;
             for (var c = 0; c < categories.length; c++) {
