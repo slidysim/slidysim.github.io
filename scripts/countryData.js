@@ -9,7 +9,8 @@
     "OCEshadow",
     "iota",
     "MOKA",
-    "xsedim"
+    "xsedim",
+    "tnum10"
 ];
 
 const adminsList = [
@@ -64,7 +65,8 @@ const rename_map = {
     'Ton618': 'Morset347',
     'xhx1791': '_1791',
     'KoluNoa': 'kolunoa',
-    'skye_trackpad': 'skye'
+    'skye_trackpad': 'skye',
+    'aky_': 'aky'
 };
 //'Jur105': same as uid 126470 if later included
 //乌米玲 - ???
