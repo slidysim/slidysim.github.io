@@ -68,6 +68,7 @@ const rename_map = {
     'skye_trackpad': 'skye',
     'aky_': 'aky',
     'anjak4': 'anja4k',
+    'Rbkple': 'rbkple'
 };
 //'Jur105': same as uid 126470 if later included
 //乌米玲 - ???
